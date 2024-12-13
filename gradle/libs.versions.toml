@@ -1,0 +1,163 @@
+[versions]
+targetSdkVersion = "35"
+compileSdkVersion = "35"
+minSdkVersion = "26"
+versionCode = "100"
+versionName = "1.0.0"
+
+agp = "8.5.2"
+kotlin = "2.0.21"
+ksp = "2.0.21-1.0.28"
+coreKtx = "1.15.0"
+appcompat = "1.7.0"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.9.3"
+navigation = "2.8.4"
+retrofit = "2.11.0"
+okhttp = "5.0.0-alpha.14"
+moshi = "1.15.1"
+hilt = "2.52"
+room = "2.7.0-alpha11"
+xlog = "1.10.1"
+hiltNavigationCompose = "1.2.0"
+coil = "2.7.0"
+lottie = "6.4.0"
+palette = "1.0.0"
+datastore = "1.1.1"
+colorpicker = "1.1.2"
+telephoto = "0.14.0"
+jsoup = "1.15.4"
+richText = "1.0.0-rc10"
+markwon = "4.6.2"
+kotlinxSerializationJson = "1.7.3"
+
+composeLib = "1.7.5"
+material3 = "1.4.0-alpha04"
+materialNavigation = "1.8.0-alpha06"
+
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+material = "1.12.0"
+
+[libraries]
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-palette = { group = "androidx.palette", name = "palette", version.ref = "palette" }
+androidx-datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "composeLib" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "composeLib" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "composeLib"  }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "composeLib"  }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "composeLib"  }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "composeLib"  }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "composeLib"  }
+material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "composeLib" }
+material-icons-core = { group = "androidx.compose.material", name = "material-icons-core-android", version.ref = "composeLib" }
+material-ripple-android = { group = "androidx.compose.material", name = "material-ripple-android", version.ref = "composeLib" }
+androidx-bottomsheet-navigation = { group = "androidx.compose.material", name = "material-navigation", version.ref = "materialNavigation" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+
+square-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+square-retrofit-converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+square-retrofit-converter-scalars = { group = "com.squareup.retrofit2", name = "converter-scalars", version.ref = "retrofit" }
+square-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+square-moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
+square-moshi-compiler = { group = "com.squareup.moshi", name = "moshi-kotlin-codegen", version.ref = "moshi" }
+
+google-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt"}
+google-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+
+xlog = { module = "com.elvishew:xlog", version.ref = "xlog" }
+lottie = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
+colorpicker = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpicker" }
+
+coil = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
+coil-video = { module = "io.coil-kt:coil-video", version.ref = "coil" }
+
+telephoto = { group = "me.saket.telephoto", name = "zoomable-image-coil", version.ref = "telephoto" }
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup"}
+richText = { group = "com.mohamedrejeb.richeditor", name = "richeditor-compose", version.ref = "richText"}
+
+renderscript-intrinsics-replacement-toolkit = { module = "com.github.android:renderscript-intrinsics-replacement-toolkit", version = "598692ab79" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+markwon-core = { group = "io.noties.markwon", name = "core", version.ref = "markwon" }
+markwon-html = { group = "io.noties.markwon", name = "html", version.ref = "markwon" }
+markwon-linkify = { group = "io.noties.markwon", name = "linkify", version.ref = "markwon" }
+markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", version.ref = "markwon" }
+markwon-ext-strikethrough = { group = "io.noties.markwon", name = "ext-strikethrough", version.ref = "markwon" }
+markwon-ext-tables = { group = "io.noties.markwon", name = "ext-tables", version.ref = "markwon" }
+markwon-ext-tasklist = { group = "io.noties.markwon", name = "ext-tasklist", version.ref = "markwon" }
+
+[bundles]
+lifecycle = [
+    "androidx-lifecycle-runtime-compose",
+    "androidx-lifecycle-runtime-ktx"
+]
+
+compose = [
+    "androidx-activity-compose",
+    "androidx-navigation-compose",
+    "androidx-material3",
+    "material-icons-extended",
+    "material-icons-core",
+    "material-ripple-android",
+    "androidx-ui",
+    "androidx-ui-graphics",
+    "androidx-ui-tooling-preview",
+    "androidx-compose-foundation",
+    "androidx-bottomsheet-navigation"
+]
+
+square = [
+    "square-moshi",
+    "square-okhttp",
+    "square-retrofit",
+    "square-retrofit-converter-moshi",
+    "square-retrofit-converter-scalars",
+]
+
+hilt = [
+    "google-hilt",
+    "hilt-navigation-compose"
+]
+room = ["androidx-room-ktx", "androidx-room-runtime"]
+coil = ["coil", "coil-gif", "coil-video"]
+markwon = [
+    "markwon-core",
+    "markwon-html",
+    "markwon-linkify",
+    "markwon-image-coil",
+    "markwon-ext-strikethrough",
+    "markwon-ext-tables",
+    "markwon-ext-tasklist"
+]
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+#kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt"}
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }

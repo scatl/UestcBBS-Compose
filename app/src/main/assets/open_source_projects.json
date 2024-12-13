@@ -1,0 +1,93 @@
+[
+	{
+		"name": "Jetpack Compose",
+		"author": "google",
+		"link": "https://developer.android.com/compose",
+		"description": "Jetpack Compose is Android’s recommended modern toolkit for building native UI. It simplifies and accelerates UI development on Android. Quickly bring your app to life with less code, powerful tools, and intuitive Kotlin APIs."
+	},
+
+	{
+		"name": "Android Jetpack",
+		"author": "google",
+		"link": "https://developer.android.com/jetpack/",
+		"description": "Jetpack is a suite of libraries to help developers follow best practices, reduce boilerplate code, and write code that works consistently across Android versions and devices so that developers can focus on the code they care about."
+	},
+
+
+	{
+		"name": "okhttp",
+		"author": "square",
+		"link": "https://github.com/square/okhttp",
+		"description": "An HTTP client for Android, Kotlin, and Java."
+	},
+
+	{
+		"name": "retrofit",
+		"author": "square",
+		"link": "https://github.com/square/retrofit",
+		"description": "A type-safe HTTP client for Android and the JVM."
+	},
+
+	{
+		"name": "moshi",
+		"author": "square",
+		"link": "https://github.com/square/moshi",
+		"description": "A modern JSON library for Kotlin and Java."
+	},
+
+	{
+		"name": "hilt",
+		"author": "google",
+		"link": "https://github.com/google/dagger",
+		"description": "A fast dependency injector for Android and Java."
+	},
+
+	{
+		"name": "xlog",
+		"author": "elvishew",
+		"link": "https://github.com/elvishew/xLog",
+		"description": "Android logger, pretty, powerful and flexible, log to everywhere, save to file, all you want is here."
+	},
+
+	{
+		"name": "coil",
+		"author": "coil-kt",
+		"link": "https://github.com/coil-kt/coil",
+		"description": "Image loading for Android and Compose Multiplatform."
+	},
+
+	{
+		"name": "lottie",
+		"author": "airbnb",
+		"link": "https://github.com/airbnb/lottie-android",
+		"description": "Render After Effects animations natively on Android and iOS, Web, and React Native"
+	},
+
+	{
+		"name": "colorpicker-compose",
+		"author": "skydoves",
+		"link": "https://github.com/skydoves/colorpicker-compose",
+		"description": "\uD83C\uDFA8 Kotlin Multiplatform color picker library for getting colors from any images by tapping on the desired color."
+	},
+
+	{
+		"name": "telephoto",
+		"author": "saket",
+		"link": "https://github.com/saket/telephoto",
+		"description": "Building blocks for designing media experiences in Compose UI."
+	},
+
+	{
+		"name": "jsoup",
+		"author": "jsoup.org",
+		"link": "https://jsoup.org/",
+		"description": "jsoup is a Java library that simplifies working with real-world HTML and XML. It offers an easy-to-use API for URL fetching, data parsing, extraction, and manipulation using DOM API methods, CSS, and xpath selectors."
+	},
+
+	{
+		"name": "compose-rich-editor",
+		"author": "MohamedRejeb",
+		"link": "https://github.com/MohamedRejeb/compose-rich-editor",
+		"description": "A Rich text editor library for both Jetpack Compose and Compose Multiplatform, fully customizable, supports HTML and Markdown."
+	}
+]
