@@ -1,8 +1,8 @@
 name: Android CI
 
 on:
-  push:                        # 触发条件：代码 push 到仓库
-    branches: [master]
+#  push:                        # 触发条件：代码 push 到仓库
+#    branches: [master]
   pull_request:                # 触发条件：提交 Pull Request
     branches: [master]
 
