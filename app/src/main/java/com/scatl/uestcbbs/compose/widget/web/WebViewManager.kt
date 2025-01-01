@@ -50,6 +50,8 @@ object WebViewManager {
                 clipToOutline = true
                 addView(webView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
             }
+        }.apply {
+            (parent as? ViewGroup?)?.removeAllViews()
         }
     }
 

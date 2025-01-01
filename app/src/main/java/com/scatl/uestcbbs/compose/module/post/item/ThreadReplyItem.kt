@@ -72,8 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.mohamedrejeb.richeditor.model.rememberRichTextState
-import com.mohamedrejeb.richeditor.ui.material3.RichText
+import com.scatl.markdown.MarkdownDefaults
 import com.scatl.markdown.MarkdownText
 import com.scatl.uestcbbs.compose.Constants
 import com.scatl.uestcbbs.compose.R
@@ -95,6 +94,7 @@ import com.scatl.uestcbbs.compose.module.post.PostViewModel
 import com.scatl.uestcbbs.compose.module.post.RateInfo
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
+import com.scatl.uestcbbs.compose.router.linkNavigate
 import com.scatl.uestcbbs.compose.theme.LocalCustomColors
 import com.scatl.uestcbbs.compose.util.HtmlUtil
 import com.scatl.uestcbbs.compose.util.formatTimestamp
@@ -118,6 +118,7 @@ fun ThreadReplyItem(
     onCreatePost: () -> Unit
 ) {
     val navHostController = LocalNavController.current
+    val uriHandler = LocalUriHandler.current
 
     val supportData by viewModel.supportData(item.postId.toString()).collectAsStateWithLifecycle()
     val supportCount = rememberSaveable { mutableIntStateOf(item.support.toIntOrElse()) }
@@ -359,25 +360,23 @@ fun ThreadReplyItem(
                             fontWeight = FontWeight.Bold
                         )
                     } else {
-//                        Text(
-//                            text = item.message.toString(),
-//                            modifier = Modifier
-//                        )
                         if (item.format == 2) {
-//                            MarkdownText(
-//                                markdown = HtmlUtil.toM(item.message.toString(), item.attachments),
-//                                linkColor = MaterialTheme.colorScheme.primary,
-//                                quoteBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-//                                quoteTextColor = MaterialTheme.colorScheme.outline,
-//                                style = TextStyle(
-//                                    color = MaterialTheme.colorScheme.onBackground,
-//                                    fontSize = 16.sp
-//                                )
-//                            )
+                            MarkdownText(
+                                markdown = HtmlUtil.formatMarkdown(item.message.toString(), item.attachments),
+                                theme = MarkdownDefaults.defaultTheme(),
+                                onLinkClicked = {
+                                    linkNavigate(
+                                        url = it,
+                                        openBrowserIfNotMatch = true,
+                                        navHostController = navHostController,
+                                        uriHandler = uriHandler
+                                    )
+                                }
+                            )
                         } else {
-//                            MarkdownText(
-//                                markdown = item.message.toString()
-//                            )
+                            Text(
+                                text = item.message.toString()
+                            )
                         }
                     }
 

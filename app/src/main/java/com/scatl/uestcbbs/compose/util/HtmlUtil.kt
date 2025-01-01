@@ -17,7 +17,6 @@ import com.scatl.uestcbbs.compose.widget.image.viewer.ImageViewerConfig
  */
 object HtmlUtil {
 
-    @JvmStatic
     fun generateStyledHtmlContent(
         content: String,
         defaultFontSize: Int,
@@ -135,7 +134,6 @@ object HtmlUtil {
             </head>
             <body>
                 $content
-                
                 <script type="text/javascript">
                     function resizeImage(img) {
                         var id = img.getAttribute('id');
@@ -190,7 +188,6 @@ object HtmlUtil {
             """
     }
 
-    @JvmStatic
     fun bbcodeToHtml(
         context: Context,
         input: String?,
@@ -260,7 +257,7 @@ object HtmlUtil {
                 "<div style=\"text-align:center;\">${match.groupValues[1]}</div>"
             },
 
-            Pair("\\[quote](.*?)\\[/quote]".toRegex(RegexOption.DOT_MATCHES_ALL)) { match ->
+            Pair("\\[quote](.*?)\\[/quote](\\r\\n|\\r|\\n)*".toRegex(RegexOption.DOT_MATCHES_ALL)) { match ->
                 "<blockquote>${match.groupValues[1]}</blockquote>"
             },
 
@@ -468,7 +465,6 @@ object HtmlUtil {
         return result
     }
 
-    @JvmStatic
     fun markdownToHtml(
         context: Context,
         input: String?,
@@ -478,10 +474,6 @@ object HtmlUtil {
         if (input == null) {
             return ""
         }
-
-//        val flavour = CommonMarkFlavourDescriptor()
-//        val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(input)
-//        val html = HtmlGenerator(input, parsedTree, flavour).generateHtml()
 
         val regexReplacements = listOf<Pair<Regex, (match: MatchResult) -> String>>(
             Pair("^######\\s*(.*?)\$".toRegex(RegexOption.MULTILINE)) { match ->
@@ -659,7 +651,6 @@ object HtmlUtil {
         return result
     }
 
-    @JvmStatic
     private fun getAttachmentHtml(
         context: Context,
         attachment: AttachmentEntity?,
@@ -702,7 +693,6 @@ object HtmlUtil {
         }
     }
 
-    @JvmStatic
     fun isVideo(name: String?): Boolean {
         if (name.isNullOrEmpty()) {
             return false
@@ -710,7 +700,6 @@ object HtmlUtil {
         return name.endsWith(".mp4", true)
     }
 
-    @JvmStatic
     fun isImage(name: String?): Boolean {
         if (name.isNullOrEmpty()) {
             return false
@@ -720,7 +709,6 @@ object HtmlUtil {
                 || name.endsWith(".png", true)
     }
 
-    @JvmStatic
     fun isAudio(name: String?): Boolean {
         if (name.isNullOrEmpty()) {
             return false
@@ -728,22 +716,428 @@ object HtmlUtil {
         return name.endsWith(".mp3", true)
     }
 
-    fun toM(input: String, attachments: List<AttachmentEntity>?): String {
-
-
-
+    fun formatMarkdown(input: String, attachments: List<AttachmentEntity>?): String {
         var res = input
+//        var res = "![image.png](i:2363162)![1196](s)![776](s)来个沙发，提醒不会消失。\n新![1168](s) 发帖功能默认分区建议改成![1168](s)水手之家，![1168](s)不然新手发帖容易发到![1168](s)站务综合里\n"
         attachments?.forEach {
             if (it.isImage == 1) {
                 res = res.replace(
                     "![${it.filename}](i:${it.attachmentId})",
-//                    "![${it.filename}](${it.thumbnailUrl.toBBSImgUrl()})"
-                    "[![${it.filename}](${it.thumbnailUrl.toBBSImgUrl()})](${it.thumbnailUrl.toBBSImgUrl()})"
+//                    "\n\n![${it.filename}](${it.thumbnailUrl.toBBSImgUrl()})\n\n"
+                    "\n\n[![${it.filename}](${it.thumbnailUrl.toBBSImgUrl()})](${it.thumbnailUrl.toBBSImgUrl()})\n\n"
                 )
             }
         }
+//        return res
 
-        return res
+        val regex = Regex("!\\[(\\d+)\\]\\([sa]\\)")
+
+        val resultText = regex.replace(res) { matchResult ->
+            val number = matchResult.groups[1]?.value
+
+            if (number != null) {
+                val item = EmotionManager.getEmotionById(number)
+                "![${item?.aPath}](${item?.aPath})"
+//                "㊧${item?.aPath}㊧"
+//                "㊧${number}㊧"
+            } else {
+                matchResult.value
+            }
+        }
+
+        return resultText
+        return """
+            # Demo
+
+            Based on [this **cheat**sheet][cheatsheet]
+
+            This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this
+            is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote.
+
+            Link to [images](#images) below.
+            Link to [Autolink] not so [down](#md-links) to [Markdown links] below.
+
+            ---
+
+            ## Emoji :100:
+
+            - By name: :ok: :grin: :+1: :boy|type_1_2:
+            - Unicode: 🇧🇭
+            - Emoji within link [this 🇧🇭 :ok: cheatsheet][cheatsheet]
+
+            ---
+
+            ## Headers
+            ---
+
+            # Header 1
+
+            ## Header 2
+
+            ### Header 3
+
+            #### Header 4
+
+            ##### Header 5
+
+            ###### Header 6
+            ---
+
+            ## Emphasis
+
+            Emphasis, aka italics, with *asterisks* or _underscores_.
+
+            Strong emphasis, aka bold, with **asterisks** or __underscores__.
+
+            Combined emphasis with **asterisks and _underscores_**.
+
+            ---
+
+            ## Lists
+
+            1. First ordered list item
+            2. Another item
+                * Unordered sub-list.
+            1. Actual numbers don't matter, just that it's a number
+                1. Ordered sub-list
+            4. And another item.
+            5. [ ] Open task
+               You can have properly indented paragraphs within list items. Notice the blank line above, and the leading spaces (at
+               least one, but we'll use three here to also align the raw Markdown).
+
+               To have a line break without a paragraph, you will need to use two trailing spaces.
+               Note that this line is separate, but within the same paragraph.
+               (This is contrary to the typical GFM line break behaviour, where trailing spaces are not required.)
+
+            * Unordered list can use asterisks
+            * Unordered list can use asterisks
+            - Or minuses
+            + Or pluses
+            + [x] Done task
+
+            ---
+
+            ## Links
+
+            [I'm an inline-style link](https://www.google.com)
+
+            [I'm a reference-style link][Arbitrary case-insensitive reference text]
+
+            [I'm a relative reference to a repository file](../blob/master/LICENSE)
+
+            [You can use numbers for reference-style link definitions][1]
+
+            Or leave it empty and use the [link text itself].
+
+            Test link to [Header 3](#header-3)
+
+            Link with [empty URL]().
+
+            Test reference link to [Header 2][h2link]
+
+            [h2link]: #header-2
+
+            [Autolink](@) option will detect text links like https://www.google.com and turn them into [Markdown links](@md-links)
+            automatically.
+
+            ---
+
+            ## Code
+
+            Inline `code` has `back-ticks around` it.
+
+            ```javascript
+            var s = "JavaScript syntax highlighting";
+            alert(s);
+            ```
+
+            ```python
+            s = "Python syntax highlighting"
+            print
+            s
+            ```
+
+            ```java
+            /**
+             * Helper method to obtain a Parser with registered strike-through &amp; table extensions
+             * &amp; task lists (added in 1.0.1)
+             *
+             * @return a Parser instance that is supported by this library
+             * @since 1.0.0
+             */
+            @NonNull
+            class ParserFactory {
+                public static Parser createParser() {
+                    return new Parser.Builder()
+                            .extensions(Arrays.asList(
+                                    StrikethroughExtension.create(),
+                                    TablesExtension.create(),
+                                    TaskListExtension.create()
+                            ))
+                            .build();
+                }
+            }
+            ```
+
+            ```xml
+
+            <ScrollView
+                    android:id="@+id/scroll_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="?android:attr/actionBarSize">
+
+                <TextView
+                        android:id="@+id/text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="16dip"
+                        android:lineSpacingExtra="2dip"
+                        android:textSize="16sp"
+                        tools:text="yo\nman"/>
+
+            </ScrollView>
+            ```
+
+            ```
+            No language indicated, so no syntax highlighting.
+            But let's throw in a <b>tag</b>.
+            ```
+
+            ---
+
+            ## Images
+
+            Inline-style:
+
+            ![random image](https://picsum.photos/seed/picsum/400/400 "Text 1") ![random image](https://picsum.photos/seed/picsum/400/400 "Text 1.5")
+            ![local image](flower.jpg "Some flowers loaded from disk")
+            ![bad image](https://example.com "Text 1.5")
+
+            Reference-style:
+
+            ![random image][logo]
+
+            [logo]: https://picsum.photos/seed/picsum2/400/400 "Text 2"
+
+            ---
+
+            ## Tables
+
+            Colons can be used to align columns.
+
+            | Tables        |      Are      |       Cool |
+            |---------------|:-------------:|-----------:|
+            | col 3 is      | right-aligned | ${'$'}1600 |
+            | col 2 is      |   centered    |   ${'$'}12 |
+            | zebra stripes |   are neat    |    ${'$'}1 |
+
+            There must be at least 3 dashes separating each header cell.
+            The outer pipes (|) are optional, and you don't need to make the
+            raw Markdown line up prettily. You can also use inline Markdown.
+
+             Markdown | Less      | Pretty                                                              
+            ----------|-----------|---------------------------------------------------------------------
+             *Still*  | `renders` | ![random image](https://picsum.photos/seed/picsum/400/400 "Text 1") 
+             1        | 2         | 3                                                                   
+
+            ---
+
+            ## Blockquotes
+
+            > Blockquotes are very handy in email to emulate reply text.
+            > This line is part of the same quote.
+
+            Quote break.
+
+            > This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this
+            > is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote.
+
+            Nested quotes
+            > Hello!
+            >> And to you!
+
+            ---
+
+            ## Inline HTML
+
+            ```html
+            <u><i>H<sup>T<sub>M</sub></sup><b><s>L</s></b></i></u>
+            ```
+
+            <body><u><i>H<sup>T<sub>M</sub></sup><b><s>L</s></b></i></u></body>
+
+            ---
+
+            ## Horizontal Rule
+
+            Three or more...
+
+            ---
+
+            Hyphens (`-`)
+
+            ***
+
+            Asterisks (`*`)
+
+            ___
+
+            Underscores (`_`)
+
+            ## License
+
+            ```
+              Copyright 2019 Dimitry Ivanov (legal@noties.io)
+
+              Licensed under the Apache License, Version 2.0 (the "License");
+              you may not use this file except in compliance with the License.
+              You may obtain a copy of the License at
+
+                  http://www.apache.org/licenses/LICENSE-2.0
+
+              Unless required by applicable law or agreed to in writing, software
+              distributed under the License is distributed on an "AS IS" BASIS,
+              WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+              See the License for the specific language governing permissions and
+              limitations under the License.
+            ```
+
+            [cheatsheet]: https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+
+            [arbitrary case-insensitive reference text]: https://www.mozilla.org
+
+            [1]: http://slashdot.org
+
+            [link text itself]: http://www.reddit.com
+        """.trimIndent()
     }
 }
+
+//fun collectNodes(node: Node?, nodeList: MutableList<Node>) {
+//    var current = node
+//    while (current != null) {
+//        nodeList.add(current)
+//        current = current.next
+//    }
+//}
+
+//fun parseNode(node: Node?): MarkdownNode? {
+//    // 如果节点为空，返回null
+//    if (node == null) return null
+//
+//    // 创建该节点的MarkdownNode实例
+//    val markdownNode = MarkdownNode(type = node.nodeName, text = node.chars.toString())
+//
+//    // 递归解析子节点并添加到children中
+//    var child = node.firstChild
+//    while (child != null) {
+//        val childNode = parseNode(child)
+//        if (childNode != null) {
+//            markdownNode.children.add(childNode)
+//        }
+//        child = child.next
+//    }
+//
+//    return markdownNode
+//}
+//
+data class MarkdownNode(
+    val type: String,
+    val text: String? = null,
+    val children: MutableList<MarkdownNode> = mutableListOf()
+)
+
+const val MARKDOWN = """
+# Markdown [link](https://www.jetbrains.com/). Playground
+
+| col1 | col2 | col3 |
+| ---- | ---- | ---- |
+| 1    | 2    | 3    |
+| 4    | 6    | 5    |
+
+
+---
+
+# This ![Image](https://avatars.githubusercontent.com/u/1476232?v=4) is an H1
+
+## This is an H2
+
+### This is an H3
+
+#### This is an H4
+
+##### This is an H5
+
+###### This is an H6
+
+This is a paragraph with some *italic* and **bold** text.
+
+This is a paragraph with some `inline code`.
+
+This is a paragraph with a [link](https://www.jetbrains.com/).
+
+This is a code block:
+```kotlin
+fun main() {
+println("Hello, world!")
+}
+```
+
+> This is a block quote.
+
+This is a divider
+
+---
+
+The above was supposed to be a divider.
+
+~~This is strikethrough with two tildes~~
+
+~This is strikethrough~
+
+This is an ordered list:
+1. Item 1
+2. Item 2
+3. Item 3
+
+This is an unordered list with dashes:
+- **Item 1**
+- Item 2
+- Item 3
+
+This is an unordered list with asterisks:
+* Item 1
+* Item 2
+* Item 3
+
+-------- 
+
+# Random
+
+### Getting Started
+                
+For multiplatform projects specify this single dependency:
+
+```
+dependencies {
+    implementation("com.scatl:multiplatform-markdown-renderer:{version}")
+}
+```
+
+You can find more information on [GitHub](https://github.com/scatl/multiplatform-markdown-renderer). More Text after this.
+![Image](https://avatars.githubusercontent.com/u/1476232?v=4)
+There are many more things which can be experimented with like, inline `code`. 
+
+Title 1
+======
+
+Title 2
+------
+              
+[https://scatl.dev](https://scatl.dev)
+[https://github.com/scatl](https://github.com/scatl)
+[Mike Penz's Blog](https://blog.scatl.dev/)
+<https://blog.scatl.dev/>
+"""
 

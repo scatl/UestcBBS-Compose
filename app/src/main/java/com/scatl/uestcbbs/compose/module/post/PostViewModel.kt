@@ -26,6 +26,7 @@ import com.scatl.uestcbbs.compose.net.BaseApiResult
 import com.scatl.uestcbbs.compose.net.onFailure
 import com.scatl.uestcbbs.compose.net.onSuccess
 import com.scatl.uestcbbs.compose.widget.refresh.UiState
+import com.scatl.uestcbbs.compose.widget.web.WebViewManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

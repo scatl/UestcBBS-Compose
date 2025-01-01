@@ -6,7 +6,7 @@ import android.text.style.ClickableSpan
 import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatTextView
 
-class CustomTextView(context: Context) : AppCompatTextView(context) {
+class MarkdownTextView(context: Context) : AppCompatTextView(context) {
 
     private var isTextSelectable: Boolean = false
 

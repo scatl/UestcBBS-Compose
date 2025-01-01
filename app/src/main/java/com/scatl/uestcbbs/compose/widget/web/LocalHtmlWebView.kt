@@ -6,6 +6,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.net.http.SslError
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest

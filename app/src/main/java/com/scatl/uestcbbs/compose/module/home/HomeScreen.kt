@@ -67,7 +67,7 @@ import com.scatl.uestcbbs.compose.module.home.toplist.TopListScreen
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import kotlin.math.min
-
+import androidx.compose.ui.unit.Density
 /**
  * Created by sca_tl at 2024/7/10 16:42:07
  */
