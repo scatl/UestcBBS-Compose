@@ -27,10 +27,7 @@ android {
     buildTypes {
         release {
             minifyEnabled = false
-            proguardFiles(
-                    getDefaultProguardFile('proguard-android-optimize.txt'),
-                    'proguard-rules.pro'
-            )
+            proguardFiles(getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro')
         }
     }
     compileOptions {
@@ -61,8 +58,16 @@ dependencies {
     implementation(project(":hcaptcha"))
     implementation(project(":markdown"))
 
+//    implementation("com.halilibo.compose-richtext:richtext-commonmark:1.0.0-alpha02")
+//    implementation("com.halilibo.compose-richtext:richtext-ui-material3:1.0.0-alpha02")
+
 //    implementation("org.jetbrains:markdown:0.7.3")
 //    implementation 'com.vladsch.flexmark:flexmark:0.64.8'
+
+//    implementation("com.scatl:multiplatform-markdown-renderer:0.27.0")
+//    implementation("com.scatl:multiplatform-markdown-renderer-m3:0.27.0")
+//    implementation("com.scatl:multiplatform-markdown-renderer-coil2:0.27.0")
+//    implementation("com.scatl:multiplatform-markdown-renderer-code:0.27.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.xlog)

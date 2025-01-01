@@ -12,12 +12,12 @@ coreKtx = "1.15.0"
 appcompat = "1.7.0"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
-navigation = "2.8.4"
+navigation = "2.8.5"
 retrofit = "2.11.0"
 okhttp = "5.0.0-alpha.14"
 moshi = "1.15.1"
 hilt = "2.52"
-room = "2.7.0-alpha11"
+room = "2.7.0-alpha12"
 xlog = "1.10.1"
 hiltNavigationCompose = "1.2.0"
 coil = "2.7.0"
@@ -26,14 +26,14 @@ palette = "1.0.0"
 datastore = "1.1.1"
 colorpicker = "1.1.2"
 telephoto = "0.14.0"
-jsoup = "1.15.4"
+jsoup = "1.18.1"
 richText = "1.0.0-rc10"
 markwon = "4.6.2"
 kotlinxSerializationJson = "1.7.3"
 
-composeLib = "1.7.5"
-material3 = "1.4.0-alpha04"
-materialNavigation = "1.8.0-alpha06"
+composeLib = "1.7.6"
+material3 = "1.4.0-alpha05"
+materialNavigation = "1.8.0-alpha07"
 
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -56,11 +56,11 @@ androidx-datastore = { group = "androidx.datastore", name = "datastore-preferenc
 
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "composeLib" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "composeLib" }
-androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "composeLib"  }
-androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "composeLib"  }
-androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "composeLib"  }
-androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "composeLib"  }
-androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "composeLib"  }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "composeLib" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "composeLib" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "composeLib" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "composeLib" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "composeLib" }
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "composeLib" }
 material-icons-core = { group = "androidx.compose.material", name = "material-icons-core-android", version.ref = "composeLib" }
 material-ripple-android = { group = "androidx.compose.material", name = "material-ripple-android", version.ref = "composeLib" }
@@ -93,8 +93,8 @@ coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
 coil-video = { module = "io.coil-kt:coil-video", version.ref = "coil" }
 
 telephoto = { group = "me.saket.telephoto", name = "zoomable-image-coil", version.ref = "telephoto" }
-jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup"}
-richText = { group = "com.mohamedrejeb.richeditor", name = "richeditor-compose", version.ref = "richText"}
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+richText = { group = "com.mohamedrejeb.richeditor", name = "richeditor-compose", version.ref = "richText" }
 
 renderscript-intrinsics-replacement-toolkit = { module = "com.github.android:renderscript-intrinsics-replacement-toolkit", version = "598692ab79" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
@@ -106,13 +106,15 @@ markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", version
 markwon-ext-strikethrough = { group = "io.noties.markwon", name = "ext-strikethrough", version.ref = "markwon" }
 markwon-ext-tables = { group = "io.noties.markwon", name = "ext-tables", version.ref = "markwon" }
 markwon-ext-tasklist = { group = "io.noties.markwon", name = "ext-tasklist", version.ref = "markwon" }
+markwon-ext-latex = { group = "io.noties.markwon", name = "ext-latex", version.ref = "markwon" }
+markwon-image = { group = "io.noties.markwon", name = "image", version.ref = "markwon" }
+markwon-inline-parser = { group = "io.noties.markwon", name = "inline-parser", version.ref = "markwon" }
 
 [bundles]
 lifecycle = [
     "androidx-lifecycle-runtime-compose",
     "androidx-lifecycle-runtime-ktx"
 ]
-
 compose = [
     "androidx-activity-compose",
     "androidx-navigation-compose",
@@ -126,7 +128,6 @@ compose = [
     "androidx-compose-foundation",
     "androidx-bottomsheet-navigation"
 ]
-
 square = [
     "square-moshi",
     "square-okhttp",
@@ -134,7 +135,6 @@ square = [
     "square-retrofit-converter-moshi",
     "square-retrofit-converter-scalars",
 ]
-
 hilt = [
     "google-hilt",
     "hilt-navigation-compose"
@@ -148,7 +148,10 @@ markwon = [
     "markwon-image-coil",
     "markwon-ext-strikethrough",
     "markwon-ext-tables",
-    "markwon-ext-tasklist"
+    "markwon-ext-tasklist",
+    "markwon-ext-latex",
+    "markwon-image",
+    "markwon-inline-parser"
 ]
 
 [plugins]
@@ -158,6 +161,6 @@ kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref =
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 #kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt"}
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }

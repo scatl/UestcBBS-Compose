@@ -274,7 +274,7 @@ fun linkNavigate(
                     )
                 } else {
                     navHostController.navigate(
-                        Router.CollectionListRouterEntity
+                        Router.CollectionListRouterEntity()
                     )
                 }
             }
