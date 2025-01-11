@@ -377,6 +377,18 @@ fun ThreadReplyItem(
                             Text(
                                 text = item.message.toString()
                             )
+//                            MarkdownText(
+//                                markdown = "<blockquote>www</blockquote>",
+//                                theme = MarkdownDefaults.defaultTheme(),
+//                                onLinkClicked = {
+//                                    linkNavigate(
+//                                        url = it,
+//                                        openBrowserIfNotMatch = true,
+//                                        navHostController = navHostController,
+//                                        uriHandler = uriHandler
+//                                    )
+//                                }
+//                            )
                         }
                     }
 
@@ -542,7 +554,7 @@ fun ThreadReplyItem(
             HorizontalDivider(
                 thickness = 0.2.dp,
                 modifier = Modifier
-                    .padding(start = 50.dp, top = pagePadding)
+                    .padding(start = 40.dp, top = pagePadding)
             )
         }
 

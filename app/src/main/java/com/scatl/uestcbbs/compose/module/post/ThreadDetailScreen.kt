@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -42,7 +43,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.BookmarkAdd
-import androidx.compose.material.icons.outlined.BookmarkAdded
 import androidx.compose.material.icons.outlined.CardGiftcard
 import androidx.compose.material.icons.outlined.CollectionsBookmark
 import androidx.compose.material.icons.outlined.ContentCopy
@@ -105,8 +105,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -124,6 +126,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -145,6 +148,7 @@ import com.scatl.uestcbbs.compose.ext.pagePadding
 import com.scatl.uestcbbs.compose.ext.px2dp
 import com.scatl.uestcbbs.compose.ext.setSecureFlag
 import com.scatl.uestcbbs.compose.ext.showToast
+import com.scatl.uestcbbs.compose.ext.sp2px
 import com.scatl.uestcbbs.compose.ext.toAvatarUrl
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.ext.unboundClickable
@@ -172,6 +176,7 @@ import com.scatl.uestcbbs.compose.widget.RoundCheckBoxDefaults
 import com.scatl.uestcbbs.compose.widget.StatusLayout
 import com.scatl.uestcbbs.compose.widget.StickyLayout
 import com.scatl.uestcbbs.compose.widget.StickyLayoutController
+import com.scatl.uestcbbs.compose.widget.WatermarkDrawable
 import com.scatl.uestcbbs.compose.widget.refresh.RetryType
 import com.scatl.uestcbbs.compose.widget.refresh.SwipeRefresh
 import com.scatl.uestcbbs.compose.widget.web.LocalHtmlWebView
@@ -259,9 +264,12 @@ fun ThreadDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
         ) {
+            WaterMark()
+
             StickyLayout(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .alpha(0.975f)
                     .background(color = MaterialTheme.colorScheme.surfaceContainer),
                 controller = stickyLayoutController,
                 headContent = {
@@ -351,6 +359,27 @@ fun ThreadDetailScreen(
             )
         }
     }
+}
+
+@Composable
+private fun WaterMark() {
+    val drawable = WatermarkDrawable().apply {
+        mText = AccountManager.getSignedInAccount()?.uid.toString()
+        mTextColor = MaterialTheme.colorScheme.onBackground.toArgb()
+        mTextSize = 20.sp2px
+        mRotation = -15f
+        mXSpace = 1.4f
+        mYSpace = 15
+    }
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp.dp2px.toInt()
+    val screenHeight = configuration.screenHeightDp.dp.dp2px.toInt()
+    Image(
+        bitmap = drawable.toBitmap(screenWidth, screenHeight).asImageBitmap(),
+        contentDescription = null,
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Fit
+    )
 }
 
 @Composable
