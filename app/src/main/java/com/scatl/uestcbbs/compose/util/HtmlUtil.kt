@@ -131,6 +131,7 @@ object HtmlUtil {
                         color: inherit !important;
                     }
                 </style>
+                <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>                
             </head>
             <body>
                 $content
@@ -475,6 +476,11 @@ object HtmlUtil {
             return ""
         }
 
+        val latexBlocks = mutableListOf<String>()
+        val inlineLatex = mutableListOf<String>()
+        val latexBlockPlaceholder = "☂LATEX_BLOCK☂"
+        val latexInlinePlaceholder = "☂LATEX_INLINE☂"
+
         val regexReplacements = listOf<Pair<Regex, (match: MatchResult) -> String>>(
             Pair("^######\\s*(.*?)\$".toRegex(RegexOption.MULTILINE)) { match ->
                 "<h6>${match.groupValues[1]}</h6>"
@@ -498,6 +504,18 @@ object HtmlUtil {
 
             Pair("^#\\s*(.*?)\$".toRegex(RegexOption.MULTILINE)) { match ->
                 "<h1>${match.groupValues[1]}</h1><hr/>"
+            },
+
+            Pair("\\$\\$\\s*(.*?)\\s*\\$\\$".toRegex(RegexOption.DOT_MATCHES_ALL)) { match ->
+                //"\\(${match.groupValues[1]}\\)"
+                latexBlocks.add(match.groupValues[1].trim())
+                latexBlockPlaceholder
+            },
+
+            Pair("\\$(.*?)\\$".toRegex(RegexOption.DOT_MATCHES_ALL)) { match ->
+                //"\\(${match.groupValues[1]}\\)"
+                inlineLatex.add(match.groupValues[1].trim())
+                latexInlinePlaceholder
             },
 
             //匹配顺序不能变了，先匹配列表，再匹配粗体和斜体
@@ -648,6 +666,13 @@ object HtmlUtil {
             .replace("\n", "<br/>")
             //.replace("PLACEHOLDER_STAR", "*")
 
+        latexBlocks.forEachIndexed { index, latex ->
+            result = result.replaceFirst(latexBlockPlaceholder, "\\($latex\\)")
+        }
+        inlineLatex.forEachIndexed { index, latex ->
+            result = result.replaceFirst(latexInlinePlaceholder, "\\($latex\\)")
+        }
+
         return result
     }
 
@@ -724,7 +749,7 @@ object HtmlUtil {
                 res = res.replace(
                     "![${it.filename}](i:${it.attachmentId})",
 //                    "\n\n![${it.filename}](${it.thumbnailUrl.toBBSImgUrl()})\n\n"
-                    "\n\n[![${it.filename}](${it.thumbnailUrl.toBBSImgUrl()})](${it.thumbnailUrl.toBBSImgUrl()})\n\n"
+                    "[![${it.filename}](${it.thumbnailUrl.toBBSImgUrl()})](${it.thumbnailUrl.toBBSImgUrl()})"
                 )
             }
         }
@@ -738,8 +763,6 @@ object HtmlUtil {
             if (number != null) {
                 val item = EmotionManager.getEmotionById(number)
                 "![${item?.aPath}](${item?.aPath})"
-//                "㊧${item?.aPath}㊧"
-//                "㊧${number}㊧"
             } else {
                 matchResult.value
             }
