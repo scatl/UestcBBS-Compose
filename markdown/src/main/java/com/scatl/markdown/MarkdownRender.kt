@@ -11,7 +11,9 @@ import com.scatl.markdown.factory.TaskListDrawable
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.SoftBreakAddsNewLinePlugin
 import io.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.ext.latex.JLatexMathPlugin
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.ext.tables.TableTheme
@@ -33,9 +35,10 @@ internal object MarkdownRender {
         return Markwon.builderNoCore(context)
             .usePlugin(MarkdownCorePlugin(theme))
             .usePlugin(HtmlPlugin.create())
-            .usePlugin(CoilImagesPlugin.create(context, context.imageLoader))
+            .usePlugin(com.scatl.markdown.plugins.CoilImagesPlugin.create(context, context.imageLoader))
             .usePlugin(StrikethroughPlugin.create())
             .usePlugin(LinkifyPlugin.create(linkifyMask))
+            .usePlugin(JLatexMathPlugin.create(20f))
             .usePlugin(TablePlugin.create(
                 TableTheme
                     .buildWithDefaults(context)
@@ -50,6 +53,7 @@ internal object MarkdownRender {
                     Color.WHITE
                 )
             ))
+            //.usePlugin(SoftBreakAddsNewLinePlugin.create())
 //            .apply {
 ////                if (enableSoftBreakAddsNewLine) {
 //                    usePlugin(SoftBreakAddsNewLinePlugin.create())
