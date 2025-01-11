@@ -17,6 +17,8 @@ class WatermarkDrawable : Drawable() {
     var mTextColor: Int = 0
     var mTextSize: Float = 0f
     var mRotation: Float = 0f
+    var mYSpace: Int = 10
+    var mXSpace: Float = 1.2f
 
     override fun draw(canvas: Canvas) {
         val width = bounds.right
@@ -34,15 +36,15 @@ class WatermarkDrawable : Drawable() {
 
         var index = 0
         var fromX: Float
-        var positionY = diagonal / 20
+        var positionY = diagonal / mYSpace
         while (positionY <= diagonal) {
             fromX = -width + (index++ % 2) * textWidth
             var positionX = fromX
             while (positionX < width) {
                 canvas.drawText(mText, positionX, positionY.toFloat(), mPaint)
-                positionX += (textWidth * 1.2).toFloat()
+                positionX += (textWidth * mXSpace)
             }
-            positionY += diagonal / 10
+            positionY += diagonal / mYSpace
         }
 
         canvas.save()
