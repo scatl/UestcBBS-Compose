@@ -14,7 +14,7 @@ object Constants {
 
     const val APP_AUTHOR_BBS_UID = 217992
     const val APP_AUTHOR_BBS_NAME = "sca_tl"
-    const val APP_OPEN_SOURCE_GITHUB_URL = "https://github.com/scatl/UestcBBS-MVP"
+    const val APP_OPEN_SOURCE_GITHUB_URL = "https://github.com/scatl/UestcBBS-Compose"
     const val APP_AUTHOR_EMAIL = "sca_tl@foxmail.com"
 }
 

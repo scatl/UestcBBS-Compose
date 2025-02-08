@@ -20,8 +20,12 @@ data class CollectionEntity(
     val description: String? = "",
     @Json(name = "follows")
     val follows: Int? = 0,
+    @Json(name = "owner_uid")
+    val ownerUid: Int? = 0,
     @Json(name = "is_owner")
     val isOwner: Boolean? = false,
+    @Json(name = "is_favorite")
+    val isFavorite: Boolean? = false,
     @Json(name = "keyword")
     val keyword: String? = "",
     @Json(name = "last_update")

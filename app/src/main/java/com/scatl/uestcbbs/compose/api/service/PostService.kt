@@ -1,20 +1,28 @@
 package com.scatl.uestcbbs.compose.api.service
 
+import com.scatl.uestcbbs.compose.api.entity.FavoriteStatusEntity
 import com.scatl.uestcbbs.compose.api.entity.FindPostEntity
 import com.scatl.uestcbbs.compose.api.entity.PostCommentAndRateEntity
+import com.scatl.uestcbbs.compose.api.entity.RateOptionsEntity
 import com.scatl.uestcbbs.compose.api.entity.ThreadDetailEntity
 import com.scatl.uestcbbs.compose.api.entity.ThreadPollEntity
 import com.scatl.uestcbbs.compose.api.entity.ThreadReplyEntity
 import com.scatl.uestcbbs.compose.api.entity.UploadAttachmentEntity
+import com.scatl.uestcbbs.compose.api.entity.request.AddFriendRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.CommentRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.CreatePostRequestEntity
+import com.scatl.uestcbbs.compose.api.entity.request.FavoriteRequestEntity
+import com.scatl.uestcbbs.compose.api.entity.request.RateRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.VoteRequestEntity
+import com.scatl.uestcbbs.compose.api.entity.user.AddFriendEntity
 import com.scatl.uestcbbs.compose.net.BaseApiResult
 import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.PartMap
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
@@ -70,4 +78,26 @@ interface PostService {
     suspend fun uploadAttachment(
         @PartMap map: MutableMap<String, RequestBody> //kind   type  files[]
     ): BaseApiResult<UploadAttachmentEntity>
+
+    @PUT("thread/{tid}/favorite")
+    suspend fun favorite(
+        @Body requestBody: FavoriteRequestEntity,
+        @Path("tid") tid: String?
+    ): BaseApiResult<Any>
+
+    @GET("thread/{tid}/favorite")
+    suspend fun getFavoriteStatus(
+        @Path("tid") tid: String?
+    ): BaseApiResult<FavoriteStatusEntity>
+
+    @GET("post/{pid}/rate")
+    suspend fun getRateOptions(
+        @Path("pid") tid: String?
+    ): BaseApiResult<RateOptionsEntity>
+
+    @POST("post/{pid}/rate")
+    suspend fun rate(
+        @Path("pid") tid: String?,
+        @Body requestBody: RateRequestEntity,
+    ): BaseApiResult<Any>
 }

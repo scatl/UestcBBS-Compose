@@ -278,7 +278,7 @@ private fun TopBar(
     val navHostController = LocalNavController.current
 
     TopAppBar(
-        colors = TopAppBarDefaults.largeTopAppBarColors().copy(
+        colors = TopAppBarDefaults.topAppBarColors().copy(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
         title = {

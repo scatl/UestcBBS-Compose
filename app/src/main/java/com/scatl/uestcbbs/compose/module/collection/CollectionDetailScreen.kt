@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.ext.LoadInitialDataIfNeeded
@@ -131,7 +130,7 @@ fun CollectionDetailScreen(
             .navigationBarsPadding()
     ) {
         LargeTopAppBar(
-            colors = TopAppBarDefaults.largeTopAppBarColors().copy(
+            colors = TopAppBarDefaults.topAppBarColors().copy(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer
             ),
             scrollBehavior = scrollBehavior,
@@ -206,7 +205,8 @@ fun CollectionDetailScreen(
                     ThreadItem(
                         modifier = Modifier.animateItem(),
                         viewModel = viewModel,
-                        data = item.data,
+                        item = item.data,
+                        collectionDetail = collectionInfo.data,
                         cTid = collectionId
                     )
                 }
@@ -520,20 +520,22 @@ private fun AuthorLabel(
 private fun ThreadItem(
     modifier: Modifier,
     viewModel: CollectionViewModel,
-    data: CollectionDetailEntity.ThreadItem,
+    collectionDetail: CollectionDetailEntity?,
+    item: CollectionDetailEntity.ThreadItem,
     cTid: Int
 ) {
     val context = LocalContext.current
     val navHostController = LocalNavController.current
     val showDeleteDialog = rememberSaveable { mutableStateOf(false) }
     val removeCollectionPostData by viewModel.removeCollectionPostData.collectAsStateWithLifecycle()
+    val self = rememberSaveable { mutableStateOf(AccountManager.getSignedInAccount()?.uid == collectionDetail?.collectionAuthorId.toString()) }
 
     LaunchedEffect(removeCollectionPostData) {
         if (removeCollectionPostData.data != null) {
-            if (removeCollectionPostData.isSuccess && removeCollectionPostData.data == data.topicId) {
+            if (removeCollectionPostData.isSuccess && removeCollectionPostData.data == item.topicId) {
                 ContextCompat.getString(context, R.string.collection_post_remove_success).showToast(context)
                 showDeleteDialog.value = false
-                viewModel.removePost(data.topicId.toIntOrElse())
+                viewModel.removePost(item.topicId.toIntOrElse())
             } else {
                 (removeCollectionPostData.errorData?.message ?:
                     ContextCompat.getString(context, R.string.collection_post_remove_fail)
@@ -547,11 +549,13 @@ private fun ThreadItem(
         modifier = modifier
             .commonCardBg (
                 onLongClick = {
-                    showDeleteDialog.value = true
+                    if (self.value) {
+                        showDeleteDialog.value = true
+                    }
                 }
             ) {
                 navHostController.navigate(Router.ThreadDetailRouterEntity(
-                    id = data.topicId.toIntOrElse()
+                    id = item.topicId.toIntOrElse()
                 ))
             }
     ) {
@@ -560,7 +564,7 @@ private fun ThreadItem(
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             AsyncImage(
-                model = data.authorAvatar,
+                model = item.authorAvatar,
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)
@@ -568,12 +572,12 @@ private fun ThreadItem(
             )
             Column {
                 Text(
-                    text = data.authorName.toString(),
+                    text = item.authorName.toString(),
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.outline
                 )
                 Text(
-                    text = data.postDate.toString(),
+                    text = item.postDate.toString(),
                     fontSize = 12.sp,
                     lineHeight = 12.sp,
                     modifier = Modifier
@@ -585,7 +589,7 @@ private fun ThreadItem(
         }
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = data.topicTitle.toString()
+            text = item.topicTitle.toString()
         )
         Spacer(modifier = Modifier.height(10.dp))
         Row (
@@ -596,7 +600,7 @@ private fun ThreadItem(
                 .align(Alignment.End)
         ) {
             Text(
-                text = stringResource(R.string.latest_reply_at, data.lastPostDate.toString()),
+                text = stringResource(R.string.latest_reply_at, item.lastPostDate.toString()),
                 fontSize = 12.sp,
                 lineHeight = 12.sp,
                 modifier = Modifier.alpha(0.5f)
@@ -605,14 +609,14 @@ private fun ThreadItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${data.commentCount} ${stringResource(R.string.reply)}",
+                    text = "${item.commentCount} ${stringResource(R.string.reply)}",
                     fontSize = 12.sp,
                     lineHeight = 12.sp,
                     modifier = Modifier.alpha(0.5f)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "${data.viewCount} ${stringResource(R.string.views)}",
+                    text = "${item.viewCount} ${stringResource(R.string.views)}",
                     fontSize = 12.sp,
                     lineHeight = 12.sp,
                     modifier = Modifier.alpha(0.5f)
@@ -629,7 +633,7 @@ private fun ThreadItem(
             showDeleteDialog.value = false
         },
         onConfirmClick = {
-            viewModel.removeCollectionPost(cTid, data.topicId.toIntOrElse())
+            viewModel.removeCollectionPost(cTid, item.topicId.toIntOrElse())
         }
     )
 }

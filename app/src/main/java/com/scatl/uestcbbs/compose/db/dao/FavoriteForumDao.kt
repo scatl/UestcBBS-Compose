@@ -5,7 +5,7 @@ import androidx.room.Query
 import com.scatl.uestcbbs.compose.db.entity.FavoriteForumDBEntity
 
 /**
- * Created by tanlei02 at 2024/11/20 16:51:07
+ * Created by sca_tl at 2024/11/20 16:51:07
  */
 @Dao
 interface FavoriteForumDao: BaseDao<FavoriteForumDBEntity>{

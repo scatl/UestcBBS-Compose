@@ -144,6 +144,7 @@
     <string name="subscribe">订阅</string>
     <string name="subscribed">已订阅</string>
     <string name="create">创建</string>
+    <string name="operation_fail">操作失败</string>
 
     <string name="pull_to_refresh">继续下拉刷新</string>
     <string name="release_to_refresh">释放立即刷新</string>
@@ -272,6 +273,9 @@
     <string name="thread_detail_author_post_only_my">只看我的回复</string>
     <string name="thread_detail_delete_post">删除帖子</string>
     <string name="thread_detail_delete_post_dsp">确定要删除该帖子吗？该操作将会消耗一张悔悟卡并且不可撤销！如果没有悔悟卡请先到“我的-道具商店”购买。</string>
+    <string name="thread_detail_favorite_success">收藏成功</string>
+    <string name="thread_detail_favorite_del_success">取消收藏成功</string>
+    <string name="thread_detail_rate_success">评分成功</string>
 
     <string name="copy_content_success">复制成功</string>
     <string name="copy_content_fail">复制失败，请检查是否拥有剪切板权限</string>
@@ -395,7 +399,7 @@
     <string name="collection_create_tags_dsp">多个标签请以空格分隔开，最多支持5个标签</string>
     <string name="collection_add_to">添加到专辑</string>
     <string name="collection_add_to_select">请选择专辑：</string>
-    <string name="collection_add_to_dsp">若您创建的专辑没有展示在此列表里，可能是专辑里已经收录了该帖子</string>
+    <string name="collection_add_to_dsp">若选项置灰，表示该专辑已经收录了该帖子</string>
     <string name="collection_add_to_success">添加成功</string>
     <string name="collection_add_to_fail">添加失败</string>
     <string name="collection_none_dsp">您还没有创建过专辑</string>

@@ -2,6 +2,7 @@ package com.scatl.uestcbbs.compose.api.service
 
 import com.scatl.uestcbbs.compose.api.entity.MessageBoardEntity
 import com.scatl.uestcbbs.compose.api.entity.request.AddFriendRequestEntity
+import com.scatl.uestcbbs.compose.api.entity.request.DeleteFavoriteRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.EditFriendRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.UserAddCommentRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.UserEditCommentRequestEntity
@@ -140,5 +141,10 @@ interface UserService {
     @DELETE("user/comment/{id}")
     suspend fun deleteComment(
         @Path("id") commentId: String
+    ): BaseApiResult<Any?>
+
+    @POST("user/favorites/delete")
+    suspend fun deleteFavorite(
+        @Body requestBody: DeleteFavoriteRequestEntity
     ): BaseApiResult<Any?>
 }

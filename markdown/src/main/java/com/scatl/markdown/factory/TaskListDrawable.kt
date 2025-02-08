@@ -13,7 +13,7 @@ import androidx.annotation.IntRange
 import kotlin.math.min
 
 /**
- * Created by tanlei02 at 2024/12/31 15:53:18
+ * Created by sca_tl at 2024/12/31 15:53:18
  */
 class TaskListDrawable: Drawable {
 

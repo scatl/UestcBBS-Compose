@@ -80,7 +80,7 @@ fun MessageScreen() {
                         .padding(end = 20.dp)
                 )
             },
-            colors = TopAppBarDefaults.mediumTopAppBarColors().copy(
+            colors = TopAppBarDefaults.topAppBarColors().copy(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer
             ),
             scrollBehavior = scrollBehavior

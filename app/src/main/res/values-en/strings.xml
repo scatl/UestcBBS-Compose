@@ -391,7 +391,7 @@
     <string name="collection_create_tags_dsp">Please separate multiple tags with spaces. A maximum of 5 tags are supported.</string>
     <string name="collection_add_to">Add to collection</string>
     <string name="collection_add_to_select">Select an album:</string>
-    <string name="collection_add_to_dsp">If the collection you created is not displayed in this list, it may be that the post has already been included in the collection.</string>
+    <string name="collection_add_to_dsp">If the option is grayed out, it means that the post has already been included in the collection.</string>
     <string name="collection_add_to_success">Success</string>
     <string name="collection_add_to_fail">Fail</string>
     <string name="collection_none_dsp">You haven\'t created an collection yet</string>

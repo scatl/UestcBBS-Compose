@@ -38,7 +38,7 @@ import com.scatl.uestcbbs.compose.widget.NumberInput
 import kotlin.math.ceil
 
 /**
- * Created by tanlei02 at 2024/11/22 9:38:21
+ * Created by sca_tl at 2024/11/22 9:38:21
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

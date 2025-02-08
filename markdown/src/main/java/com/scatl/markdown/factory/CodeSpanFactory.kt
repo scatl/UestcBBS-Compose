@@ -10,7 +10,7 @@ import io.noties.markwon.RenderProps
 import io.noties.markwon.SpanFactory
 
 /**
- * Created by tanlei02 at 2024/12/31 13:47:18
+ * Created by sca_tl at 2024/12/31 13:47:18
  */
 class CodeSpanFactory(val theme: MarkdownTheme): SpanFactory {
     override fun getSpans(configuration: MarkwonConfiguration, props: RenderProps): Any {

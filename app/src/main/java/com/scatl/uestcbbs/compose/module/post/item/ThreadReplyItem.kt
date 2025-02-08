@@ -86,12 +86,13 @@ import com.scatl.uestcbbs.compose.ext.pagePadding
 import com.scatl.uestcbbs.compose.ext.toAvatarUrl
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.manager.AccountManager
-import com.scatl.uestcbbs.compose.module.post.CommentBottomSheet
+import com.scatl.uestcbbs.compose.module.post.commentrate.CommentBottomSheet
 import com.scatl.uestcbbs.compose.module.post.CommentInfo
 import com.scatl.uestcbbs.compose.module.post.DeletePost
 import com.scatl.uestcbbs.compose.module.post.MoreOptionItem
 import com.scatl.uestcbbs.compose.module.post.PostViewModel
 import com.scatl.uestcbbs.compose.module.post.RateInfo
+import com.scatl.uestcbbs.compose.module.post.commentrate.RateBottomSheet
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.router.linkNavigate
@@ -604,6 +605,7 @@ private fun MoreOptions(
     val showDeleteDialog = rememberSaveable { mutableStateOf(false) }
 
     val openCommentBottomSheet = rememberSaveable { mutableStateOf(false) }
+    val openRateBottomSheet = rememberSaveable { mutableStateOf(false) }
 
     BackHandler(enabled = openSheet.value) {
         scope.launchSafety {
@@ -682,7 +684,8 @@ private fun MoreOptions(
                             text = "评分",
                             icon = Icons.Outlined.WaterDrop
                         ) {
-
+                            hide()
+                            openRateBottomSheet.value = true
                         }
                     }
                 }
@@ -740,6 +743,17 @@ private fun MoreOptions(
             postId = data.postId.toIntOrElse(),
             onSuccess = { pid, msg ->
                 onCommentSuccess?.invoke(pid, msg)
+            }
+        )
+    }
+
+    if (openRateBottomSheet.value) {
+        RateBottomSheet(
+            openRateBottomSheet = openRateBottomSheet,
+            threadId = data.threadId.toIntOrElse(),
+            postId = data.postId.toIntOrElse(),
+            onSuccess = { pid ->
+
             }
         )
     }
