@@ -7,18 +7,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.scatl.uestcbbs.compose.App
 import com.scatl.uestcbbs.compose.R
+import com.scatl.uestcbbs.compose.api.entity.FavoriteStatusEntity
 import com.scatl.uestcbbs.compose.api.entity.PostCommentAndRateEntity
 import com.scatl.uestcbbs.compose.api.entity.PostSupportEntity
+import com.scatl.uestcbbs.compose.api.entity.RateOptionsEntity
 import com.scatl.uestcbbs.compose.api.entity.ThreadDetailEntity
 import com.scatl.uestcbbs.compose.api.entity.ThreadPollEntity
 import com.scatl.uestcbbs.compose.api.entity.ThreadReplyEntity
 import com.scatl.uestcbbs.compose.api.entity.request.CreatePostRequestEntity
+import com.scatl.uestcbbs.compose.api.entity.request.DeleteFavoriteRequestEntity
+import com.scatl.uestcbbs.compose.api.entity.request.FavoriteRequestEntity
+import com.scatl.uestcbbs.compose.api.entity.request.RateRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.VoteRequestEntity
 import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.db.entity.BrowsingHistoryDBEntity
 import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.safeSubstring
+import com.scatl.uestcbbs.compose.ext.toIntColor
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.manager.AccountManager
 import com.scatl.uestcbbs.compose.manager.ThreadSnapshotManager
@@ -30,12 +36,16 @@ import com.scatl.uestcbbs.compose.widget.web.WebViewManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import javax.inject.Inject
@@ -68,6 +78,15 @@ class PostViewModel @Inject constructor(
 
     private val _createReplyData = MutableStateFlow(UiState<ThreadReplyEntity>().init())
     val createReplyData: StateFlow<UiState<ThreadReplyEntity>> = _createReplyData
+
+    private val _threadFavoriteData = MutableStateFlow(UiState<Boolean?>().init())
+    val threadFavoriteData: StateFlow<UiState<Boolean?>> = _threadFavoriteData
+
+    private val _rateOptionData = MutableStateFlow(UiState<RateOptionsEntity?>().init())
+    val rateOptionData: StateFlow<UiState<RateOptionsEntity?>> = _rateOptionData
+
+    private val _rateData = MutableStateFlow(UiState<Boolean?>().init())
+    val rateData: StateFlow<UiState<Boolean?>> = _rateData
 
     private val _supportDataMap = mutableMapOf<String, MutableStateFlow<UiState<PostSupportEntity>>>()
     private var currentThreadDetailPage: Int = 1
@@ -109,17 +128,29 @@ class PostViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getThreadDetail(threadId: String) {
         viewModelScope.launchSafety {
-            val detailFlow = flow {
-                emit(
+            val combineFlow = flow {
+                val detailData = async {
                     postRepository.getThreadDetail(
                         threadId = threadId,
                         order = "2",
                         page = currentThreadDetailPage
                     )
-                )
+                }.await()
+
+                val favoriteData = async {
+                    try {
+                        postRepository.getFavoriteStatus(threadId)
+                    } catch (e: Exception) {
+                        BaseApiResult(data = FavoriteStatusEntity())
+                    }
+                }.await()
+
+                emit(Pair(detailData, favoriteData))
             }
 
-            detailFlow.flatMapConcat { detailData ->
+            combineFlow.flatMapConcat { (detailData, favoriteData) ->
+                detailData.data?.thread?.isFavorite = favoriteData.data?.isPersonalFavorite == true
+
                 var commentPids = ""
                 var ratePids = ""
 
@@ -471,6 +502,115 @@ class PostViewModel @Inject constructor(
                         _repliesData.value.data?.add(firstVisibleIndex + 1, latest)
                         _threadDetailData.value.data?.rows?.add(firstVisibleIndex + 1, latest)
                         _currentReplyCount.value += 1
+                    }
+                }
+                .onFailure {
+                    error(Throwable(it.message))
+                }
+        }.onCatch {
+            error(it)
+        }
+    }
+
+    fun favorite(tid: String) {
+        fun error(e: Throwable) {
+            _threadFavoriteData.value = UiState<Boolean?>().error().apply {
+                isSuccess = false
+                data = false
+                errorData = e
+            }
+        }
+
+        viewModelScope.launchSafety {
+            postRepository
+                .favorite(FavoriteRequestEntity(true), tid)
+                .onSuccess {
+                    _threadFavoriteData.value = UiState<Boolean?>().apply {
+                        isSuccess = true
+                        data = true
+                    }
+                }
+                .onFailure {
+                    error(Throwable(it.message))
+                }
+        }.onCatch {
+            error(it)
+        }
+    }
+
+    fun delFavorite(tid: String) {
+        fun error(e: Throwable) {
+            _threadFavoriteData.value = UiState<Boolean?>().error().apply {
+                isSuccess = false
+                data = false
+                errorData = e
+            }
+        }
+
+        viewModelScope.launchSafety {
+            postRepository
+                .deleteFavorite(DeleteFavoriteRequestEntity(true, mutableListOf(tid.toIntOrElse())))
+                .onSuccess {
+                    _threadFavoriteData.value = UiState<Boolean?>().apply {
+                        isSuccess = true
+                        data = false
+                    }
+                }
+                .onFailure {
+                    error(Throwable(it.message))
+                }
+        }.onCatch {
+            error(it)
+        }
+    }
+
+    fun getRateOption(tid: String) {
+        fun error(e: Throwable) {
+            _rateOptionData.value = UiState<RateOptionsEntity?>().error().apply {
+                isSuccess = false
+                data = null
+                errorData = e
+            }
+        }
+        viewModelScope.launchSafety {
+            postRepository
+                .getRateOptions(tid)
+                .onSuccess {
+                    _rateOptionData.value = UiState<RateOptionsEntity?>().success().apply {
+                        data = it
+                    }
+                }
+                .onFailure {
+                    error(Throwable(it.message))
+                }
+        }.onCatch {
+            error(it)
+        }
+    }
+
+    fun rate(pid: String, credit: Int) {
+        fun error(e: Throwable) {
+            _rateData.value = UiState<Boolean?>().error().apply {
+                isSuccess = false
+                data = false
+                errorData = e
+            }
+        }
+        viewModelScope.launchSafety {
+            postRepository
+                .rate(
+                    pid = pid,
+                    requestEntity = RateRequestEntity(
+                        reason = "水滴操作",
+                        credits = RateRequestEntity.Credit(
+                            water = credit
+                        )
+                    )
+                )
+                .onSuccess {
+                    _rateData.value = UiState<Boolean?>().success().apply {
+                        isSuccess = true
+                        data = true
                     }
                 }
                 .onFailure {

@@ -41,7 +41,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.CardGiftcard
 import androidx.compose.material.icons.outlined.CollectionsBookmark
@@ -49,7 +49,6 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardDoubleArrowDown
 import androidx.compose.material.icons.outlined.LibraryAdd
 import androidx.compose.material.icons.outlined.MoreVert
@@ -64,8 +63,6 @@ import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -154,10 +151,9 @@ import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.ext.unboundClickable
 import com.scatl.uestcbbs.compose.manager.AccountManager
 import com.scatl.uestcbbs.compose.manager.ForumCategoryManager
-import com.scatl.uestcbbs.compose.module.collection.CollectionViewModel
-import com.scatl.uestcbbs.compose.module.collection.CreateCollectionBottomSheet
-import com.scatl.uestcbbs.compose.module.collection.entity.MyCollectionList
+import com.scatl.uestcbbs.compose.module.post.commentrate.CommentBottomSheet
 import com.scatl.uestcbbs.compose.module.post.commentrate.CommentRateType
+import com.scatl.uestcbbs.compose.module.post.commentrate.RateBottomSheet
 import com.scatl.uestcbbs.compose.module.post.item.ThreadReplyItem
 import com.scatl.uestcbbs.compose.module.post.item.CommonThreadTitle
 import com.scatl.uestcbbs.compose.module.snapshot.SnapshotViewModel
@@ -205,6 +201,7 @@ fun ThreadDetailScreen(
     val openMoreOptionsBottomSheet = rememberSaveable { mutableStateOf(false) }
 
     val openCommentBottomSheet = rememberSaveable { mutableStateOf(false) }
+    val openRateBottomSheet = rememberSaveable { mutableStateOf(false) }
     val openCreatePostScreen = rememberSaveable { mutableStateOf(false) }
 
     val showSnapshotData = rememberSaveable { mutableStateOf(false) }
@@ -240,7 +237,10 @@ fun ThreadDetailScreen(
 
     DisposableEffect(threadDetailData.data) {
         val activity = context as ComponentActivity
-        activity.setSecureFlag(Constants.INTERNAL_FIDS.contains(threadDetailData.data?.thread?.forumId ?: 0))
+        activity.setSecureFlag(
+            Constants.INTERNAL_FIDS.contains(threadDetailData.data?.thread?.forumId.toIntOrElse())
+                    || showSnapshotData.value
+        )
         onDispose {
             activity.setSecureFlag(false)
         }
@@ -325,7 +325,9 @@ fun ThreadDetailScreen(
             if (showSnapshotData.value.not()) {
                 BottomBar(
                     data = threadDetailData.data,
+                    viewModel = viewModel,
                     openCommentBottomSheet = openCommentBottomSheet,
+                    openRateBottomSheet = openRateBottomSheet,
                     openCreatePostScreen = openCreatePostScreen,
                     currentCreatePostData = currentCreatePostData,
                     scrollDirection = scrollDirection,
@@ -349,6 +351,17 @@ fun ThreadDetailScreen(
                     postId = threadDetailData.data?.thread?.postId.toIntOrElse(),
                     onSuccess = { pid, msg ->
                         viewModel.insertComment(pid, msg)
+                    }
+                )
+            }
+
+            if (openRateBottomSheet.value) {
+                RateBottomSheet(
+                    openRateBottomSheet = openRateBottomSheet,
+                    threadId = threadDetailData.data?.thread?.threadId.toIntOrElse(),
+                    postId = threadDetailData.data?.thread?.postId.toIntOrElse(),
+                    onSuccess = { pid ->
+
                     }
                 )
             }
@@ -2053,12 +2066,36 @@ private fun SupportInfo(
 @Composable
 private fun BottomBar(
     data: ThreadDetailEntity?,
+    viewModel: PostViewModel,
     openCommentBottomSheet: MutableState<Boolean>,
+    openRateBottomSheet: MutableState<Boolean>,
     scrollDirection: MutableState<Int?>,
     openCreatePostScreen: MutableState<Boolean>,
     currentCreatePostData: MutableState<CreatePostEntity>,
     modifier: Modifier
 ) {
+    val context = LocalContext.current
+    val isFavorite = remember { mutableStateOf(data?.thread?.isFavorite == true) }
+    val favoriteCount = remember { mutableIntStateOf(data?.thread?.favoriteTimes.toIntOrElse()) }
+    val favoriteData = viewModel.threadFavoriteData.collectAsStateWithLifecycle()
+
+    LaunchedEffect(favoriteData.value) {
+        if (favoriteData.value.data != null) {
+            if (favoriteData.value.isSuccess) {
+                isFavorite.value = favoriteData.value.data!!
+                if (isFavorite.value) {
+                    favoriteCount.value += 1
+                    ContextCompat.getString(context, R.string.thread_detail_favorite_success).showToast(context)
+                } else {
+                    favoriteCount.value -= 1
+                    ContextCompat.getString(context, R.string.thread_detail_favorite_del_success).showToast(context)
+                }
+            } else {
+                ContextCompat.getString(context, R.string.operation_fail).showToast(context)
+            }
+        }
+    }
+
     AnimatedVisibility(
         modifier = modifier,
         visible = (scrollDirection.value ?: 1) > 0,
@@ -2145,7 +2182,7 @@ private fun BottomBar(
                     },
                     modifier = Modifier
                         .unboundClickable {
-
+                            openRateBottomSheet.value = true
                         }
                 ) {
                     Icon(
@@ -2161,21 +2198,39 @@ private fun BottomBar(
                             modifier = Modifier.offset(y = (-4).dp)
                         ) {
                             Text(
-                                text = if (data?.thread?.favoriteTimes.toIntOrElse() > 0) {
-                                    data?.thread?.favoriteTimes.toIntOrElse().toString()
+                                text = if (favoriteCount.intValue > 0) {
+                                    favoriteCount.intValue.toString()
                                 } else {
                                     ""
+                                },
+                                color = if (isFavorite.value) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onBackground
                                 }
                             )
                         }
                     },
                     modifier = Modifier
                         .unboundClickable {
-
+                            if (isFavorite.value) {
+                                viewModel.delFavorite(data?.thread?.threadId.toString())
+                            } else {
+                                viewModel.favorite(data?.thread?.threadId.toString())
+                            }
                         }
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.StarOutline,
+                        imageVector = if (isFavorite.value) {
+                            Icons.Filled.Star
+                        } else {
+                            Icons.Outlined.StarOutline
+                        },
+                        tint = if (isFavorite.value) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onBackground
+                        },
                         contentDescription = null
                     )
                 }
@@ -2256,7 +2311,7 @@ private fun MoreOptions(
 //                    }
 //                }
 
-                if (!showSnapshot.value) {
+                if (showSnapshot.value.not()) {
                     item {
                         MoreOptionItem(
                             text = stringResource(id = R.string.add_to_collection),
@@ -2268,7 +2323,7 @@ private fun MoreOptions(
                     }
                 }
 
-                if (self.value) {
+                if (self.value && showSnapshot.value.not()) {
                     item {
                         MoreOptionItem(
                             text = stringResource(id = R.string.delete),
@@ -2280,7 +2335,7 @@ private fun MoreOptions(
                     }
                 }
 
-                if (!showSnapshot.value && !Constants.INTERNAL_FIDS.contains(data?.thread?.forumId ?: 0)) {
+                if (showSnapshot.value.not() && Constants.INTERNAL_FIDS.contains(data?.thread?.forumId ?: 0).not()) {
                     item {
                         MoreOptionItem(
                             text = stringResource(R.string.snapshot_title),
@@ -2321,7 +2376,7 @@ private fun MoreOptions(
                     }
                 }
 
-                if (!showSnapshot.value && self.value.not()) {
+                if (showSnapshot.value.not() && self.value.not()) {
                     item {
                         MoreOptionItem(
                             text = stringResource(id = R.string.report),
@@ -2371,7 +2426,7 @@ private fun MoreOptions(
         )
     }
 
-    AddToCollection(
+    AddToCollectionBottomSheet(
         addToCollectionSheetState = addToCollectionSheetState,
         addToCollectionBottomSheet = addToCollectionBottomSheet,
         tid = data?.thread?.threadId.toIntOrElse()
@@ -2416,197 +2471,6 @@ fun MoreOptionItem(
             textAlign = TextAlign.Center,
             fontSize = 12.sp,
             lineHeight = 16.sp
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddToCollection(
-    addToCollectionBottomSheet: MutableState<Boolean>,
-    addToCollectionSheetState: SheetState,
-    tid: Int
-) {
-    if (addToCollectionBottomSheet.value) {
-        val context = LocalContext.current
-        val scope = rememberCoroutineScope()
-        val viewModel: CollectionViewModel = hiltViewModel()
-        val beforeAddToCollectionData by viewModel.beforeAddToCollectionData.collectAsStateWithLifecycle()
-        val addToCollectionData by viewModel.addToCollectionData.collectAsStateWithLifecycle()
-        val openCreateCollectionBottomSheet = rememberSaveable { mutableStateOf(false) }
-        val currentSelected = rememberSaveable { mutableStateOf<MyCollectionList?>(null) }
-        val showMenu = rememberSaveable { mutableStateOf(false) }
-
-        val rotationDegree by animateFloatAsState(
-            targetValue = if (showMenu.value) 180f else 0f,
-            animationSpec = tween(durationMillis = 500),
-            label = "arrow_rotation"
-        )
-
-        fun hide() {
-            scope.launchSafety {
-                addToCollectionSheetState.hide()
-                addToCollectionBottomSheet.value = false
-            }
-        }
-
-        LoadInitialDataIfNeeded(context) {
-            scope.launchSafety {
-                viewModel.beforeAddToCollection(tid)
-            }
-        }
-
-        LaunchedEffect(beforeAddToCollectionData.data) {
-            currentSelected.value = beforeAddToCollectionData.data?.getOrNull(0)
-        }
-
-        LaunchedEffect(addToCollectionData) {
-            if (addToCollectionData.data != null) {
-                if (addToCollectionData.isSuccess) {
-                    ContextCompat.getString(context, R.string.collection_add_to_success).showToast(context)
-                    hide()
-                } else {
-                    (addToCollectionData.errorData?.message ?:
-                        ContextCompat.getString(context, R.string.collection_add_to_fail)
-                    ).showToast(context)
-                }
-                viewModel.resetAddToCollectionData()
-            }
-        }
-
-        ModalBottomSheet(
-            onDismissRequest = {
-                addToCollectionBottomSheet.value = false
-            },
-            sheetState = addToCollectionSheetState
-        ) {
-            StatusLayout(
-                uiState = beforeAddToCollectionData,
-                loadingModifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 40.dp),
-                emptyModifier = Modifier.fillMaxWidth()
-            ) {
-                if (beforeAddToCollectionData.data?.isEmpty() == true) {
-                    Column (
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 100.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.collection_none_dsp)
-                        )
-                        Button(
-                            onClick = {
-                                openCreateCollectionBottomSheet.value = true
-                            }
-                        ) {
-                            Text(
-                                text = stringResource(R.string.create)
-                            )
-                        }
-                    }
-                } else {
-                    Column (
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp)
-                            .padding(bottom = 50.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.collection_add_to),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                        )
-                        Spacer(modifier = Modifier.height(40.dp))
-                        Row {
-                            Text(
-                                text = stringResource(R.string.collection_add_to_select)
-                            )
-                            Box {
-                                Row (
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                    modifier = Modifier
-                                        .unboundClickable {
-                                            showMenu.value = !showMenu.value
-                                        }
-                                ) {
-                                    Text(
-                                        text = currentSelected.value?.name.toString(),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Icon(
-                                        imageVector = Icons.Outlined.KeyboardArrowDown,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .rotate(rotationDegree)
-                                    )
-                                }
-
-                                DropdownMenu(
-                                    expanded = showMenu.value,
-                                    onDismissRequest = { showMenu.value = false },
-                                ) {
-                                    beforeAddToCollectionData.data?.forEach {
-                                        DropdownMenuItem(
-                                            text = { Text(text = it.name) },
-                                            onClick = {
-                                                showMenu.value = false
-                                                currentSelected.value = it
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(5.dp))
-                        Text(
-                            text = stringResource(R.string.collection_add_to_dsp),
-                            color = MaterialTheme.colorScheme.outline,
-                            fontSize = 13.sp,
-                            lineHeight = 18.sp
-                        )
-                        Spacer(modifier = Modifier.height(70.dp))
-                        Button (
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally),
-                            onClick = {
-                                viewModel.confirmAddToCollection(currentSelected.value?.ctid.toIntOrElse(), tid)
-                            }
-                        ) {
-                            IconTitle(
-                                icon = Icons.Outlined.AddCircleOutline,
-                                iconSize = 20.dp,
-                                text = stringResource(R.string.confirm),
-                                gap = 4.dp,
-                                textStyle = TextStyle()
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(5.dp))
-                        Text(
-                            text = stringResource(R.string.collection_create_title),
-                            fontSize = 14.sp,
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .clickable(unbound = true) {
-                                    openCreateCollectionBottomSheet.value = true
-                                }
-                        )
-                    }
-                }
-            }
-        }
-
-        CreateCollectionBottomSheet(
-            openCreateCollectionBottomSheet = openCreateCollectionBottomSheet,
-            onCreateSuccess = {
-                viewModel.beforeAddToCollection(tid)
-            }
         )
     }
 }

@@ -61,7 +61,7 @@ import com.scatl.uestcbbs.compose.widget.HorizontalSwitchView
 import kotlinx.parcelize.Parcelize
 
 /**
- * Created by tanlei02 at 2024/11/21 9:52:13
+ * Created by sca_tl at 2024/11/21 9:52:13
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

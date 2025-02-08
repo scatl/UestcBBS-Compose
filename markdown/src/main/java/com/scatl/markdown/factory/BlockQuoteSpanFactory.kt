@@ -17,7 +17,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Created by tanlei02 at 2024/12/31 11:14:15
+ * Created by sca_tl at 2024/12/31 11:14:15
  */
 class BlockQuoteSpanFactory(private val theme: MarkdownTheme): SpanFactory {
     override fun getSpans(configuration: MarkwonConfiguration, props: RenderProps): Any {

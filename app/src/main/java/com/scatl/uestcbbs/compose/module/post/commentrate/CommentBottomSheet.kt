@@ -1,17 +1,17 @@
-package com.scatl.uestcbbs.compose.module.post
+package com.scatl.uestcbbs.compose.module.post.commentrate
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -39,6 +39,7 @@ import com.scatl.uestcbbs.compose.ext.cardCorner
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.pagePadding
 import com.scatl.uestcbbs.compose.ext.showToast
+import com.scatl.uestcbbs.compose.module.post.PostViewModel
 import com.scatl.uestcbbs.compose.widget.CustomTextField
 import kotlinx.coroutines.delay
 
@@ -62,18 +63,20 @@ fun CommentBottomSheet(
     val keyboardController = LocalSoftwareKeyboardController.current
     val commentSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    LoadInitialDataIfNeeded(context) {
-        scope.launchSafety {
-            delay(400)
-            focusRequester.requestFocus()
-            keyboardController?.show()
-        }
-    }
+//    LaunchedEffect(openCommentBottomSheet.value) {
+//        if (openCommentBottomSheet.value) {
+//            scope.launchSafety {
+//                delay(400)
+//                focusRequester.requestFocus()
+//                keyboardController?.show()
+//            }
+//        }
+//    }
 
     fun hide() {
         scope.launchSafety {
-            keyboardController?.hide()
-            focusRequester.freeFocus()
+//            keyboardController?.hide()
+//            focusRequester.freeFocus()
             commentSheetState.hide()
             openCommentBottomSheet.value = false
         }
@@ -86,9 +89,7 @@ fun CommentBottomSheet(
                 hide()
                 "点评成功".showToast(context)
             } else {
-                (commentData.errorData?.message
-                    ?: "点评失败"
-                        ).showToast(context)
+                (commentData.errorData?.message ?: "点评失败").showToast(context)
             }
             viewModel.resetCommentData()
         }

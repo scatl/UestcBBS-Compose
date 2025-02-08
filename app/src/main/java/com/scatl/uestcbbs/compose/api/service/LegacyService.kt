@@ -171,18 +171,6 @@ interface LegacyService {
     ): String?
 
     @Multipart
-    @POST("forum.php?mod=collection&action=edit&op=delthread")
-    suspend fun removeCollectionPost(
-        @PartMap map: MutableMap<String, RequestBody>
-    ): String?
-
-    @FormUrlEncoded
-    @POST("forum.php?mod=collection&action=edit&op=addthread")
-    suspend fun beforeAddToCollection(
-        @Field("tid") tid: Int
-    ): String?
-
-    @Multipart
     @POST("forum.php?mod=collection&action=edit&op=addthread")
     suspend fun confirmAddToCollection(
         @PartMap map: MutableMap<String, RequestBody>

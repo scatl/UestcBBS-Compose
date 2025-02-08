@@ -1,5 +1,6 @@
 package com.scatl.uestcbbs.compose.module.collection
 
+import com.scatl.uestcbbs.compose.api.entity.request.DeleteFavoriteRequestEntity
 import com.scatl.uestcbbs.compose.base.BaseRepository
 import com.scatl.uestcbbs.compose.datastore.DataStore
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -54,16 +55,11 @@ class CollectionRepository @Inject constructor(): BaseRepository() {
         ctid: Int
     ) = legacyService.deleteCollection(ctid, DataStore.legacyForumHash)
 
-    suspend fun removeCollectionPost(ctid: Int, tid: Int): String? {
-        val map = mutableMapOf<String, RequestBody>()
-        map["delthread[]"] = tid.toString().toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        map["ctid"] = ctid.toString().toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        map["formhash"] = DataStore.legacyForumHash.toRequestBody("multipart/form-data".toMediaTypeOrNull())
+    suspend fun removeCollectionPost(
+        requestEntity: DeleteFavoriteRequestEntity,
+    ) = userService.deleteFavorite(requestEntity)
 
-        return legacyService.removeCollectionPost(map)
-    }
-
-    suspend fun beforeAddToCollection(tid: Int) = legacyService.beforeAddToCollection(tid)
+    suspend fun getMyCollectionList(tid: String) = postService.getFavoriteStatus(tid)
 
     suspend fun confirmAddToCollection(tid: Int, ctid: Int, reason: String): String? {
         val map = mutableMapOf<String, RequestBody>()

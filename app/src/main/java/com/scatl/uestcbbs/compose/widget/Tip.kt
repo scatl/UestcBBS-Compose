@@ -1,6 +1,7 @@
 package com.scatl.uestcbbs.compose.widget
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +26,7 @@ import com.scatl.uestcbbs.compose.ext.commonCardBg
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.ext.clickable
+import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 
 /**
  * Created by sca_tl at 2024/9/19 15:21:47
@@ -33,6 +35,7 @@ import com.scatl.uestcbbs.compose.ext.clickable
 fun Tip (
     tip: String,
     tipId: String,
+    modifier: Modifier = Modifier,
     title: String = stringResource(R.string.tip),
     confirmText: String = stringResource(R.string.tip_no_show_again),
     bgColor: Color = MaterialTheme.colorScheme.surfaceContainer,
@@ -41,10 +44,13 @@ fun Tip (
     val show = rememberSaveable { mutableStateOf(!DataStore.tipShowedId.contains(tipId)) }
     AnimatedVisibility(
         visible = show.value,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(modifier)
     ) {
         Column (
             modifier = Modifier
+                .animateContentSize()
                 .commonCardBg (
                     bgColor = bgColor,
                     containerColor = containerColor
@@ -66,25 +72,28 @@ fun Tip (
                 text = tip,
                 fontSize = 14.sp
             )
-            Text(
-                text = confirmText,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .clickable(unbound = true) {
-                        show.value = false
-                        val value = mutableSetOf<String>().apply {
-                            addAll(DataStore.tipShowedId)
-                            add(tipId)
+            if (confirmText.isNotNullAndEmpty()) {
+                Text(
+                    text = confirmText,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .clickable(unbound = true) {
+                            show.value = false
+                            val value = mutableSetOf<String>().apply {
+                                addAll(DataStore.tipShowedId)
+                                add(tipId)
+                            }
+                            DataStore.tipShowedId = value
                         }
-                        DataStore.tipShowedId = value
-                    }
-            )
+                )
+            }
         }
     }
 }
 
 const val TIP_ID_THREAD_SNAPSHOT = "TIP_ID_THREAD_SNAPSHOT"
 const val TIP_ID_MAGIC_SHOP = "TIP_ID_MAGIC_SHOP"
+const val TIP_ID_RATE = "TIP_ID_RATE"

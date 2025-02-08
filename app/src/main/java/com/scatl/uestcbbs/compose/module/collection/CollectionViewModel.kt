@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.scatl.uestcbbs.compose.App
 import com.scatl.uestcbbs.compose.R
+import com.scatl.uestcbbs.compose.api.entity.CollectionEntity
+import com.scatl.uestcbbs.compose.api.entity.request.DeleteFavoriteRequestEntity
 import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.toAvatarUrl
@@ -15,6 +17,8 @@ import com.scatl.uestcbbs.compose.module.collection.entity.CollectionDetailData
 import com.scatl.uestcbbs.compose.module.collection.entity.CollectionDetailEntity
 import com.scatl.uestcbbs.compose.module.collection.entity.CollectionListEntity
 import com.scatl.uestcbbs.compose.module.collection.entity.MyCollectionList
+import com.scatl.uestcbbs.compose.net.onFailure
+import com.scatl.uestcbbs.compose.net.onSuccess
 import com.scatl.uestcbbs.compose.util.BBSLinkUtil
 import com.scatl.uestcbbs.compose.util.LinkType
 import com.scatl.uestcbbs.compose.widget.refresh.UiState
@@ -57,8 +61,8 @@ class CollectionViewModel @Inject constructor(
     private val _removeCollectionPostData = MutableStateFlow(UiState<Int?>().init())
     val removeCollectionPostData: StateFlow<UiState<Int?>> = _removeCollectionPostData
 
-    private val _beforeAddToCollectionData = MutableStateFlow(UiState<SnapshotStateList<MyCollectionList>>().init())
-    val beforeAddToCollectionData: StateFlow<UiState<SnapshotStateList<MyCollectionList>>> = _beforeAddToCollectionData
+    private val _myCollectionListData = MutableStateFlow(UiState<SnapshotStateList<CollectionEntity>>().init())
+    val myCollectionListData: StateFlow<UiState<SnapshotStateList<CollectionEntity>>> = _myCollectionListData
 
     private val _addToCollectionData = MutableStateFlow(UiState<Boolean?>().init())
     val addToCollectionData: StateFlow<UiState<Boolean?>> = _addToCollectionData
@@ -446,60 +450,57 @@ class CollectionViewModel @Inject constructor(
             _removeCollectionPostData.value = UiState<Int?>().apply {
                 isSuccess = false
                 errorData = e
-                data = ctid
+                data = tid
             }
         }
         viewModelScope.launchSafety {
-            val html = collectionRepository.removeCollectionPost(ctid, tid) ?: ""
-            val info = Jsoup.parse(html).select("div[id=messagetext]").text()
-            if (info.contains("删除淘专辑内主题成功")) {
-                _removeCollectionPostData.value = UiState<Int?>().apply {
-                    isSuccess = true
-                    data = tid
+            collectionRepository
+                .removeCollectionPost(
+                    DeleteFavoriteRequestEntity(
+                        personalFavorite = false,
+                        tidList = mutableListOf(tid.toIntOrElse()),
+                        collectionId = ctid
+                    )
+                )
+                .onSuccess {
+                    _removeCollectionPostData.value = UiState<Int?>().apply {
+                        isSuccess = true
+                        data = tid
+                    }
                 }
-            } else {
-                error(Throwable(info))
-            }
+                .onFailure {
+                    error(Throwable(it.message))
+                }
         }.onCatch {
             error(it)
         }
     }
 
-    fun beforeAddToCollection(tid: Int) {
+    fun getMyCollectionList(tid: Int) {
         fun error(e: Throwable) {
-            _beforeAddToCollectionData.value.error(
+            _myCollectionListData.value.error(
                 errorData = e
             )
         }
         viewModelScope.launchSafety {
-            val html = collectionRepository.beforeAddToCollection(tid) ?: ""
-            if (html.contains("请先登录")) {
-                error(Throwable(ContextCompat.getString(App.context, R.string.need_login_dsp)))
-            } else if (html.contains("您还没有创建淘专辑")) {
-                _beforeAddToCollectionData.value.success(
-                    data = SnapshotStateList()
-                )
-            } else {
-                val document = Jsoup.parse(html)
-                val formHash = document.select("form[id=scbar_form]").select("input[name=formhash]").attr("value")
-                DataStore.legacyForumHash = formHash
-
-                val elements = document.select("select[id=selectCollection]").select("option")
-
-                val myCollectionList = mutableListOf<MyCollectionList>()
-                elements.forEach {
-                    myCollectionList.add(
-                        MyCollectionList(
-                            ctid = it.attr("value").toIntOrElse(),
-                            name = it.text()
+            collectionRepository
+                .getMyCollectionList(tid.toString())
+                .onSuccess {
+                    if (it?.publicFavorites.isNullOrEmpty()) {
+                        _myCollectionListData.value.success(
+                            data = SnapshotStateList()
                         )
-                    )
+                    } else {
+                        _myCollectionListData.value.success(
+                            data = SnapshotStateList<CollectionEntity>().apply {
+                                addAll(it?.publicFavorites!!)
+                            }
+                        )
+                    }
                 }
-                //val remainNum = document.select("span[id=reamincreatenum]").text().toInt()
-                _beforeAddToCollectionData.value.success(
-                    data = SnapshotStateList<MyCollectionList>().apply { addAll(myCollectionList) }
-                )
-            }
+                .onFailure {
+                    error(Throwable(it.message))
+                }
         }.onCatch {
             error(it)
         }

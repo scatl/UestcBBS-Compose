@@ -91,7 +91,7 @@ fun CollectionScreen(
             .navigationBarsPadding()
     ) {
         LargeTopAppBar(
-            colors = TopAppBarDefaults.largeTopAppBarColors().copy(
+            colors = TopAppBarDefaults.topAppBarColors().copy(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer
             ),
             scrollBehavior = scrollBehavior,

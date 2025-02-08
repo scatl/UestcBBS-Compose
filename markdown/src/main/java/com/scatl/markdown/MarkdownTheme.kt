@@ -8,7 +8,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 
 /**
- * Created by tanlei02 at 2024/12/31 10:27:20
+ * Created by sca_tl at 2024/12/31 10:27:20
  */
 object MarkdownDefaults {
 

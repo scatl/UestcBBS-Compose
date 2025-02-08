@@ -100,6 +100,7 @@ data class CommonThreadEntity(
     @Json(name = "rush_reply")
     val rushReply: RushReply? = null,
 
+    var isFavorite: Boolean = false,
     var postId: Int? = 0,
     var summaries: MutableList<String>? = null
 ) : SwipeRefreshItem {

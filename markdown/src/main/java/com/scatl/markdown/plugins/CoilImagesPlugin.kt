@@ -23,7 +23,7 @@ import org.commonmark.node.Image
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Created by tanlei02 at 2025/1/3 10:07:10
+ * Created by sca_tl at 2025/1/3 10:07:10
  */
 class CoilImagesPlugin(
     context: Context,

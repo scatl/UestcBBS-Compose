@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
 
 /**
- * Created by tanlei02 at 2024/11/20 16:48:05
+ * Created by sca_tl at 2024/11/20 16:48:05
  */
 @Entity(tableName = "favorite_forum")
 @Parcelize
