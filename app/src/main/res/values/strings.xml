@@ -6,6 +6,7 @@
     <string name="app_name">清水河畔</string>
 
     <string name="login">登录</string>
+    <string name="logout">退出</string>
     <string name="add_account">添加账号</string>
     <string name="delete_account">删除账号</string>
     <string name="add_account_process">添加账号中，请稍候…</string>
@@ -24,7 +25,7 @@
     <string name="switch_account">切换账号</string>
     <string name="add_account_already_exist">账号已存在，可直接登录</string>
     <string name="sign_in_after_account_added">添加成功后登录账号</string>
-    <string name="account_manage_dsp">1、长按可删除账号\n2、若长时间未登录账号，可能需要删除后重新登录才能使用</string>
+    <string name="account_manage_dsp">账号登录状态一段时间后会自动失效，你可以重新登录账号</string>
     <string name="account_delete_success">删除账号成功</string>
     <string name="account_delete_dialog_dsp">确认要删除“%1$s”这个账号吗？</string>
     <string name="account_delete_dialog_dsp_logged">确认要删除“%1$s”这个账号吗？"由于该账号当前已登录，删除后会退出登录该账号。</string>

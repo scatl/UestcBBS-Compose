@@ -419,21 +419,21 @@ fun CircleRefreshIndicator(
                 )
                 .padding(10.dp)
         ) {
-            if (state.refreshing || (success && state.position == state.refreshOffset)) {
+//            if (state.refreshing || (success && state.position == state.refreshOffset)) {
                 CircularProgressIndicator(
                     strokeWidth = 3.dp,
                     modifier = Modifier.size(25.dp)
                 )
-            } else {
-                CircularProgressIndicator(
-                    progress = {
-                        //indicatorProgress.value
-                        state.position / threadHeightPx / 2
-                    },
-                    strokeWidth = 3.dp,
-                    modifier = Modifier.size(25.dp)
-                )
-            }
+//            } else {
+//                CircularProgressIndicator(
+//                    progress = {
+//                        //indicatorProgress.value
+//                        state.position / threadHeightPx / 2
+//                    },
+//                    strokeWidth = 3.dp,
+//                    modifier = Modifier.size(25.dp)
+//                )
+//            }
         }
     }
 }
