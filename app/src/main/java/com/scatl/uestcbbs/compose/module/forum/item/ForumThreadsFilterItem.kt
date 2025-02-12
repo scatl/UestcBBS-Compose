@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scatl.uestcbbs.compose.api.entity.ForumDetailEntity
@@ -78,7 +79,8 @@ fun ForumThreadsFilterItem(
                     label = {
                         Text(
                             text = item.name.toString(),
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     },
                     shape = RoundedCornerShape(15.dp),

@@ -1,12 +1,16 @@
 package com.scatl.uestcbbs.compose.db.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
  * Created by sca_tl at 2024/7/31 22:29
  */
-@Entity(tableName = "account")
+@Entity(
+    tableName = "account",
+    indices = [Index(value = ["uid"], unique = true)]
+)
 data class AccountDBEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int,

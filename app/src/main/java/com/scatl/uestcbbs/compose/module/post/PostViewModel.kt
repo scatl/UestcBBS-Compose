@@ -24,7 +24,6 @@ import com.scatl.uestcbbs.compose.db.entity.BrowsingHistoryDBEntity
 import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.safeSubstring
-import com.scatl.uestcbbs.compose.ext.toIntColor
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.manager.AccountManager
 import com.scatl.uestcbbs.compose.manager.ThreadSnapshotManager
@@ -32,7 +31,6 @@ import com.scatl.uestcbbs.compose.net.BaseApiResult
 import com.scatl.uestcbbs.compose.net.onFailure
 import com.scatl.uestcbbs.compose.net.onSuccess
 import com.scatl.uestcbbs.compose.widget.refresh.UiState
-import com.scatl.uestcbbs.compose.widget.web.WebViewManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,11 +39,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import javax.inject.Inject

@@ -38,6 +38,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -58,6 +62,7 @@ import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.api.entity.request.LoginRequestEntity
 import com.scatl.uestcbbs.compose.ext.removeAllBlank
 import com.scatl.uestcbbs.compose.ext.showToast
+import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.widget.LoadingDialog
@@ -83,6 +88,7 @@ fun AddAccountScreen() {
     var showLoadingDialog by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
     var signInAfterAdd by remember { mutableStateOf(true) }
+    var ruleAgree by remember { mutableStateOf(true) }
 
     val appIcon = remember { mutableStateOf<Drawable?>(null) }
 
@@ -169,8 +175,6 @@ fun AddAccountScreen() {
                 Text(
                     text = if (userName.isEmpty()) {
                         stringResource(id = R.string.user_name_empty_hint)
-                    } else if (!signInData.isSuccess && viewModel.authRepository.dataBase.getAccountDao().findFirstByName(userName) != null) {
-                        stringResource(id = R.string.add_account_already_exist)
                     } else {
                         ""
                     },
@@ -215,38 +219,91 @@ fun AddAccountScreen() {
                     color = MaterialTheme.colorScheme.error
                 )
                 Spacer(modifier = Modifier.height(40.dp))
-                Row (
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+
+                Column (
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    RoundCheckBox(
-                        isChecked = signInAfterAdd,
-                        onClick = {
-                            signInAfterAdd = !signInAfterAdd
-                        },
-                        color = RoundCheckBoxDefaults.colors(
-                            borderColor = MaterialTheme.colorScheme.primary,
-                            selectedColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
-                    Text(
-                        text = stringResource(id = R.string.sign_in_after_account_added),
-                        fontSize = 14.sp,
-                        modifier = Modifier
-                            .clickable (
-                                interactionSource = null,
-                                indication = null,
-                                onClick = {
-                                    signInAfterAdd = !signInAfterAdd
-                                }
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        RoundCheckBox(
+                            isChecked = signInAfterAdd,
+                            onClick = {
+                                signInAfterAdd = signInAfterAdd.not()
+                            },
+                            color = RoundCheckBoxDefaults.colors(
+                                borderColor = MaterialTheme.colorScheme.primary,
+                                selectedColor = MaterialTheme.colorScheme.primary
                             )
-                    )
+                        )
+                        Text(
+                            text = stringResource(id = R.string.sign_in_after_account_added),
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .clickable (
+                                    interactionSource = null,
+                                    indication = null,
+                                    onClick = {
+                                        signInAfterAdd = signInAfterAdd.not()
+                                    }
+                                )
+                        )
+                    }
+
+//                    Row (
+//                        verticalAlignment = Alignment.CenterVertically,
+//                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+//                    ) {
+//                        RoundCheckBox(
+//                            isChecked = ruleAgree,
+//                            onClick = {
+//                                ruleAgree = ruleAgree.not()
+//                            },
+//                            color = RoundCheckBoxDefaults.colors(
+//                                borderColor = MaterialTheme.colorScheme.primary,
+//                                selectedColor = MaterialTheme.colorScheme.primary
+//                            )
+//                        )
+//                        Text(
+//                            text = buildAnnotatedString {
+//                                append("我已阅读并同意《清水河畔总版规》")
+//                                addLink(
+//                                    clickable = LinkAnnotation.Clickable(
+//                                        tag = "subject",
+//                                        styles = TextLinkStyles(
+//                                            style = SpanStyle(color = MaterialTheme.colorScheme.primary)
+//                                        ),
+//                                        linkInteractionListener = {
+//                                            navHostController.navigate(Router.ThreadDetailRouterEntity(
+//                                                id = 752718,
+//                                            ))
+//                                        }
+//                                    ),
+//                                    start = 7,
+//                                    end = 16
+//                                )
+//                            },
+//                            fontSize = 14.sp,
+//                            modifier = Modifier
+//                                .clickable (
+//                                    interactionSource = null,
+//                                    indication = null,
+//                                    onClick = {
+//                                        ruleAgree = ruleAgree.not()
+//                                    }
+//                                )
+//                        )
+//                    }
                 }
+
                 Spacer(modifier = Modifier.height(10.dp))
+
                 Button(
                     enabled = !userName.removeAllBlank().isNullOrEmpty()
                             && !password.removeAllBlank().isNullOrEmpty()
-                            && viewModel.authRepository.dataBase.getAccountDao().findFirstByName(userName) == null,
+                            && ruleAgree,
                     onClick = {
                         keyboardController?.hide()
                         showHCaptchaDialog = !showHCaptchaDialog

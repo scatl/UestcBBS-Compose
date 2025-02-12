@@ -37,7 +37,7 @@ fun Tip (
     tipId: String,
     modifier: Modifier = Modifier,
     title: String = stringResource(R.string.tip),
-    confirmText: String = stringResource(R.string.tip_no_show_again),
+    confirmText: String? = stringResource(R.string.tip_no_show_again),
     bgColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     containerColor: Color = MaterialTheme.colorScheme.background,
 ) {
@@ -97,3 +97,4 @@ fun Tip (
 const val TIP_ID_THREAD_SNAPSHOT = "TIP_ID_THREAD_SNAPSHOT"
 const val TIP_ID_MAGIC_SHOP = "TIP_ID_MAGIC_SHOP"
 const val TIP_ID_RATE = "TIP_ID_RATE"
+const val TIP_ID_ACCOUNT_MANAGE = "TIP_ID_ACCOUNT_MANAGE"

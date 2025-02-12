@@ -14,7 +14,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Login
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Logout
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -46,6 +51,12 @@ import com.scatl.uestcbbs.compose.ext.showToast
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.widget.CommonAlertDialog
+import com.scatl.uestcbbs.compose.widget.TIP_ID_ACCOUNT_MANAGE
+import com.scatl.uestcbbs.compose.widget.TIP_ID_RATE
+import com.scatl.uestcbbs.compose.widget.Tip
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 /**
  * Created by sca_tl at 2024/8/1 15:18:04
@@ -74,22 +85,11 @@ fun AccountManageScreen() {
             fontWeight = FontWeight.Bold
         )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = pagePadding)
-                .border(
-                    width = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
-                    shape = RoundedCornerShape(cardCorner)
-                )
-                .padding(pagePadding)
-        ) {
-            Text(
-                text = stringResource(id = R.string.account_manage_dsp),
-                fontSize = 14.sp
-            )
-        }
+        Tip(
+            tip = stringResource(id = R.string.account_manage_dsp),
+            tipId = TIP_ID_ACCOUNT_MANAGE,
+            confirmText = null
+        )
 
         LazyColumn {
             itemsIndexed(accounts) { _, item ->
@@ -97,12 +97,7 @@ fun AccountManageScreen() {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
-                        .commonCardBg(
-                            onLongClick = {
-                                longPressAccount.value = item
-                                showDeleteDialog.value = true
-                            }
-                        )
+                        .commonCardBg()
                 ) {
                     Row (
                         verticalAlignment = Alignment.CenterVertically,
@@ -121,43 +116,57 @@ fun AccountManageScreen() {
                         )
                     }
 
-                    if (item.signedIn == true) {
-                        Text(
-                            text = stringResource(id = R.string.logout_account),
-                            fontSize = 11.sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        if (item.signedIn == true) {
+                            Text(
+                                text = stringResource(id = R.string.logout),
+                                fontSize = 11.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .clickable (unbound = false) {
+                                        viewModel.authRepository.dataBase.getAccountDao().setAllSignedOut()
+                                        navHostController.navigateAndClean(Router.AccountManageRouterEntity)
+                                    }
+                                    .background(
+                                        color = Color.Red.copy(alpha = 0.5f),
+                                        shape = RoundedCornerShape(cardCorner)
+                                    )
+                                    .padding(horizontal = 15.dp, vertical = 2.dp)
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(id = R.string.login),
+                                fontSize = 11.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .clickable (
+                                        unbound = false
+                                    ) {
+                                        viewModel.switchAccount(uid = item.uid, name = item.name)
+                                        navHostController.navigateAndClean(Router.MainRouterEntity)
+                                    }
+                                    .background(
+                                        color = MaterialTheme.colorScheme.primary,
+                                        shape = RoundedCornerShape(cardCorner)
+                                    )
+                                    .padding(horizontal = 15.dp, vertical = 2.dp)
+                            )
+                        }
+
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
-                                .clickable (
-                                    unbound = false
-                                ) {
-                                    viewModel.authRepository.dataBase.getAccountDao().setAllSignedOut()
-                                    navHostController.navigateAndClean(Router.AccountManageRouterEntity)
+                                .clickable(unbound = true) {
+                                    longPressAccount.value = item
+                                    showDeleteDialog.value = true
                                 }
-                                .background(
-                                    color = Color.Red.copy(alpha = 0.5f),
-                                    shape = RoundedCornerShape(cardCorner)
-                                )
-                                .padding(horizontal = 15.dp, vertical = 4.dp)
-                        )
-                    } else {
-                        Text(
-                            text = stringResource(id = R.string.login_account),
-                            fontSize = 11.sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .clickable (
-                                    unbound = false
-                                ) {
-                                    viewModel.switchAccount(uid = item.uid, name = item.name)
-                                    navHostController.navigateAndClean(Router.MainRouterEntity)
-                                }
-                                .background(
-                                    color = MaterialTheme.colorScheme.primary,
-                                    shape = RoundedCornerShape(cardCorner)
-                                )
-                                .padding(horizontal = 15.dp, vertical = 4.dp)
                         )
                     }
                 }
