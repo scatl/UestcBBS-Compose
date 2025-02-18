@@ -1,5 +1,6 @@
 package com.scatl.uestcbbs.compose.module.user.basicinfo
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Attachment
 import androidx.compose.material.icons.outlined.RemoveCircle
 import androidx.compose.material.icons.outlined.RemoveCircleOutline
 import androidx.compose.material.icons.outlined.WorkspacePremium
@@ -30,6 +34,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,6 +67,7 @@ import com.scatl.uestcbbs.compose.ext.unboundClickable
 import com.scatl.uestcbbs.compose.module.user.UserProfilePage
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
+import com.scatl.uestcbbs.compose.widget.IconTitle
 import com.scatl.uestcbbs.compose.widget.web.LocalHtmlWebView
 import java.util.UUID
 
@@ -72,7 +80,9 @@ fun UserBasicInfoScreen(
     viewModel: UserViewModel,
     state: ScrollState = rememberScrollState()
 ) {
+    val hidePrivateInfo = rememberSaveable { mutableStateOf(true) }
     viewModel.setPageInitialized(UserProfilePage.HOME)
+
     Column (
         verticalArrangement = Arrangement.spacedBy(pagePadding),
         modifier = Modifier
@@ -91,11 +101,30 @@ fun UserBasicInfoScreen(
                 .padding(pagePadding)
                 .fillMaxSize()
         ) {
-            Text(
-                text = stringResource(id = R.string.user_basic_profile),
-                fontWeight = FontWeight.Bold,
-                fontSize = 17.sp
-            )
+            Row (
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(id = R.string.user_basic_profile),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp
+                )
+                IconTitle(
+                    icon = if (hidePrivateInfo.value) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                    iconSize = 18.dp,
+                    text = if (hidePrivateInfo.value) "展示所有信息" else "隐藏敏感信息",
+                    textStyle = TextStyle(
+                        fontSize = 15.sp
+                    ),
+                    modifier = Modifier
+                        .alpha(alpha = 0.7f)
+                        .clickable(unbound = true) {
+                            hidePrivateInfo.value = hidePrivateInfo.value.not()
+                        }
+                )
+            }
             Spacer(modifier = Modifier.height(pagePadding))
             Text(
                 text = "UID：${data.userSummary?.uid}",
@@ -160,9 +189,11 @@ fun UserBasicInfoScreen(
                         modifier = Modifier.alpha(0.7f)
                     )
                     Text(
-                        text = "${data.email.removeAllBlank()}",
+                        text = if (hidePrivateInfo.value) "******" else "${data.email.removeAllBlank()}",
                         fontSize = 14.sp,
-                        modifier = Modifier.alpha(0.7f)
+                        modifier = Modifier
+                            .animateContentSize()
+                            .alpha(0.7f)
                     )
                 }
             }
@@ -223,9 +254,11 @@ fun UserBasicInfoScreen(
             )
             if (!data.registerIp.isNullOrEmpty()) {
                 Text(
-                    text = "${stringResource(id = R.string.user_registration_ip)}：${data.registerIp}",
+                    text = "${stringResource(id = R.string.user_registration_ip)}：${if (hidePrivateInfo.value) "******" else data.registerIp}",
                     fontSize = 14.sp,
-                    modifier = Modifier.alpha(0.7f)
+                    modifier = Modifier
+                        .animateContentSize()
+                        .alpha(0.7f)
                 )
             }
             Text(
@@ -245,9 +278,11 @@ fun UserBasicInfoScreen(
             )
             if (!data.lastIp.isNullOrEmpty()) {
                 Text(
-                    text = "${stringResource(id = R.string.user_last_ip)}：${data.lastIp}",
+                    text = "${stringResource(id = R.string.user_last_ip)}：${if (hidePrivateInfo.value) "******" else data.lastIp}",
                     fontSize = 14.sp,
-                    modifier = Modifier.alpha(0.7f)
+                    modifier = Modifier
+                        .animateContentSize()
+                        .alpha(0.7f)
                 )
             }
             Text(

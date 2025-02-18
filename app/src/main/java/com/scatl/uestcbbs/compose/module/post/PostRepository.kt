@@ -4,6 +4,7 @@ import com.scatl.uestcbbs.compose.api.entity.request.CommentRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.CreatePostRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.DeleteFavoriteRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.FavoriteRequestEntity
+import com.scatl.uestcbbs.compose.api.entity.request.PostReportRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.RateRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.VoteRequestEntity
 import com.scatl.uestcbbs.compose.base.BaseRepository
@@ -85,4 +86,6 @@ class PostRepository @Inject constructor(): BaseRepository() {
     suspend fun getRateOptions(tid: String) = postService.getRateOptions(tid)
 
     suspend fun rate(pid: String, requestEntity: RateRequestEntity) = postService.rate(pid, requestEntity)
+
+    suspend fun report(requestEntity: PostReportRequestEntity) = postService.report(requestEntity)
 }
