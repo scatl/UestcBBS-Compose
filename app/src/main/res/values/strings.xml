@@ -277,6 +277,7 @@
     <string name="thread_detail_favorite_success">收藏成功</string>
     <string name="thread_detail_favorite_del_success">取消收藏成功</string>
     <string name="thread_detail_rate_success">评分成功</string>
+    <string name="thread_detail_report_success">举报成功</string>
 
     <string name="copy_content_success">复制成功</string>
     <string name="copy_content_fail">复制失败，请检查是否拥有剪切板权限</string>

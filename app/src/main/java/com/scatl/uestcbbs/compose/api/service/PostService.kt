@@ -8,13 +8,12 @@ import com.scatl.uestcbbs.compose.api.entity.ThreadDetailEntity
 import com.scatl.uestcbbs.compose.api.entity.ThreadPollEntity
 import com.scatl.uestcbbs.compose.api.entity.ThreadReplyEntity
 import com.scatl.uestcbbs.compose.api.entity.UploadAttachmentEntity
-import com.scatl.uestcbbs.compose.api.entity.request.AddFriendRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.CommentRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.CreatePostRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.FavoriteRequestEntity
+import com.scatl.uestcbbs.compose.api.entity.request.PostReportRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.RateRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.VoteRequestEntity
-import com.scatl.uestcbbs.compose.api.entity.user.AddFriendEntity
 import com.scatl.uestcbbs.compose.net.BaseApiResult
 import okhttp3.RequestBody
 import retrofit2.http.Body
@@ -99,5 +98,10 @@ interface PostService {
     suspend fun rate(
         @Path("pid") tid: String?,
         @Body requestBody: RateRequestEntity,
+    ): BaseApiResult<Any>
+
+    @POST("post/report")
+    suspend fun report(
+        @Body requestBody: PostReportRequestEntity,
     ): BaseApiResult<Any>
 }

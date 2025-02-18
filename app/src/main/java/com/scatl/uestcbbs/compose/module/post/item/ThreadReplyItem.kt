@@ -92,6 +92,7 @@ import com.scatl.uestcbbs.compose.module.post.DeletePost
 import com.scatl.uestcbbs.compose.module.post.MoreOptionItem
 import com.scatl.uestcbbs.compose.module.post.PostViewModel
 import com.scatl.uestcbbs.compose.module.post.RateInfo
+import com.scatl.uestcbbs.compose.module.post.ReportBottomSheet
 import com.scatl.uestcbbs.compose.module.post.commentrate.RateBottomSheet
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
@@ -606,6 +607,7 @@ private fun MoreOptions(
 
     val openCommentBottomSheet = rememberSaveable { mutableStateOf(false) }
     val openRateBottomSheet = rememberSaveable { mutableStateOf(false) }
+    val openReportBottomSheet = rememberSaveable { mutableStateOf(false) }
 
     BackHandler(enabled = openSheet.value) {
         scope.launchSafety {
@@ -716,7 +718,8 @@ private fun MoreOptions(
                             text = stringResource(id = R.string.report),
                             icon = Icons.Outlined.ErrorOutline
                         ) {
-
+                            hide()
+                            openReportBottomSheet.value = true
                         }
                     }
                 }
@@ -755,6 +758,14 @@ private fun MoreOptions(
             onSuccess = { pid ->
 
             }
+        )
+    }
+
+    if (openReportBottomSheet.value) {
+        ReportBottomSheet(
+            openReportBottomSheet = openReportBottomSheet,
+            pid = data.postId.toIntOrElse(),
+            fid = data.forumId.toIntOrElse()
         )
     }
 }

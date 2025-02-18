@@ -203,6 +203,7 @@ fun ThreadDetailScreen(
     val openCommentBottomSheet = rememberSaveable { mutableStateOf(false) }
     val openRateBottomSheet = rememberSaveable { mutableStateOf(false) }
     val openCreatePostScreen = rememberSaveable { mutableStateOf(false) }
+    val openReportBottomSheet = rememberSaveable { mutableStateOf(false) }
 
     val showSnapshotData = rememberSaveable { mutableStateOf(false) }
     val headGraphicsLayer = rememberGraphicsLayer()
@@ -338,6 +339,7 @@ fun ThreadDetailScreen(
             MoreOptions(
                 sheetState = moreOptionsBottomSheetState,
                 openMoreOptionsBottomSheet = openMoreOptionsBottomSheet,
+                openReportBottomSheet = openReportBottomSheet,
                 data = threadDetailData.data,
                 viewModel = viewModel,
                 showSnapshot = showSnapshotData,
@@ -363,6 +365,14 @@ fun ThreadDetailScreen(
                     onSuccess = { pid ->
 
                     }
+                )
+            }
+
+            if (openReportBottomSheet.value) {
+                ReportBottomSheet(
+                    openReportBottomSheet = openReportBottomSheet,
+                    pid = threadDetailData.data?.thread?.postId.toIntOrElse(),
+                    fid = threadDetailData.data?.forum?.fid.toIntOrElse()
                 )
             }
 
@@ -2244,6 +2254,7 @@ private fun BottomBar(
 private fun MoreOptions(
     sheetState: SheetState,
     openMoreOptionsBottomSheet: MutableState<Boolean>,
+    openReportBottomSheet: MutableState<Boolean>,
     data: ThreadDetailEntity?,
     viewModel: PostViewModel,
     showSnapshot: MutableState<Boolean>,
@@ -2382,7 +2393,8 @@ private fun MoreOptions(
                             text = stringResource(id = R.string.report),
                             icon = Icons.Outlined.ErrorOutline
                         ) {
-
+                            hide()
+                            openReportBottomSheet.value = true
                         }
                     }
                 }

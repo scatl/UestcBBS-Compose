@@ -17,6 +17,7 @@ import com.scatl.uestcbbs.compose.api.entity.ThreadReplyEntity
 import com.scatl.uestcbbs.compose.api.entity.request.CreatePostRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.DeleteFavoriteRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.FavoriteRequestEntity
+import com.scatl.uestcbbs.compose.api.entity.request.PostReportRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.RateRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.VoteRequestEntity
 import com.scatl.uestcbbs.compose.datastore.DataStore
@@ -82,6 +83,9 @@ class PostViewModel @Inject constructor(
 
     private val _rateData = MutableStateFlow(UiState<Boolean?>().init())
     val rateData: StateFlow<UiState<Boolean?>> = _rateData
+
+    private val _reportData = MutableStateFlow(UiState<Boolean?>().init())
+    val reportData: StateFlow<UiState<Boolean?>> = _reportData
 
     private val _supportDataMap = mutableMapOf<String, MutableStateFlow<UiState<PostSupportEntity>>>()
     private var currentThreadDetailPage: Int = 1
@@ -604,6 +608,37 @@ class PostViewModel @Inject constructor(
                 )
                 .onSuccess {
                     _rateData.value = UiState<Boolean?>().success().apply {
+                        isSuccess = true
+                        data = true
+                    }
+                }
+                .onFailure {
+                    error(Throwable(it.message))
+                }
+        }.onCatch {
+            error(it)
+        }
+    }
+
+    fun report(pid: Int, fid: Int, message: String) {
+        fun error(e: Throwable) {
+            _reportData.value = UiState<Boolean?>().error().apply {
+                isSuccess = false
+                data = false
+                errorData = e
+            }
+        }
+        viewModelScope.launchSafety {
+            postRepository
+                .report(
+                    requestEntity = PostReportRequestEntity(
+                        pid = pid,
+                        fid = fid,
+                        message = message
+                    )
+                )
+                .onSuccess {
+                    _reportData.value = UiState<Boolean?>().success().apply {
                         isSuccess = true
                         data = true
                     }
