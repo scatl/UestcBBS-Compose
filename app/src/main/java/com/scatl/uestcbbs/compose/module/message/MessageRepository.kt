@@ -22,4 +22,9 @@ class MessageRepository @Inject constructor(): BaseRepository() {
         uid: Int,
         page: Int
     ) = messageService.getChatDetail(uid, page)
+
+    suspend fun getUserSpace(
+        id: String,
+        `do`: String
+    ) = legacyService.userSpace(id, `do`)
 }

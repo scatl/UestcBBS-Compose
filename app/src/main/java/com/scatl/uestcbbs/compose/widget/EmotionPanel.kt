@@ -177,7 +177,7 @@ private fun EmotionTabLayout(
                                 tabPositions[index] = Pair(offset, width)
                             }
                         }
-                        .clickable {
+                        .clickable(enabled = true) {
                             tabClick.invoke(index)
                         }
                         .padding(

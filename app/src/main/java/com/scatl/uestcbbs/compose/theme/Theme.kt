@@ -8,19 +8,19 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.elvishew.xlog.XLog
+import com.materialkolor.PaletteStyle
+import com.materialkolor.rememberDynamicColorScheme
+import com.scatl.uestcbbs.compose.ext.hexToColor
 import com.scatl.uestcbbs.compose.ext.isGTESdk31
-import com.scatl.uestcbbs.compose.ext.toIntColor
 import com.scatl.uestcbbs.compose.manager.ThemeManager
 
 @Composable
@@ -41,6 +41,7 @@ fun AppTheme(
     )
     ThemeManager.toggleAppNightMode(useDarkMode.value)
 
+    @Composable
     fun getColorScheme(): ColorScheme {
         return when {
             useDynamicColor && customTheme.isEmpty() && isGTESdk31() -> {
@@ -50,19 +51,11 @@ fun AppTheme(
                     dynamicLightColorScheme(context)
                 }
             }
-            useDarkMode.value -> {
-                if (customTheme.isEmpty()) {
-                    ThemeManager.defaultDarkScheme()
-                } else {
-                    ThemeManager.createCustomScheme(seedColor = customTheme.toIntColor(), dark = true)
-                }
-            }
             else -> {
-                if (customTheme.isEmpty()) {
-                    ThemeManager.defaultLightScheme()
-                } else {
-                    ThemeManager.createCustomScheme(seedColor = customTheme.toIntColor(), dark = false)
-                }
+                rememberDynamicColorScheme(
+                    seedColor = if (customTheme.isEmpty()) ThemeManager.DEFAULT_SEED_COLOR.hexToColor() else customTheme.hexToColor(),
+                    isDark = useDarkMode.value
+                )
             }
         }
     }
@@ -87,8 +80,15 @@ fun AppTheme(
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            content = content
+            content = content,
         )
+
+//        DynamicMaterialTheme(
+//            seedColor = seedColor,
+//            isDark = useDarkMode.value,
+//            animate = true,
+//            content = content,
+//        )
     }
 }
 
@@ -101,17 +101,18 @@ fun DarkTheme(
     val customThemeScheme by ThemeManager.customThemeScheme.collectAsState()
     val context = LocalContext.current
 
+    @Composable
     fun getColorScheme(): ColorScheme {
         return when {
             useDynamicColor && customTheme.isEmpty() && isGTESdk31() -> {
                 dynamicDarkColorScheme(context)
             }
             else -> {
-                if (customTheme.isEmpty()) {
-                    ThemeManager.defaultDarkScheme()
-                } else {
-                    ThemeManager.createCustomScheme(seedColor = customTheme.toIntColor(), dark = true)
-                }
+                rememberDynamicColorScheme(
+                    seedColor = if (customTheme.isEmpty()) ThemeManager.DEFAULT_SEED_COLOR.hexToColor() else customTheme.hexToColor(),
+                    style = PaletteStyle.entries.find { it.name == customThemeScheme } ?: PaletteStyle.Fidelity,
+                    isDark = true,
+                )
             }
         }
     }

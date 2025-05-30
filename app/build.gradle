@@ -54,7 +54,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":material-color-utilities"))
+    //implementation(project(":material-color-utilities"))
     implementation(project(":hcaptcha"))
     implementation(project(":markdown"))
 
@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.renderscript.intrinsics.replacement.toolkit)
     implementation(libs.richText)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.materialKolor)
 
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.compose)
@@ -88,6 +89,7 @@ dependencies {
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.room)
     implementation(libs.bundles.coil)
+    implementation(libs.bundles.media3)
 
     ksp(libs.square.moshi.compiler)
     ksp(libs.google.hilt.compiler)

@@ -178,4 +178,15 @@ interface LegacyService {
 
     // </editor-fold>
 
+
+    // <editor-fold desc="用户主页">
+
+    @FormUrlEncoded
+    @POST("home.php?mod=space")
+    suspend fun userSpace(
+        @Field("uid") uid: String,
+        @Field("do") `do`: String,
+    ): String?
+
+    // </editor-fold>
 }

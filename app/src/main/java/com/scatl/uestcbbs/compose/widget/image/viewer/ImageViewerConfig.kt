@@ -1,8 +1,11 @@
 package com.scatl.uestcbbs.compose.widget.image.viewer
 
-import android.net.Uri
+import androidx.core.text.htmlEncode
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
+import okio.ByteString.Companion.encodeUtf8
+import java.net.URLEncoder
+import java.nio.charset.Charset
 
 @JsonClass(generateAdapter = true)
 data class ImageViewerConfig(

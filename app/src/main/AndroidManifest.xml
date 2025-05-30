@@ -49,6 +49,12 @@
             android:foregroundServiceType="shortService"/>
 
         <service
+            android:name=".widget.image.viewer.ImageSaveService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="shortService"/>
+
+        <service
             android:name=".module.dayquestion.DayQuestionService"
             android:enabled="true"
             android:exported="false" />

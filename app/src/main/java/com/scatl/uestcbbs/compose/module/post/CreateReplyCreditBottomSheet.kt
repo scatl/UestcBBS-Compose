@@ -52,8 +52,7 @@ fun CreateReplyCreditBottomSheet(
         val context = LocalContext.current
         val listState = rememberLazyListState()
         val createReplyCreditSheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { false }
+            skipPartiallyExpanded = true
         )
 
         val creditAmount = rememberSaveable { mutableIntStateOf(data.value?.creditAmount ?: 1) }

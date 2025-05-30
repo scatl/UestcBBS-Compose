@@ -37,6 +37,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.jsoup.Jsoup
 
 /**
  * Created by sca_tl at 2024/7/15 10:04:42
@@ -89,6 +90,9 @@ class UserViewModel @AssistedInject constructor(
     private val _deleteCommentData = MutableStateFlow(UiState<String?>().init())
     val deleteCommentData: StateFlow<UiState<String?>> = _deleteCommentData
 
+    private val _onlineData = MutableStateFlow(UiState<Boolean?>().init())
+    val onlineData: StateFlow<UiState<Boolean?>> = _onlineData
+
     private val initializedPageMap = mutableStateMapOf<UserProfilePage, Boolean>()
     private var currentUserPostPage = 1
     private var currentUserCollectionPage = 1
@@ -115,6 +119,7 @@ class UserViewModel @AssistedInject constructor(
         viewModelScope.launchSafety {
             delay(250)
             getUserProfile()
+            getUserSpace(userId.toIntOrElse())
         }
     }
 
@@ -638,6 +643,19 @@ class UserViewModel @AssistedInject constructor(
                 .apply {
                     error(it)
                 }
+        }
+    }
+
+    fun getUserSpace(uid: Int) {
+        viewModelScope.launchSafety {
+            val html = userRepository.getUserSpace(uid.toString(),  "profile") ?: ""
+            val document = Jsoup.parse(html)
+            val elements = document.select("div[class=bm_c u_profile]").select("div[class=pbm mbm bbda cl]")
+            val isOnline = elements[0].select("h2[class=mbn]").html().contains("在线")
+            _onlineData.value = UiState<Boolean?>().apply {
+                isSuccess = true
+                data = isOnline
+            }
         }
     }
 }

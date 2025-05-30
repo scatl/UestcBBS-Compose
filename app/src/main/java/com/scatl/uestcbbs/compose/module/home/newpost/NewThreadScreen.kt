@@ -25,7 +25,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.scatl.uestcbbs.compose.api.service.TopListService
 import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.eventbus.BaseEvent

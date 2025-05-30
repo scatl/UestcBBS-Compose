@@ -77,7 +77,7 @@ fun PrivateMsgItem(
                 modifier = Modifier
                     .size(45.dp)
                     .clip(shape = RoundedCornerShape(50))
-                    .clickable {
+                    .clickable(enabled = true) {
                         unread.value = false
                         navHostController.navigate(
                             Router.UserProfileRouterEntity(

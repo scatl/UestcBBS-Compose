@@ -29,6 +29,7 @@ import com.scatl.uestcbbs.compose.module.auth.AccountManageScreen
 import com.scatl.uestcbbs.compose.module.auth.AddAccountScreen
 import com.scatl.uestcbbs.compose.module.collection.CollectionDetailScreen
 import com.scatl.uestcbbs.compose.module.collection.CollectionScreen
+import com.scatl.uestcbbs.compose.module.dayquestion.DayQuestionScreen
 import com.scatl.uestcbbs.compose.module.download.DownloadScreen
 import com.scatl.uestcbbs.compose.module.forum.detail.ForumDetailScreen
 import com.scatl.uestcbbs.compose.module.history.BrowsingHistoryScreen
@@ -47,6 +48,7 @@ import com.scatl.uestcbbs.compose.module.setting.OpenSourceScreen
 import com.scatl.uestcbbs.compose.module.setting.SettingScreen
 import com.scatl.uestcbbs.compose.module.snapshot.SnapShotScreen
 import com.scatl.uestcbbs.compose.module.user.UserProfileScreen
+import com.scatl.uestcbbs.compose.module.video.VideoPlayerScreen
 import com.scatl.uestcbbs.compose.module.watertask.WaterTaskScreen
 import com.scatl.uestcbbs.compose.util.BBSLinkUtil
 import com.scatl.uestcbbs.compose.util.LinkType
@@ -126,6 +128,10 @@ fun NavGraph(
                     SnapShotScreen()
                 }
 
+                composable<Router.DayQuestionRouterEntity> {
+                    DayQuestionScreen()
+                }
+
                 composable<Router.UserProfileRouterEntity> {
                     val entity: Router.UserProfileRouterEntity = it.toRoute()
                     UserProfileScreen(
@@ -198,6 +204,14 @@ fun NavGraph(
                     CreateThreadScreen()
                 }
 
+                composable<Router.VideoPlayerRouterEntity> {
+                    val entity: Router.VideoPlayerRouterEntity = it.toRoute()
+                    VideoPlayerScreen(
+                        videoUrl = entity.url,
+                        videoName = entity.name
+                    )
+                }
+
                 bottomSheet<Router.PostCommentAndRateRouterEntity> {
                     val entity: Router.PostCommentAndRateRouterEntity = it.toRoute()
                     CommentRateScreen(
@@ -264,6 +278,9 @@ fun linkNavigate(
             }
             is LinkType.Magic -> {
                 navHostController.navigate(Router.MagicShopRouterEntity)
+            }
+            is LinkType.Medal -> {
+                navHostController.navigate(Router.MedalRouterEntity)
             }
             is LinkType.Collection -> {
                 if (linkType.id > 0) {

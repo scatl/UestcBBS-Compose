@@ -15,6 +15,7 @@ object Router {
     @Serializable object AboutRouterEntity
     @Serializable object OpenSourceRouterEntity
     @Serializable object SnapshotRouterEntity
+    @Serializable object DayQuestionRouterEntity
     @Serializable object SearchRouterEntity
     @Serializable object HistoryRouterEntity
     @Serializable object MagicShopRouterEntity
@@ -77,6 +78,12 @@ object Router {
     data class UserProfileRouterEntity(
         var uid: Int?,
         var name: String
+    )
+
+    @Serializable
+    data class VideoPlayerRouterEntity(
+        var url: String,
+        var name: String?
     )
 
 }

@@ -1,6 +1,7 @@
 package com.scatl.uestcbbs.compose.widget.image.viewer
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -63,6 +64,7 @@ import com.scatl.uestcbbs.compose.ext.isGTESdk29
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.showToast
 import com.scatl.uestcbbs.compose.ext.unboundClickable
+import com.scatl.uestcbbs.compose.module.download.DownloadService
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.theme.DarkTheme
 import com.scatl.uestcbbs.compose.util.ImageSaveUtil
@@ -259,19 +261,26 @@ private fun BottomBar(
     val context = LocalContext.current
 
     fun downloadCurrentImg() {
-        showSavingDialog.value = true
+        showSavingDialog.value = false
+
         val urls = mutableListOf<String>()
         config.images.getOrNull(pagerState.currentPage)?.originUrl?.let {
             urls.add(it)
         }
-        ImageSaveUtil.saveImages(context, urls) {
-            showSavingDialog.value = false
-            if (it == urls.size) {
-                ContextCompat.getString(context, R.string.save_image_successful)
-            } else {
-                ContextCompat.getString(context, R.string.save_image_fail)
-            }.showToast(context)
+
+        val intent = Intent(context, ImageSaveService::class.java).apply {
+            putExtra("urls", urls.toTypedArray())
         }
+        context.startService(intent)
+
+//        ImageSaveUtil.saveImages(context, urls) {
+//            showSavingDialog.value = false
+//            if (it == urls.size) {
+//                ContextCompat.getString(context, R.string.save_image_successful)
+//            } else {
+//                ContextCompat.getString(context, R.string.save_image_fail)
+//            }.showToast(context)
+//        }
     }
 
     var hasWritePermission by remember { mutableStateOf(false) }
@@ -330,14 +339,18 @@ private fun MoreOptions(
                 urls.add(it)
             }
         }
-        ImageSaveUtil.saveImages(context, urls) {
-            showSavingDialog.value = false
-            if (it == urls.size) {
-                ContextCompat.getString(context, R.string.save_all_images_successful)
-            } else {
-                ContextCompat.getContextForLanguage(context).getString(R.string.save_images_successful_part, it.toString(), (urls.size - it).toString())
-            }.showToast(context)
+        val intent = Intent(context, ImageSaveService::class.java).apply {
+            putExtra("urls", urls.toTypedArray())
         }
+        context.startService(intent)
+//        ImageSaveUtil.saveImages(context, urls) {
+//            showSavingDialog.value = false
+//            if (it == urls.size) {
+//                ContextCompat.getString(context, R.string.save_all_images_successful)
+//            } else {
+//                ContextCompat.getContextForLanguage(context).getString(R.string.save_images_successful_part, it.toString(), (urls.size - it).toString())
+//            }.showToast(context)
+//        }
     }
 
     var hasWritePermission by remember { mutableStateOf(false) }
@@ -386,7 +399,7 @@ private fun MoreOptions(
                         icon = Icons.Outlined.Save
                     ) {
                         openSheet.value = false
-                        showSavingDialog.value = true
+                        showSavingDialog.value = false
                         if (isGTESdk29() || hasWritePermission) {
                             downloadAllImages()
                         } else {

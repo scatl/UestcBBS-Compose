@@ -11,11 +11,13 @@ import com.scatl.uestcbbs.compose.api.entity.message.MessageEntity
 import com.scatl.uestcbbs.compose.api.service.MessageService
 import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
+import com.scatl.uestcbbs.compose.module.collection.entity.CollectionDetailEntity
 import com.scatl.uestcbbs.compose.net.onFailure
 import com.scatl.uestcbbs.compose.net.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.jsoup.Jsoup
 import javax.inject.Inject
 
 /**
@@ -34,6 +36,9 @@ class MessageViewModel @Inject constructor(
 
     private val _chatDetailData = MutableStateFlow(UiState<SnapshotStateList<ChatDetailEntity.Row>>().init())
     val chatDetailData: StateFlow<UiState<SnapshotStateList<ChatDetailEntity.Row>>> = _chatDetailData
+
+    private val _onlineData = MutableStateFlow(UiState<Boolean?>().init())
+    val onlineData: StateFlow<UiState<Boolean?>> = _onlineData
 
     private val initializedPageMap = mutableStateMapOf<MessageService.MessageType, Boolean>()
     private var currentPrivateMsgPage = 1
@@ -209,6 +214,19 @@ class MessageViewModel @Inject constructor(
                 }
         }.onCatch {
             _chatDetailData.value.error(it)
+        }
+    }
+
+    fun getUserSpace(uid: Int) {
+        viewModelScope.launchSafety {
+            val html = messageRepository.getUserSpace(uid.toString(),  "profile") ?: ""
+            val document = Jsoup.parse(html)
+            val elements = document.select("div[class=bm_c u_profile]").select("div[class=pbm mbm bbda cl]")
+            val isOnline = elements[0].select("h2[class=mbn]").html().contains("在线")
+            _onlineData.value = UiState<Boolean?>().apply {
+                isSuccess = true
+                data = isOnline
+            }
         }
     }
 }

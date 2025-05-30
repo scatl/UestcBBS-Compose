@@ -1,18 +1,11 @@
 package com.scatl.uestcbbs.compose.module.magic
 
-import android.util.Log
-import android.webkit.ConsoleMessage
-import android.webkit.WebChromeClient
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -36,10 +29,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,20 +44,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.scatl.uestcbbs.compose.App
-import com.scatl.uestcbbs.compose.Constants
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.ext.LoadInitialDataIfNeeded
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.showToast
-import com.scatl.uestcbbs.compose.ext.toIntColor
-import com.scatl.uestcbbs.compose.manager.ThemeManager
 import com.scatl.uestcbbs.compose.module.magic.screen.MyMagicScreen
 import com.scatl.uestcbbs.compose.module.magic.screen.ShopListScreen
 import com.scatl.uestcbbs.compose.theme.LocalCustomColors
@@ -74,7 +59,6 @@ import com.scatl.uestcbbs.compose.widget.HorizontalSwitchView
 import com.scatl.uestcbbs.compose.widget.NumberInput
 import com.scatl.uestcbbs.compose.widget.ScratchCard
 import com.scatl.uestcbbs.compose.widget.StatusLayout
-import com.scatl.uestcbbs.compose.widget.web.WebViewManager
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 
