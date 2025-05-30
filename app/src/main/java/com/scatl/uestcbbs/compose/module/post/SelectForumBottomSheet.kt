@@ -4,12 +4,15 @@ import android.os.Parcelable
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +24,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -34,6 +39,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -42,6 +48,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,15 +56,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.scatl.uestcbbs.compose.api.entity.ForumDetailEntity
 import com.scatl.uestcbbs.compose.api.entity.IndexEntity
+import com.scatl.uestcbbs.compose.db.entity.FavoriteForumDBEntity
 import com.scatl.uestcbbs.compose.ext.cardCorner
 import com.scatl.uestcbbs.compose.ext.clickable
 import com.scatl.uestcbbs.compose.ext.launchSafety
+import com.scatl.uestcbbs.compose.ext.pagePadding
 import com.scatl.uestcbbs.compose.ext.rememberMutableStateListOf
 import com.scatl.uestcbbs.compose.ext.showToast
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.manager.ForumCategoryManager
 import com.scatl.uestcbbs.compose.module.forum.ForumViewModel
 import com.scatl.uestcbbs.compose.widget.HorizontalSwitchView
+import com.scatl.uestcbbs.compose.widget.IconTitle
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -67,13 +77,15 @@ import kotlinx.parcelize.Parcelize
 @Composable
 fun SelectForumBottomSheet(
     show: MutableState<Boolean>,
-    onSelect: (result: SelectForumResult) -> Unit
+    onSelect: (result: SelectForumResult, favorite: Boolean) -> Unit
 ) {
     if (show.value) {
         val scope = rememberCoroutineScope()
         val viewModel: ForumViewModel = hiltViewModel()
         val context = LocalContext.current
         val listState = rememberLazyListState()
+        val isAddingFavorite = rememberSaveable { mutableStateOf(false) }
+        val favorites = rememberMutableStateListOf(viewModel.forumRepository.dataBase.getFavoriteForumDao().getAll())
         val showContent2 = rememberSaveable { mutableStateOf(false) }
         val selectedParent = remember { mutableStateOf<IndexEntity.Forum?>(null) }
         val sheetState = rememberModalBottomSheetState(
@@ -82,8 +94,8 @@ fun SelectForumBottomSheet(
 
         fun hide() {
             scope.launchSafety {
-                sheetState.hide()
                 show.value = false
+                sheetState.hide()
             }
         }
 
@@ -120,7 +132,30 @@ fun SelectForumBottomSheet(
                         .align(Alignment.CenterHorizontally)
                 )
 
+                AnimatedVisibility(
+                    visible = isAddingFavorite.value,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    Text(
+                        text = "正在添加板块至常用",
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 15.sp
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(20.dp))
+
+                Favorites(
+                    showContent2 = showContent2,
+                    isAddingFavorite = isAddingFavorite,
+                    favorites = favorites,
+                    viewModel = viewModel,
+                    onSelect = { result, favorite ->
+                        hide()
+                        onSelect.invoke(result, favorite)
+                    }
+                )
 
                 Box {
                     HorizontalSwitchView(
@@ -128,16 +163,20 @@ fun SelectForumBottomSheet(
                         content1 = {
                             Content1(
                                 showContent2 = showContent2,
-                                selectedParent = selectedParent
+                                selectedParent = selectedParent,
+                                isAddingFavorite = isAddingFavorite
                             )
                         },
                         content2 = {
                             Content2(
                                 viewModel = viewModel,
                                 selectedParent = selectedParent,
-                                onSelect = {
-                                    onSelect.invoke(it)
+                                isAddingFavorite = isAddingFavorite,
+                                favorites = favorites,
+                                showContent2 = showContent2,
+                                onSelect = { result, favorite ->
                                     hide()
+                                    onSelect.invoke(result, favorite)
                                 }
                             )
                         }
@@ -148,11 +187,113 @@ fun SelectForumBottomSheet(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
+@Composable
+private fun Favorites(
+    showContent2: MutableState<Boolean>,
+    isAddingFavorite: MutableState<Boolean>,
+    favorites: SnapshotStateList<FavoriteForumDBEntity>,
+    onSelect: (result: SelectForumResult, favorite: Boolean) -> Unit,
+    viewModel: ForumViewModel
+) {
+    AnimatedVisibility(
+        visible = showContent2.value.not()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 20.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(5.dp)
+                )
+                .padding(pagePadding)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "常用板块",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 16.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            FlowRow (
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                favorites.forEach {
+                    Text(
+                        text = it.forumName.toString().plus(if (it.categoryName.isNullOrEmpty()) "" else "-${it.categoryName}"),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 12.sp,
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                shape = RoundedCornerShape(50)
+                            )
+                            .clip(shape = RoundedCornerShape(50))
+                            .combinedClickable(
+                                onClick = {
+                                    onSelect.invoke(
+                                        SelectForumResult(
+                                            detail = ForumDetailEntity(
+                                                fid = it.forumId,
+                                                name = it.forumName
+                                            ),
+                                            category = ForumDetailEntity.ThreadType(
+                                                typeId = it.categoryId,
+                                                name = it.categoryName
+                                            )
+                                        ),true
+                                    )
+                                },
+                                onLongClick = {
+                                    favorites.remove(it)
+                                    viewModel.forumRepository.dataBase
+                                        .getFavoriteForumDao()
+                                        .delete(it.id)
+                                }
+                            )
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
+                    )
+                }
+
+                IconTitle(
+                    icon = Icons.Outlined.Add,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    gap = 2.dp,
+                    iconSize = 12.dp,
+                    text = if (isAddingFavorite.value) "添加中..." else "添加",
+                    textStyle = TextStyle(
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            shape = RoundedCornerShape(50)
+                        )
+                        .clip(shape = RoundedCornerShape(50))
+                        .clickable(unbound = false) {
+                            isAddingFavorite.value = isAddingFavorite.value.not()
+                        }
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                )
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun Content1(
     showContent2: MutableState<Boolean>,
-    selectedParent: MutableState<IndexEntity.Forum?>
+    selectedParent: MutableState<IndexEntity.Forum?>,
+    isAddingFavorite: MutableState<Boolean>,
 ) {
     val context = LocalContext.current
 
@@ -213,7 +354,10 @@ private fun Content1(
 private fun Content2(
     viewModel: ForumViewModel,
     selectedParent: MutableState<IndexEntity.Forum?>,
-    onSelect: (result: SelectForumResult) -> Unit
+    isAddingFavorite: MutableState<Boolean>,
+    favorites: SnapshotStateList<FavoriteForumDBEntity>,
+    showContent2: MutableState<Boolean>,
+    onSelect: (result: SelectForumResult, favorite: Boolean) -> Unit
 ) {
     val context = LocalContext.current
     val forumDetailData by viewModel.forumDetailData.collectAsStateWithLifecycle()
@@ -236,15 +380,7 @@ private fun Content2(
 
     LaunchedEffect(forumDetailData.data) {
         categories.clear()
-        if (forumDetailData.data?.threadTypes != null) {
-            if (forumDetailData.data?.threadTypes.isNullOrEmpty()) {
-                categories.add(ForumDetailEntity.ThreadType(
-                    name = "不分类",
-                    typeId = null
-                ))
-            }
-            forumDetailData.data?.threadTypes?.let { categories.addAll(it) }
-        }
+        forumDetailData.data?.threadTypes?.let { categories.addAll(it) }
     }
 
     Column (
@@ -332,12 +468,29 @@ private fun Content2(
                                 )
                                 .clickable(unbound = false) {
                                     forumDetailData.data?.let {
-                                        onSelect.invoke(
-                                            SelectForumResult(
-                                                detail = it,
-                                                category = category
+                                        if (isAddingFavorite.value) {
+                                            isAddingFavorite.value = false
+                                            showContent2.value = false
+                                            val dbEntity = FavoriteForumDBEntity(
+                                                forumId = it.fid,
+                                                forumName = it.name,
+                                                categoryName = category.name,
+                                                categoryId = category.typeId
                                             )
-                                        )
+                                            if (favorites.contains(dbEntity)) {
+                                                "已经添加过该板块了".showToast(context)
+                                            } else {
+                                                favorites.add(dbEntity)
+                                                viewModel.forumRepository.dataBase.getFavoriteForumDao().insert(dbEntity)
+                                            }
+                                        } else {
+                                            onSelect.invoke(
+                                                SelectForumResult(
+                                                    detail = it,
+                                                    category = category
+                                                ), false
+                                            )
+                                        }
                                     }
                                 }
                                 .padding(horizontal = 5.dp)
@@ -360,7 +513,10 @@ private fun Line(text: String) {
                 .padding(start = 2.dp)
                 .background(
                     brush = Brush.linearGradient(
-                        colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), Color.Transparent),
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                            Color.Transparent
+                        ),
                         start = Offset(0f, 200f),
                         end = Offset(200f, 0f)
                     ),

@@ -11,6 +11,7 @@ import com.scatl.uestcbbs.compose.Constants
 import com.scatl.uestcbbs.compose.R
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
+import androidx.core.graphics.toColorInt
 
 /**
  * Created by sca_tl at 2024/8/19 13:55:55
@@ -43,7 +44,7 @@ fun String?.copyToClipBoard(context: Context) {
 
 fun String?.hexToColor(default: Color = Color.Transparent): Color {
     return try {
-        Color(android.graphics.Color.parseColor(this))
+        Color(this!!.toColorInt())
     } catch (e: Exception) {
         default
     }
@@ -53,12 +54,6 @@ fun String?.toIntOrElse(default: Int = 0) = try {
     this?.toIntOrNull() ?: default
 } catch (e: Exception) {
     default
-}
-
-fun String.toIntColor() = try {
-    android.graphics.Color.parseColor(this)
-} catch (e: Exception) {
-    0
 }
 
 fun String?.removeAllBlank() = this

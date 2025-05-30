@@ -219,7 +219,7 @@ fun ThreadReplyItem(
                     modifier = Modifier
                         .size(35.dp)
                         .clip(shape = RoundedCornerShape(50))
-                        .clickable {
+                        .clickable(enabled = true) {
                             navHostController.navigate(
                                 Router.UserProfileRouterEntity(
                                     uid = item.authorId,

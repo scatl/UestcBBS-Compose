@@ -736,6 +736,16 @@ private fun MoreTools() {
                     navHostController.navigate(Router.SnapshotRouterEntity)
                 }
             }
+
+            item {
+                BBSToolItem(
+                    resId = R.drawable.ic_snapshot,
+                    color = LocalCustomColors.current.meSnapshot,
+                    text = "自动答题"
+                ) {
+                    navHostController.navigate(Router.DayQuestionRouterEntity)
+                }
+            }
         }
     }
 

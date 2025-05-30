@@ -183,6 +183,10 @@ object HtmlUtil {
                     function onAttachmentClick(url, name) {
                         Android.onAttachmentClick(url, name);
                     }
+                    
+                    function onVideoClick(url, name) {
+                        Android.onVideoClick(url, name);
+                    }
                 </script>
             </body>
             </html>
@@ -692,6 +696,15 @@ object HtmlUtil {
                         "onload=\"applyStoredHeight(this)\"" +
                         "alt=\"${attachment.description}\"/>"
             } else if (isVideo(attachment.filename)) {
+//                "<div >" +
+//                    "<strong>视频附件：</strong> <a onclick=\"onVideoClick('${attachment.path.toBBSImgUrl()}', '${attachment.filename}')\">全屏播放</a>" +
+//                    "<br/>" +
+//                    "<video class=\"video\" controls ${if (DataStore.videoAutoPlay) "autoplay muted" else ""}>" +
+//                        "<source src=\"${attachment.path.toBBSImgUrl()}\" type=\"video/${attachment.filename?.substringAfterLast(".")}\">" +
+//                        "Your browser does not support the video tag." +
+//                    "</video>" +
+//                "</div>"
+
                 "<video class=\"video\" controls ${if (DataStore.videoAutoPlay) "autoplay muted" else ""}>" +
                     "<source src=\"${attachment.path.toBBSImgUrl()}\" type=\"video/${attachment.filename?.substringAfterLast(".")}\">" +
                     "Your browser does not support the video tag." +

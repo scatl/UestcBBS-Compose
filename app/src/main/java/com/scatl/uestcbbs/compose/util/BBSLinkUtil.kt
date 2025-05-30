@@ -63,6 +63,9 @@ object BBSLinkUtil {
                 "magic" -> {
                     return LinkType.Magic(params["id"].toIntOrElse())
                 }
+                "medal" -> {
+                    return LinkType.Medal
+                }
                 "spacecp" -> {
                     val ac = params["ac"]
                     if ("credit" == ac) {
@@ -164,6 +167,7 @@ sealed class LinkType {
     data class Collection(val id: Int): LinkType()
     data object CreditHistory: LinkType()
     data object ResetPsw: LinkType()
+    data object Medal: LinkType()
     data class Magic(val id: Int): LinkType()
     data class Attachment(val url: String): LinkType()
     data object Unknown: LinkType()

@@ -71,8 +71,7 @@ fun CreateVoteBottomSheet(
         val context = LocalContext.current
         val listState = rememberLazyListState()
         val createVoteSheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { false }
+            skipPartiallyExpanded = true
         )
 
         val options = rememberMutableStateListOf(data.value?.options ?: mutableListOf(Option.obtain(), Option.obtain()))
@@ -270,6 +269,9 @@ fun CreateVoteBottomSheet(
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier
                                         .clickable(unbound = true) {
+                                            if (maxChoices.intValue == options.size) {
+                                                maxChoices.intValue = options.size - 1
+                                            }
                                             options.remove(item)
                                         }
                                 )

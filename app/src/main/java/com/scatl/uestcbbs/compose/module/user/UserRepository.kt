@@ -103,4 +103,9 @@ class UserRepository @Inject constructor(): BaseRepository() {
     suspend fun deleteComment(
         id: String
     ) = userService.deleteComment(id)
+
+    suspend fun getUserSpace(
+        id: String,
+        `do`: String
+    ) = legacyService.userSpace(id, `do`)
 }

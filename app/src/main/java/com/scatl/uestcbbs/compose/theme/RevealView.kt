@@ -20,6 +20,7 @@ import android.view.Window
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.animation.addListener
 import kotlin.math.hypot
+import androidx.core.graphics.createBitmap
 
 fun Context.activeRevealView(
     animModel: RevealAnimModel,
@@ -29,7 +30,7 @@ fun Context.activeRevealView(
     createRevealComplete: () -> Unit,
     revealAnimFinish: () -> Unit
 ) {
-    val windows=(this as Activity).window
+    val windows = (this as Activity).window
     val rootView = windows.decorView.rootView as ViewGroup
     captureView(rootView, windows){
         val bitmap = it
@@ -45,7 +46,7 @@ fun Context.activeRevealView(
 
 private fun captureView(view: View, window: Window, bitmapCallback: (Bitmap)->Unit) {
     // Above Android O, use PixelCopy
-    val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap(view.width, view.height)
     val location = IntArray(2)
     view.getLocationInWindow(location)
     PixelCopy.request(window,

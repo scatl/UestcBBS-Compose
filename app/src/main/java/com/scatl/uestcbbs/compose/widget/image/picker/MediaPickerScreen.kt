@@ -13,7 +13,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -59,6 +59,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -72,6 +73,8 @@ import com.scatl.uestcbbs.compose.ext.clickable
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.rememberMutableStateListOf
 import com.scatl.uestcbbs.compose.ext.showToast
+import com.scatl.uestcbbs.compose.ext.toIntOrElse
+import com.scatl.uestcbbs.compose.module.post.commentrate.CommentRateType
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.widget.RoundCheckBox
@@ -303,7 +306,10 @@ private fun ImageGrid(
                         .animateItem()
                         .clickable(unbound = false) {
                             if (mediaEntity.isVideo) {
-
+                                navHostController.navigate(Router.VideoPlayerRouterEntity(
+                                    url = mediaEntity.absolutePath ?: "",
+                                    name = mediaEntity.name
+                                ))
                             } else {
                                 toImageViewer(mediaEntity)
                             }
@@ -413,6 +419,7 @@ private fun ImageGrid(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun BottomBar(
     modifier: Modifier,
@@ -453,38 +460,44 @@ private fun BottomBar(
                 )
             }
 
-            Text(
-                text = if (currentSelect.isEmpty()) {
-                    "确认"
-                } else {
-                    "确认(${currentSelect.size})"
-                },
-                fontSize = 14.sp,
-                color = Color.White,
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = animateFloatAsState(
-                                targetValue = if (currentSelect.isEmpty()) 0.4f else 1f,
-                                label = "btn_alpha"
-                            ).value
-                        ),
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .clip(
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .clickable(unbound = false) {
-                        if (currentSelect.isNotEmpty()) {
+            LookaheadScope {
+                Text(
+                    text = if (currentSelect.isEmpty()) {
+                        "确认"
+                    } else {
+                        "确认(${currentSelect.size})"
+                    },
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primary.copy(
+                                alpha = animateFloatAsState(
+                                    targetValue = if (currentSelect.isEmpty()) 0.4f else 1f,
+                                    label = "btn_alpha"
+                                ).value
+                            ),
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .clip(
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .clickable(unbound = false) {
+                            if (currentSelect.isNotEmpty()) {
 
+                            }
                         }
-                    }
-                    .animateContentSize()
-                    .padding(
-                        vertical = 5.dp,
-                        horizontal = 20.dp
-                    )
-            )
+                        //.animateContentSize()
+//                        .animateBounds(
+//                            lookaheadScope = this@LookaheadScope
+//                        )
+                        .padding(
+                            vertical = 5.dp,
+                            horizontal = 20.dp
+                        )
+                )
+            }
+
         }
 
         AnimatedVisibility(

@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -344,11 +346,8 @@ private fun SelectForum(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val showSelectForumSheet = rememberSaveable { mutableStateOf(false) }
-    val isAddingFavorite = rememberSaveable { mutableStateOf(false) }
-    val favorites = rememberMutableStateListOf(viewModel.postRepository.dataBase.getFavoriteForumDao().getAll())
     val keyboardController = LocalSoftwareKeyboardController.current
     val keyboardVisibility by KeyboardManager.keyboardVisibility.collectAsState()
-    val tempSelectFavorite = rememberSaveable { mutableStateOf<FavoriteForumDBEntity?>(null) }
 
     suspend fun hideKeyBoard() {
         if (keyboardVisibility) {
@@ -361,10 +360,7 @@ private fun SelectForum(
         if (forumDetailData.data != null && showSelectForumSheet.value.not()) {
             selectedForum.value = SelectForumResult(
                 detail = forumDetailData.data!!,
-                category = ForumDetailEntity.ThreadType(
-                    name = tempSelectFavorite.value?.categoryName,
-                    typeId = tempSelectFavorite.value?.categoryId
-                )
+                category = selectedForum.value?.category!!
             )
             forumViewModel.resetForumDetail()
         }
@@ -453,105 +449,15 @@ private fun SelectForum(
                 }
             }
         }
-
-        Row (
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                text = "常用板块:",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.outline
-            )
-
-            LazyRow (
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                itemsIndexed(
-                    items = favorites,
-                    key = { _, item -> item.forumId.toString().plus(item.categoryId) }
-                ) { _, item ->
-                    Text(
-                        text = item.forumName.toString().plus(if (item.categoryName.isNullOrEmpty()) "" else "-${item.categoryName}"),
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 14.sp,
-                        modifier = Modifier
-                            .animateItem()
-                            .background(
-                                color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                shape = RoundedCornerShape(50)
-                            )
-                            .clip(shape = RoundedCornerShape(50))
-                            .combinedClickable(
-                                onClick = {
-                                    tempSelectFavorite.value = item
-                                    forumViewModel.getForumDetail(true, item.forumId.toIntOrElse())
-                                },
-                                onLongClick = {
-                                    favorites.remove(item)
-                                    viewModel.postRepository.dataBase
-                                        .getFavoriteForumDao()
-                                        .delete(item.id)
-                                }
-                            )
-                            .padding(horizontal = 10.dp, vertical = 2.dp)
-                    )
-                }
-
-                item {
-                    IconTitle(
-                        icon = Icons.Outlined.Add,
-                        iconTint = MaterialTheme.colorScheme.primary,
-                        gap = 2.dp,
-                        iconSize = 14.dp,
-                        text = "添加",
-                        textStyle = TextStyle(
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.primary
-                        ),
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                shape = RoundedCornerShape(50)
-                            )
-                            .clip(shape = RoundedCornerShape(50))
-                            .clickable(unbound = false) {
-                                scope.launchSafety {
-                                    hideKeyBoard()
-                                    isAddingFavorite.value = true
-                                    showSelectForumSheet.value = true
-                                }
-                            }
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
-                    )
-                }
-            }
-        }
     }
 
     SelectForumBottomSheet(
         show = showSelectForumSheet,
-        onSelect = {
+        onSelect = { result, favorite ->
             forumViewModel.resetForumDetail()
-            if (isAddingFavorite.value) {
-                isAddingFavorite.value = false
-                val dbEntity = FavoriteForumDBEntity(
-                    forumId = it.detail.fid,
-                    forumName = it.detail.name,
-                    categoryName = it.category.name,
-                    categoryId = it.category.typeId
-                )
-                if (favorites.contains(dbEntity)) {
-                    "已经添加过该板块了".showToast(context)
-                } else {
-                    favorites.add(dbEntity)
-                    viewModel.postRepository.dataBase.getFavoriteForumDao().insert(dbEntity)
-                }
-            } else {
-                selectedForum.value = it
+            selectedForum.value = result
+            if (favorite) {
+                forumViewModel.getForumDetail(true, result.detail.fid.toIntOrElse())
             }
         }
     )

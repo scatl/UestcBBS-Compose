@@ -1,7 +1,5 @@
 package com.scatl.uestcbbs.compose.module.setting
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,15 +15,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ColorLens
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,18 +28,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.materialkolor.PaletteStyle
+import com.materialkolor.rememberDynamicColorScheme
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.datastore.DataStore
+import com.scatl.uestcbbs.compose.ext.hexToColor
 import com.scatl.uestcbbs.compose.ext.toHexWithAlpha
-import com.scatl.uestcbbs.compose.ext.toIntColor
-import com.scatl.uestcbbs.compose.ext.unboundClickable
 import com.scatl.uestcbbs.compose.manager.ThemeManager
 import com.scatl.uestcbbs.compose.widget.ColorPicker
 import com.scatl.uestcbbs.compose.widget.SingleSelectionDialog
@@ -63,17 +57,14 @@ fun ColorPickerDialog(
 ) {
     if (showDialog) {
         var selectedColor by remember { mutableStateOf(initColor?.toHexWithAlpha() ?: "#00000000") }
-        var primaryColor by remember { mutableStateOf(Color.Transparent) }
-        var secondaryColor by remember { mutableStateOf(Color.Transparent) }
-        var tertiaryColor by remember { mutableStateOf(Color.Transparent) }
         val showSchemeDialog = rememberSaveable { mutableStateOf(false) }
         val currentScheme = rememberSaveable { mutableStateOf(DataStore.customThemeScheme) }
 
-        LaunchedEffect(selectedColor, currentScheme.value) {
-            primaryColor = ThemeManager.createCustomScheme(currentScheme.value, selectedColor.toIntColor(), ThemeManager.isAppDarkMode).primary
-            secondaryColor = ThemeManager.createCustomScheme(currentScheme.value, selectedColor.toIntColor(), ThemeManager.isAppDarkMode).secondary
-            tertiaryColor = ThemeManager.createCustomScheme(currentScheme.value, selectedColor.toIntColor(), ThemeManager.isAppDarkMode).tertiary
-        }
+        val dynamicColor = rememberDynamicColorScheme(
+            seedColor = selectedColor.hexToColor(),
+            style = PaletteStyle.entries.find { it.name == currentScheme.value } ?: PaletteStyle.Fidelity,
+            isDark = ThemeManager.isAppDarkMode,
+        )
 
         Dialog(onDismissRequest = onDismissRequest) {
             Column(
@@ -138,15 +129,15 @@ fun ColorPickerDialog(
                         when (index) {
                             0 -> {
                                 name = stringResource(id = R.string.setting_primary_color)
-                                color = primaryColor
+                                color = dynamicColor.primary
                             }
                             1 -> {
                                 name = stringResource(id = R.string.setting_secondary_color)
-                                color = secondaryColor
+                                color = dynamicColor.secondary
                             }
                             else -> {
                                 name = stringResource(id = R.string.setting_tertiary_color)
-                                color = tertiaryColor
+                                color = dynamicColor.tertiary
                             }
                         }
                         Row (
@@ -209,8 +200,8 @@ fun ColorPickerDialog(
         }
 
         val schemes = mutableListOf<Pair<String, String>>()
-        ThemeManager.ThemeScheme.entries.forEach {
-            schemes.add(Pair(it.value, it.value))
+        PaletteStyle.entries.forEach {
+            schemes.add(Pair(it.name, it.name))
         }
         SingleSelectionDialog(
             showDialog = showSchemeDialog.value,

@@ -175,7 +175,7 @@ fun UserFriendItem(
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp,
                 modifier = Modifier
-                    .clickable {
+                    .clickable(enabled = true) {
                         navHostController.navigate(
                             Router.ThreadDetailRouterEntity(
                                 id = item.latestThread?.tid.toIntOrElse()

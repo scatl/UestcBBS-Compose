@@ -26,20 +26,20 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.outlined.Attachment
 import androidx.compose.material.icons.outlined.RemoveCircle
-import androidx.compose.material.icons.outlined.RemoveCircleOutline
 import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -49,27 +49,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.core.graphics.toColorInt
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.api.entity.user.UserProfileEntity
 import com.scatl.uestcbbs.compose.ext.cardCorner
+import com.scatl.uestcbbs.compose.ext.clickable
+import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.pagePadding
 import com.scatl.uestcbbs.compose.ext.removeAllBlank
 import com.scatl.uestcbbs.compose.ext.toAvatarUrl
 import com.scatl.uestcbbs.compose.ext.toBBSImgUrl
-import com.scatl.uestcbbs.compose.module.user.UserViewModel
-import com.scatl.uestcbbs.compose.util.calculateDays
-import com.scatl.uestcbbs.compose.util.formatTimestamp
-import com.scatl.uestcbbs.compose.R
-import com.scatl.uestcbbs.compose.ext.clickable
-import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
-import com.scatl.uestcbbs.compose.ext.unboundClickable
+import com.scatl.uestcbbs.compose.manager.AccountManager
 import com.scatl.uestcbbs.compose.module.user.UserProfilePage
+import com.scatl.uestcbbs.compose.module.user.UserViewModel
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
+import com.scatl.uestcbbs.compose.util.calculateDays
+import com.scatl.uestcbbs.compose.util.formatTimestamp
 import com.scatl.uestcbbs.compose.widget.IconTitle
 import com.scatl.uestcbbs.compose.widget.web.LocalHtmlWebView
-import java.util.UUID
 
 /**
  * Created by sca_tl at 2024/7/17 10:53:42
@@ -82,6 +82,9 @@ fun UserBasicInfoScreen(
 ) {
     val hidePrivateInfo = rememberSaveable { mutableStateOf(true) }
     viewModel.setPageInitialized(UserProfilePage.HOME)
+    val detailData by viewModel.detailData.collectAsStateWithLifecycle()
+    val onlineData by viewModel.onlineData.collectAsStateWithLifecycle()
+    val self = rememberSaveable { mutableStateOf(AccountManager.getSignedInAccount()?.uid == detailData.data?.userSummary?.uid.toString()) }
 
     Column (
         verticalArrangement = Arrangement.spacedBy(pagePadding),
@@ -111,19 +114,21 @@ fun UserBasicInfoScreen(
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp
                 )
-                IconTitle(
-                    icon = if (hidePrivateInfo.value) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                    iconSize = 18.dp,
-                    text = if (hidePrivateInfo.value) "展示所有信息" else "隐藏敏感信息",
-                    textStyle = TextStyle(
-                        fontSize = 15.sp
-                    ),
-                    modifier = Modifier
-                        .alpha(alpha = 0.7f)
-                        .clickable(unbound = true) {
-                            hidePrivateInfo.value = hidePrivateInfo.value.not()
-                        }
-                )
+                if (self.value) {
+                    IconTitle(
+                        icon = if (hidePrivateInfo.value) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                        iconSize = 18.dp,
+                        text = if (hidePrivateInfo.value) "展示所有信息" else "隐藏敏感信息",
+                        textStyle = TextStyle(
+                            fontSize = 15.sp
+                        ),
+                        modifier = Modifier
+                            .alpha(alpha = 0.7f)
+                            .clickable(unbound = true) {
+                                hidePrivateInfo.value = hidePrivateInfo.value.not()
+                            }
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(pagePadding))
             Text(
@@ -131,6 +136,21 @@ fun UserBasicInfoScreen(
                 fontSize = 14.sp,
                 modifier = Modifier.alpha(0.7f)
             )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "在线状态：",
+                    fontSize = 14.sp,
+                    modifier = Modifier.alpha(0.7f)
+                )
+                Text(
+                    text = if (onlineData.data == true) "在线" else "离线",
+                    color = if (onlineData.data == true) Color("#00B4E7".toColorInt()) else Color("#BC6363".toColorInt()),
+                    fontSize = 14.sp,
+                    modifier = Modifier.alpha(0.7f)
+                )
+            }
             Row (
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -427,6 +447,7 @@ private fun Visitors(
                             AsyncImage(
                                 model = item.uid.toAvatarUrl(),
                                 contentDescription = null,
+                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(40.dp)
                                     .clip(RoundedCornerShape(50))

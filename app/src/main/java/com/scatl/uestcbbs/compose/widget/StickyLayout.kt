@@ -2,6 +2,10 @@ package com.scatl.uestcbbs.compose.widget
 
 import android.animation.ObjectAnimator
 import androidx.annotation.FloatRange
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.animateDecay
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -31,10 +35,14 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Velocity
 import com.elvishew.xlog.XLog
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.px2dp
+import kotlin.math.abs
 
 /**
  * Created by sca_tl at 2024/5/22 16:14:33
@@ -57,6 +65,8 @@ fun StickyLayout(
     val tag = "StickyLayout"
 
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val density = LocalDensity.current
     var barContentHeight by rememberSaveable { mutableFloatStateOf(0f) }
     var headContentHeight by rememberSaveable { mutableFloatStateOf(0f) }
     val headContentScrollState = rememberScrollState()
@@ -123,7 +133,7 @@ fun StickyLayout(
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
 
-                XLog.tag(tag).d("offset:$offset, total:${offset + headContentHeight}, barHeight:${barContentHeight}")
+                XLog.tag(tag).d("offset:$offset, total:${offset + headContentHeight}, barHeight:${barContentHeight}, y:${available.y}")
 
                 onScrollDirectionChange?.invoke(when {
                     available.y < 0 -> -1
@@ -133,6 +143,7 @@ fun StickyLayout(
 
                 // 如果向上滚动，或者headContent已经有偏移（但未达到最大值）
                 if (available.y < 0 && offset > -maxUpPx) {
+                    XLog.tag(tag).d("1")
                     val o = Offset(0f, calculateOffset(available.y))
                     onProgress.invoke(offset / -maxUpPx, offset)
                     return o
@@ -140,6 +151,7 @@ fun StickyLayout(
 
                 // 如果headContent偏移已经是最大值，且我们正在向上滚动，允许LazyColumn处理滚动事件
                 if (available.y < 0 && offset == -maxUpPx) {
+                    XLog.tag(tag).d("2")
                     scope.launchSafety { headContentScrollState.scrollTo(0) }
                     onProgress.invoke(1f, offset)
                     return Offset.Zero
@@ -148,7 +160,9 @@ fun StickyLayout(
                 // 如果headContent偏移已经是最大值，且我们正在向下滚动，允许LazyColumn处理滚动事件
                 // 这里还需判断内容是否滑动到最顶部，滑动到最顶部再交由外层滑动
                 if (available.y > 0 && offset == -maxUpPx) {
+                    XLog.tag(tag).d("3")
                     if (bodyScrollableState?.canScrollBackward == true) {
+                        XLog.tag(tag).d("9")
                         onProgress.invoke(1f, offset)
                         return Offset.Zero
                     }
@@ -159,17 +173,20 @@ fun StickyLayout(
 
                 // 如果headContent完全可见，且向下滚动，直接返回 Offset.Zero 不消费事件，允许 LazyColumn 滚动
                 if (available.y > 0 && offset == 0f) {
+                    XLog.tag(tag).d("4")
                     onProgress.invoke(0f, 0f)
                     return Offset.Zero
                 }
 
                 // 在其他情况下（向下滚动且headContent有偏移），消费滚动事件使headContent先滚动
                 if (available.y > 0 && offset != 0f) {
+                    XLog.tag(tag).d("5")
                     val o = calculateOffset(available.y)
                     onProgress.invoke(offset / -maxUpPx, offset)
                     return Offset(0f, o)
                 }
 
+                XLog.tag(tag).d("6")
                 // 在其他情况下，不消费滚动事件
                 onProgress.invoke(offset / -maxUpPx, offset)
                 return Offset.Zero
@@ -178,9 +195,10 @@ fun StickyLayout(
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
                 // 内层滚动到顶了，将剩下的滚动量交给外层处理
                 if (available.y > 0 && bodyScrollableState?.canScrollBackward == false && offset == -maxUpPx) {
+                    XLog.tag(tag).d("7")
                     return Offset(0f, calculateOffset(available.y))
                 }
-
+                XLog.tag(tag).d("8")
                 return Offset.Zero
             }
         }
@@ -188,7 +206,7 @@ fun StickyLayout(
 
     Box(
         modifier = modifier
-            .nestedScroll(nestedScrollConnection, nestedScrollDispatcher),
+            .nestedScroll(nestedScrollConnection),
         contentAlignment = contentAlignment
     ) {
         Box(

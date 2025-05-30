@@ -16,12 +16,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -31,47 +34,93 @@ object ImageSaveUtil {
 
     const val TAG = "ImageSaveUtil"
 
+    enum class ImageSaveStatus {
+        PENDING,
+        ALL_SUCCESS,
+        PART_SUCCESS
+    }
+
+    data class ImageSaveResult(
+        val totalCount: Int,
+        val successCount: Int,
+        val failCount: Int,
+        val status: ImageSaveStatus
+    )
+
     @OptIn(ExperimentalCoilApi::class)
     @JvmStatic
     fun saveImages(
         context: Context,
         urls: List<String>,
-        callback: (successCount: Int) -> Unit = { }
+        callback: (result: ImageSaveResult) -> Unit = { }
     ) {
+        callback.invoke(
+            ImageSaveResult(
+                totalCount = urls.size,
+                successCount = 0,
+                failCount = 0,
+                status = ImageSaveStatus.PENDING
+            )
+        )
+
         val okHttpClient = OkHttpClient()
         CoroutineScope(Dispatchers.IO).launch {
+            val semaphore = Semaphore(7) //控制并发数量，防止图片太大OOM
             var successCount = 0
+            var failCount = 0
             val jobs = urls.map { url ->
                 async {
-                    try {
-                        val cachedSnapshot = context.imageLoader.diskCache?.openSnapshot(url)
-                        if (cachedSnapshot != null) {
-                            XLog.tag(TAG).d("cachedSnapshot != null")
-                            val inputStream = cachedSnapshot.data.toFile().inputStream()
-                            if (saveToAlbum(inputStream, context)) {
-                                cachedSnapshot.close()
-                                successCount ++
-                            } else {
-                                XLog.tag(TAG).d("save fail")
-                            }
-                        } else {
-                            XLog.tag(TAG).d("cachedSnapshot == null, download")
-                            val request = Request.Builder().url(url).build()
-                            val response = okHttpClient.newCall(request).execute()
-                            if (response.isSuccessful) {
-                                response.body.byteStream().use { inputStream ->
-                                    if (saveToAlbum(inputStream, context)) {
-                                        successCount ++
-                                    } else {
-                                        XLog.tag(TAG).d("download: saveToAlbum fail")
-                                    }
+                    semaphore.withPermit {
+                        try {
+                            val cachedSnapshot = context.imageLoader.diskCache?.openSnapshot(url)
+                            if (cachedSnapshot != null) {
+                                XLog.tag(TAG).d("cachedSnapshot != null")
+                                val inputStream = cachedSnapshot.data.toFile().inputStream()
+                                if (saveToAlbum(inputStream, context)) {
+                                    cachedSnapshot.close()
+                                    successCount ++
+                                    callback.invoke(
+                                        ImageSaveResult(
+                                            totalCount = urls.size,
+                                            successCount = successCount,
+                                            failCount = 0,
+                                            status = ImageSaveStatus.PENDING
+                                        )
+                                    )
+                                } else {
+                                    failCount ++
+                                    XLog.tag(TAG).d("save fail")
                                 }
                             } else {
-                                XLog.tag(TAG).d("download: response fail")
+                                XLog.tag(TAG).d("cachedSnapshot == null, download")
+                                val request = Request.Builder().url(url).build()
+                                val response = okHttpClient.newCall(request).execute()
+                                if (response.isSuccessful) {
+                                    response.body.byteStream().use { inputStream ->
+                                        if (saveToAlbum(inputStream, context)) {
+                                            successCount ++
+                                            callback.invoke(
+                                                ImageSaveResult(
+                                                    totalCount = urls.size,
+                                                    successCount = successCount,
+                                                    failCount = 0,
+                                                    status = ImageSaveStatus.PENDING
+                                                )
+                                            )
+                                        } else {
+                                            failCount ++
+                                            XLog.tag(TAG).d("download: saveToAlbum fail")
+                                        }
+                                    }
+                                } else {
+                                    failCount ++
+                                    XLog.tag(TAG).d("download: response fail")
+                                }
                             }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            failCount ++
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
                     }
                 }
             }
@@ -79,7 +128,14 @@ object ImageSaveUtil {
             jobs.awaitAll()
 
             withContext(Dispatchers.Main) {
-                callback(successCount)
+                callback.invoke(
+                    ImageSaveResult(
+                        totalCount = urls.size,
+                        successCount = successCount,
+                        failCount = failCount,
+                        status = if (successCount == urls.size) ImageSaveStatus.ALL_SUCCESS else ImageSaveStatus.PART_SUCCESS
+                    )
+                )
             }
         }
     }
@@ -94,33 +150,37 @@ object ImageSaveUtil {
 
     @JvmStatic
     fun saveToAlbum(inputStream: InputStream, context: Context): Boolean {
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        inputStream.use { input ->
-            byteArrayOutputStream.use { output ->
-                copyStream(input, output)
+        val tempFile = File.createTempFile("temp_image_${UUID.randomUUID()}", ".tmp", context.cacheDir)
+
+        try {
+            FileOutputStream(tempFile).use { output ->
+                inputStream.copyTo(output)
             }
-        }
-        val cachedInputStream1 = ByteArrayInputStream(byteArrayOutputStream.toByteArray())
-        val cachedInputStream2 = ByteArrayInputStream(byteArrayOutputStream.toByteArray())
 
-        val options = BitmapFactory.Options().apply {
-            inJustDecodeBounds = true
-        }
-        cachedInputStream1.use {
-            BitmapFactory.decodeStream(cachedInputStream1, null, options)
-        }
-        val mimeType = if (options.outMimeType?.startsWith("image/") == true) {
-            options.outMimeType
-        } else {
-            "image/jpeg"
-        }
+            val options = BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+            BitmapFactory.decodeFile(tempFile.absolutePath, options)
 
-        val fileName = UUID.randomUUID().toString()
+            val mimeType = if (options.outMimeType?.startsWith("image/") == true) {
+                options.outMimeType
+            } else {
+                "image/jpeg"
+            }
+            val fileName = UUID.randomUUID().toString()
 
-        return if (isGTESdk29()) {
-            saveToAlbumAboveAndroid10(context, cachedInputStream2, fileName, mimeType)
-        } else {
-            saveToAlbumBelowAndroid10(context, cachedInputStream2, fileName, mimeType)
+            FileInputStream(tempFile).use { finalInputStream ->
+                return if (isGTESdk29()) {
+                    saveToAlbumAboveAndroid10(context, finalInputStream, fileName, mimeType)
+                } else {
+                    saveToAlbumBelowAndroid10(context, finalInputStream, fileName, mimeType)
+                }
+            }
+        } catch (e: Exception) {
+            XLog.tag(TAG).d(e)
+            return false
+        } finally {
+            tempFile.delete()
         }
     }
 

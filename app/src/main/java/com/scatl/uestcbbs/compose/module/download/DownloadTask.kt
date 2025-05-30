@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -28,6 +27,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+import androidx.core.net.toUri
 
 /**
  * Created by sca_tl at 2023/5/31 15:56
@@ -76,7 +76,7 @@ class DownloadTask(val context: Context) {
         override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
             val progress = (bytesRead * 100 / contentLength).toInt()
 
-            XLog.tag(TAG).d("${bytesRead}, ${contentLength}, ${done}")
+            XLog.tag(TAG).d("$bytesRead, $contentLength, $done")
 
             sendNotification(
                 content = "$progress%, ${(FileUtil.formatFileSize(contentLength))}",
@@ -131,7 +131,7 @@ class DownloadTask(val context: Context) {
                     val outputStream = if (DownLoadManager.isDownloadFolderUriAccessible(context)) {
                         DownLoadManager.getExistFile(context, mFileName)?.delete()
                         val file = DocumentFile
-                            .fromTreeUri(context, Uri.parse(DataStore.downloadFolderUri))
+                            .fromTreeUri(context, DataStore.downloadFolderUri.toUri())
                             ?.createFile(FileUtil.getMimeType(mFileName), mFileName)
                         file?.uri?.let { context.contentResolver.openOutputStream(it) }
                     } else {

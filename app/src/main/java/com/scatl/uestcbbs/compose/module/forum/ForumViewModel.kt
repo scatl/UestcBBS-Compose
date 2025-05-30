@@ -23,7 +23,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ForumViewModel @Inject constructor(
-    private val forumRepository: ForumRepository
+    val forumRepository: ForumRepository
 ) : ViewModel() {
 
     private val _forumCategoryData = MutableStateFlow(UiState<SnapshotStateList<ForumCategoryData>>().init())

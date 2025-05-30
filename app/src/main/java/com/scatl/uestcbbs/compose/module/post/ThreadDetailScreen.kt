@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -264,6 +265,7 @@ fun ThreadDetailScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .navigationBarsPadding()
         ) {
             WaterMark()
 
@@ -1106,7 +1108,7 @@ private fun ThreadInfo(
             modifier = Modifier
                 .size(20.dp)
                 .clip(shape = RoundedCornerShape(50))
-                .clickable {
+                .clickable(enabled = true) {
                     navHostController.navigate(
                         Router.UserProfileRouterEntity(
                             uid = data.thread?.authorId,
@@ -1412,7 +1414,7 @@ private fun PollInfo(
                         .clip(
                             shape = RoundedCornerShape(5.dp)
                         )
-                        .clickable {
+                        .clickable(enabled = true) {
                             if (enable && !showSnapshot.value) {
                                 selectedOptions.value = if (isChecked) {
                                     (selectedOptions.value - ((option.id ?: 0)))
@@ -1606,7 +1608,7 @@ private fun Collection(
                         shape = RoundedCornerShape(cardCorner)
                     )
                     .clip(shape = RoundedCornerShape(cardCorner))
-                    .clickable {
+                    .clickable(enabled = true){
                         navHostController.navigate(Router.CollectionDetailRouterEntity(collectionEntity.collectionId.toIntOrElse()))
                     }
                     .padding(pagePadding + 5.dp)
@@ -1687,7 +1689,7 @@ private fun Collection(
                         modifier = Modifier
                             .size(15.dp)
                             .clip(shape = RoundedCornerShape(50))
-                            .clickable {
+                            .clickable(enabled = true) {
                                 navHostController.navigate(
                                     Router.UserProfileRouterEntity(
                                         uid = collectionEntity.uid,

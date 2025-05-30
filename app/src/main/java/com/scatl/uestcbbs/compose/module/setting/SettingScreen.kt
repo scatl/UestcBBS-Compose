@@ -40,26 +40,27 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.materialkolor.PaletteStyle
+import com.materialkolor.rememberDynamicColorScheme
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.ext.LoadInitialDataIfNeeded
 import com.scatl.uestcbbs.compose.ext.getVersionName
 import com.scatl.uestcbbs.compose.ext.goToAppNotificationChannelSetting
 import com.scatl.uestcbbs.compose.ext.goToAppNotificationSetting
+import com.scatl.uestcbbs.compose.ext.hexToColor
 import com.scatl.uestcbbs.compose.ext.isGTESdk31
-import com.scatl.uestcbbs.compose.ext.toIntColor
 import com.scatl.uestcbbs.compose.ext.unboundClickable
 import com.scatl.uestcbbs.compose.manager.LanguageManager
 import com.scatl.uestcbbs.compose.manager.ThemeManager
@@ -274,12 +275,11 @@ fun SettingScreen(
                                                 Color.Transparent
                                             } else {
                                                 animateColorAsState(
-                                                    targetValue = Color(
-                                                        ThemeManager.createCustomScheme(
-                                                            seedColor = customTheme.value.toIntColor(),
-                                                            dark = ThemeManager.isAppDarkMode
-                                                        ).primary.toArgb()
-                                                    ),
+                                                    targetValue = rememberDynamicColorScheme(
+                                                        seedColor = customTheme.value.hexToColor(),
+                                                        style = PaletteStyle.entries.find { it.name == DataStore.customThemeScheme } ?: PaletteStyle.Fidelity,
+                                                        isDark = ThemeManager.isAppDarkMode,
+                                                    ).primary,
                                                     animationSpec = tween(durationMillis = 500),
                                                     label = "customThemeColor"
                                                 ).value
@@ -727,7 +727,7 @@ fun SettingScreen(
 
     ColorPickerDialog(
         showDialog = showColorPickerDialog.value,
-        initColor = if (customTheme.value.isEmpty()) null else Color(customTheme.value.toIntColor()),
+        initColor = if (customTheme.value.isEmpty()) null else Color(customTheme.value.toColorInt()),
         title = stringResource(id = R.string.setting_custom_theme),
         onDismissRequest = {
             showColorPickerDialog.value = false

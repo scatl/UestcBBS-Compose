@@ -79,6 +79,7 @@ fun ChatDetailScreen(
 ) {
     val viewModel: MessageViewModel = hiltViewModel()
     val chatDetailData by viewModel.chatDetailData.collectAsStateWithLifecycle()
+    val onlineData by viewModel.onlineData.collectAsStateWithLifecycle()
 
     LoadInitialDataIfNeeded(key = routerEntity.uid) {
         viewModel.getChatDetail(
@@ -86,12 +87,14 @@ fun ChatDetailScreen(
             init = true,
             loadMore = false
         )
+        viewModel.getUserSpace(routerEntity.uid)
     }
 
     Scaffold (
         topBar = {
             TopBar(
-                name = routerEntity.name
+                name = routerEntity.name,
+                viewModel = viewModel
             )
         }
     ) { paddingValues ->
@@ -126,16 +129,33 @@ fun ChatDetailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
-    name: String
+    name: String,
+    viewModel: MessageViewModel
 ) {
     val navHostController = LocalNavController.current
+    val onlineData by viewModel.onlineData.collectAsStateWithLifecycle()
+
     TopAppBar(
         title = {
-            Text(
-                text = name,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(start = pagePadding)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                Text(
+                    text = name,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(start = pagePadding)
+                )
+                Text(
+                    text = "",
+                    modifier = Modifier
+                        .background(
+                            color = if (onlineData.data == true) Color.Green else Color.Gray,
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        .size(10.dp)
+                )
+            }
         },
         navigationIcon = {
             Icon(

@@ -6,9 +6,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.net.http.SslError
-import android.view.ViewGroup
+import android.view.View
 import android.webkit.JavascriptInterface
 import android.webkit.SslErrorHandler
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -16,7 +17,6 @@ import android.webkit.WebViewClient
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.toColorInt
 import androidx.navigation.NavHostController
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -39,15 +40,13 @@ import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.toBBSImgUrl
 import com.scatl.uestcbbs.compose.ext.toHexNoAlpha
-import com.scatl.uestcbbs.compose.ext.toHexWithAlpha
-import com.scatl.uestcbbs.compose.ext.toIntColor
 import com.scatl.uestcbbs.compose.manager.ThemeManager
 import com.scatl.uestcbbs.compose.router.LocalNavController
-import com.scatl.uestcbbs.compose.widget.image.viewer.ImageViewerConfig
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.router.linkNavigate
 import com.scatl.uestcbbs.compose.theme.LocalCustomColors
 import com.scatl.uestcbbs.compose.util.HtmlUtil
+import com.scatl.uestcbbs.compose.widget.image.viewer.ImageViewerConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -138,8 +137,9 @@ fun LocalHtmlWebView(
         factory = {
             WebViewManager.getWebViewLayout(context, uniqueId).also { f ->
                 (f.getChildAt(0) as? WebView?)?.apply {
-                    setBackgroundColor(backgroundColorHex.toIntColor())
+                    setBackgroundColor(backgroundColorHex.toColorInt())
                     webViewClient = webViewClient(scope, navHostController, context, uriHandler, onPageFinished)
+                    webChromeClient = webChromeClient()
                     addJavascriptInterface(WebAppInterface(context, navHostController, imageViewerConfig), "Android")
                     if (!loaded.value && styledHtmlContent.value == null) {
                         loadDataWithBaseURL(Constants.BBS_URL, "", "text/html", "UTF-8", null)
@@ -149,7 +149,7 @@ fun LocalHtmlWebView(
         },
         update = {
             (it.getChildAt(0) as? WebView?)?.apply {
-                setBackgroundColor(backgroundColorHex.toIntColor())
+                setBackgroundColor(backgroundColorHex.toColorInt())
                 if (nightMode.value != ThemeManager.isAppDarkMode) {
                     nightMode.value = ThemeManager.isAppDarkMode
                     loaded.value = false
@@ -182,6 +182,16 @@ private class WebAppInterface(
     }
 
     @JavascriptInterface
+    fun onVideoClick(url: String?, name: String?) {
+        (context as Activity).runOnUiThread {
+            navHostController.navigate(Router.VideoPlayerRouterEntity(
+                url = url.toString(),
+                name = name
+            ))
+        }
+    }
+
+    @JavascriptInterface
     fun onImageClick(url: String?) {
         if (url != null) {
             imageViewerConfig.images.forEachIndexed { index, imageViewerItem ->
@@ -206,6 +216,16 @@ private class WebAppInterface(
                 )
             }
         }
+    }
+}
+
+private fun webChromeClient() = object : WebChromeClient() {
+    override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
+        super.onShowCustomView(view, callback)
+    }
+
+    override fun onCloseWindow(window: WebView?) {
+        super.onCloseWindow(window)
     }
 }
 
