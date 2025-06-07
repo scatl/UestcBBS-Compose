@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDownward
@@ -47,8 +48,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -77,7 +80,6 @@ import retrofit2.HttpException
 import kotlin.math.abs
 import kotlin.math.pow
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T: SwipeRefreshItem> SwipeRefresh(
     uiState: UiState<out List<T>>,
@@ -409,20 +411,23 @@ fun CircleRefreshIndicator(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .graphicsLayer {
-                    translationY = state.position - 45.dp.toPx()
+                    translationY = state.position - 50.dp.toPx()
                     scaleX = scale.value
                     scaleY = scale.value
                 }
+                .shadow(elevation = 5.dp, shape = CircleShape)
+                .clip(CircleShape)
                 .background(
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shape = RoundedCornerShape(50)
+                    shape = CircleShape
                 )
                 .padding(10.dp)
         ) {
 //            if (state.refreshing || (success && state.position == state.refreshOffset)) {
                 CircularProgressIndicator(
                     strokeWidth = 3.dp,
-                    modifier = Modifier.size(25.dp)
+                    modifier = Modifier
+                        .size(25.dp)
                 )
 //            } else {
 //                CircularProgressIndicator(

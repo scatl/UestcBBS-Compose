@@ -1,12 +1,16 @@
 package com.scatl.uestcbbs.compose.api.service
 
+import com.scatl.uestcbbs.compose.api.entity.DarkRoomEntity
 import com.scatl.uestcbbs.compose.datastore.DataStore
+import com.scatl.uestcbbs.compose.net.BaseApiResult
 import okhttp3.RequestBody
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PartMap
+import retrofit2.http.Query
 
 /**
  * Created by sca_tl at 2024/9/24 16:52:54
@@ -178,7 +182,6 @@ interface LegacyService {
 
     // </editor-fold>
 
-
     // <editor-fold desc="用户主页">
 
     @FormUrlEncoded
@@ -187,6 +190,28 @@ interface LegacyService {
         @Field("uid") uid: String,
         @Field("do") `do`: String,
     ): String?
+
+    // </editor-fold>
+
+    // <editor-fold desc="积分">
+
+    @GET("https://bbs.uestc.edu.cn/home.php?mod=spacecp&ac=credit")
+    suspend fun creditInfo(
+        @Query("op") op: String
+    ): String
+
+    // </editor-fold>
+
+    // <editor-fold desc="其它">
+
+    @GET("forum.php")
+    suspend fun homeData(): String
+
+    @GET("forum.php?mod=misc&action=showdarkroom&ajaxdata=json")
+    suspend fun darkRoomList(
+        @Query("cid") cid: String,
+        @Query("t") t: String,
+    ): String
 
     // </editor-fold>
 }

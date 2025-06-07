@@ -1,6 +1,7 @@
 package com.scatl.uestcbbs.compose.theme
 
 import android.app.Activity
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +19,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.elvishew.xlog.XLog
 import com.materialkolor.PaletteStyle
+import com.materialkolor.ktx.animateColorScheme
 import com.materialkolor.rememberDynamicColorScheme
 import com.scatl.uestcbbs.compose.ext.hexToColor
 import com.scatl.uestcbbs.compose.ext.isGTESdk31
@@ -63,7 +65,7 @@ fun AppTheme(
     var colorScheme = getColorScheme()
 
     val view = LocalView.current
-    if (!view.isInEditMode) {
+    if (view.isInEditMode.not()) {
         SideEffect {
             val window = (view.context as Activity).window
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !useDarkMode.value
@@ -79,16 +81,12 @@ fun AppTheme(
         LocalCustomColors provides if (useDarkMode.value) DarkCustomColors else LightCustomColors
     ) {
         MaterialTheme(
-            colorScheme = colorScheme,
+            colorScheme = animateColorScheme(
+                colorScheme = colorScheme,
+                animationSpec = spring()
+            ),
             content = content,
         )
-
-//        DynamicMaterialTheme(
-//            seedColor = seedColor,
-//            isDark = useDarkMode.value,
-//            animate = true,
-//            content = content,
-//        )
     }
 }
 
@@ -116,6 +114,14 @@ fun DarkTheme(
             }
         }
     }
+
+//    val view = LocalView.current
+//    if (view.isInEditMode.not()) {
+//        SideEffect {
+//            val window = (view.context as Activity).window
+//            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+//        }
+//    }
 
     var colorScheme = getColorScheme()
 

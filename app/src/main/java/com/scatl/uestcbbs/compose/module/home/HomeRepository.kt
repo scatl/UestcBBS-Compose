@@ -22,4 +22,6 @@ class HomeRepository @Inject constructor(): BaseRepository() {
         forumList = null,
         topList = null
     )
+
+    suspend fun getHomeData() = legacyService.homeData()
 }

@@ -114,6 +114,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -125,6 +126,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -267,12 +269,14 @@ fun ThreadDetailScreen(
                 .fillMaxSize()
                 .navigationBarsPadding()
         ) {
-            WaterMark()
+            WaterMark(
+                showSnapshot = showSnapshotData
+            )
 
             StickyLayout(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .alpha(0.975f)
+                    .alpha(if (showSnapshotData.value) 0.95f else 0.975f)
                     .background(color = MaterialTheme.colorScheme.surfaceContainer),
                 controller = stickyLayoutController,
                 headContent = {
@@ -387,18 +391,20 @@ fun ThreadDetailScreen(
 }
 
 @Composable
-private fun WaterMark() {
+private fun WaterMark(
+    showSnapshot: MutableState<Boolean>
+) {
     val drawable = WatermarkDrawable().apply {
         mText = AccountManager.getSignedInAccount()?.uid.toString()
         mTextColor = MaterialTheme.colorScheme.onBackground.toArgb()
-        mTextSize = 20.sp2px
+        mTextSize = if (showSnapshot.value) 30.sp2px else 20.sp2px
         mRotation = -15f
         mXSpace = 1.4f
         mYSpace = 15
     }
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp.dp2px.toInt()
-    val screenHeight = configuration.screenHeightDp.dp.dp2px.toInt()
+    val windowInfo = LocalWindowInfo.current
+    val screenWidth = windowInfo.containerSize.width
+    val screenHeight = windowInfo.containerSize.height
     Image(
         bitmap = drawable.toBitmap(screenWidth, screenHeight).asImageBitmap(),
         contentDescription = null,
@@ -594,9 +600,9 @@ private fun ReadProgressIndicator(
         }
     }
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp.dp2px.toInt()
-    val screenHeight = configuration.screenHeightDp.dp.dp2px.toInt()
+    val windowInfo = LocalWindowInfo.current
+    val screenWidth = windowInfo.containerSize.width
+    val screenHeight = windowInfo.containerSize.height
 
     LinearProgressIndicator(
         modifier = Modifier
@@ -1834,12 +1840,12 @@ fun RateInfo(
     postId: String?
 ) {
     val navHostController = LocalNavController.current
-    if (data == null || data.rates.isNullOrEmpty()) {
+    if (data == null || data.rates.isEmpty()) {
         return
     }
     val hasMore = remember { data.rates.size.toIntOrElse() > 5 }
-    val waterTotalSize = remember { data.rateStat?.totalCredits?.water.toIntOrElse() }
-    val weiWangTotalSize = remember { data.rateStat?.totalCredits?.weiWang.toIntOrElse() }
+    val waterTotalSize = remember { data.rateStat.totalCredits.water.toIntOrElse() }
+    val weiWangTotalSize = remember { data.rateStat.totalCredits.weiWang.toIntOrElse() }
 
     val context = LocalContext.current
 
@@ -1892,7 +1898,7 @@ fun RateInfo(
         }
 
         Text(
-            text = stringResource(R.string.thread_detail_rate_dsp, data.rateStat?.totalUsers.toIntOrElse(),)
+            text = stringResource(R.string.thread_detail_rate_dsp, data.rateStat.totalUsers.toIntOrElse(),)
                 .plus(" ")
                 .plus(if (waterTotalSize != 0) stringResource(R.string.water).plus("${if (waterTotalSize > 0 ) "+" else ""}${waterTotalSize} ") else "")
                 .plus(if (weiWangTotalSize != 0) stringResource(R.string.prestige).plus("${if (weiWangTotalSize > 0 ) "+" else ""}${weiWangTotalSize} ") else ""),
@@ -2096,10 +2102,10 @@ private fun BottomBar(
             if (favoriteData.value.isSuccess) {
                 isFavorite.value = favoriteData.value.data!!
                 if (isFavorite.value) {
-                    favoriteCount.value += 1
+                    favoriteCount.intValue += 1
                     ContextCompat.getString(context, R.string.thread_detail_favorite_success).showToast(context)
                 } else {
-                    favoriteCount.value -= 1
+                    favoriteCount.intValue -= 1
                     ContextCompat.getString(context, R.string.thread_detail_favorite_del_success).showToast(context)
                 }
             } else {

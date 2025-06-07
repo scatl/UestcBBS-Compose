@@ -4,15 +4,15 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.elvishew.xlog.XLog
 import com.scatl.uestcbbs.compose.Constants
 import com.scatl.uestcbbs.compose.api.entity.BingDailyPicEntity
 import com.scatl.uestcbbs.compose.api.entity.CommonThreadEntity
 import com.scatl.uestcbbs.compose.api.service.TopListService.IdListType
-import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
+import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.module.home.newpost.entity.NewThreadData
+import com.scatl.uestcbbs.compose.module.home.newpost.entity.SiteStatusData
 import com.scatl.uestcbbs.compose.net.onFailure
 import com.scatl.uestcbbs.compose.net.onSuccess
 import com.scatl.uestcbbs.compose.widget.refresh.UiState
@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import javax.inject.Inject
 
 /**
@@ -71,21 +73,32 @@ class HomeViewModel @Inject constructor(
         }
 
         if (!loadMore) {
+            //轮播图
             val bannerFlow = flow {
                 emit(homeRepository.getBingDailyPic())
             }.catch {
                 emit(BingDailyPicEntity())
             }
 
+            //主页数据
+            val homeFlow = flow {
+                emit(homeRepository.getHomeData())
+            }.catch {
+                emit("")
+            }
+
+            //帖子列表
             val newPostFlow = flow {
                 emit(homeRepository.getNewThreadList(currentNewThreadPage))
             }
+
+            //帖子数等
             val indexFlow = flow {
                 emit(homeRepository.getIndexData())
             }
 
             viewModelScope.launchSafety {
-                combine(bannerFlow, newPostFlow, indexFlow) { bannerData, newPostData, indexData ->
+                combine(bannerFlow, homeFlow, newPostFlow, indexFlow) { bannerData, homeData, newPostData, indexData ->
 
                     val finalData = SnapshotStateList<NewThreadData>()
 
@@ -98,7 +111,22 @@ class HomeViewModel @Inject constructor(
                     }
 
                     if (indexData.data != null) {
-                        finalData.add(NewThreadData.SiteStatus(data = indexData.data))
+                        val siteStatusData = SiteStatusData(
+                            indexEntity = indexData.data,
+                        )
+
+                        siteStatusData.onlineNum = try {
+                            Jsoup
+                                .parse(homeData)
+                                .select("span[class=xs1]")
+                                .select("strong")[0]
+                                .text()
+                                .toIntOrElse()
+                        } catch (e: Exception) {
+                            0
+                        }
+
+                        finalData.add(NewThreadData.SiteStatus(data = siteStatusData))
                     }
 
                     newPostData.data?.newThread?.forEach {

@@ -61,7 +61,6 @@ import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.pagePadding
 import com.scatl.uestcbbs.compose.ext.showToast
-import com.scatl.uestcbbs.compose.ext.toAvatarUrl
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.ext.unboundClickable
 import com.scatl.uestcbbs.compose.manager.AccountManager
@@ -69,6 +68,7 @@ import com.scatl.uestcbbs.compose.module.collection.entity.CollectionDetailData
 import com.scatl.uestcbbs.compose.module.collection.entity.CollectionDetailEntity
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
+import com.scatl.uestcbbs.compose.widget.AuthorLabel
 import com.scatl.uestcbbs.compose.widget.CommonAlertDialog
 import com.scatl.uestcbbs.compose.widget.IconTitle
 import com.scatl.uestcbbs.compose.widget.refresh.RetryType
@@ -473,46 +473,6 @@ private fun CollectionInfo(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun AuthorLabel(
-    uid: Int?,
-    name: String?
-) {
-    val navHostController = LocalNavController.current
-    Row (
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
-        modifier = Modifier
-            .background(
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(50)
-            )
-            .clip(
-                shape = RoundedCornerShape(50)
-            )
-            .clickable(unbound = false) {
-                navHostController.navigate(Router.UserProfileRouterEntity(
-                    uid = uid.toIntOrElse(),
-                    name = name.toString()
-                ))
-            }
-            .padding(horizontal = 5.dp)
-    ) {
-        AsyncImage(
-            model = uid.toAvatarUrl(),
-            contentDescription = null,
-            modifier = Modifier
-                .size(15.dp)
-                .clip(shape = RoundedCornerShape(50))
-        )
-        Text(
-            text = name.toString(),
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 10.sp
-        )
     }
 }
 

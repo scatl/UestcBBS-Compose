@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -24,11 +25,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import com.scatl.uestcbbs.compose.R
-import com.scatl.uestcbbs.compose.api.entity.IndexEntity
 import com.scatl.uestcbbs.compose.ext.commonCardBg
 import com.scatl.uestcbbs.compose.ext.hexToColor
+import com.scatl.uestcbbs.compose.module.home.newpost.entity.SiteStatusData
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.linkNavigate
 import com.scatl.uestcbbs.compose.widget.IconTitle
@@ -39,7 +39,7 @@ import com.scatl.uestcbbs.compose.widget.LoopBanner
  */
 @Composable
 fun NewThreadSiteStatus(
-    data: IndexEntity
+    data: SiteStatusData
 ) {
     val uriHandler = LocalUriHandler.current
     val navHostController = LocalNavController.current
@@ -47,7 +47,7 @@ fun NewThreadSiteStatus(
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier
-            .commonCardBg {  }
+            .commonCardBg()
     ) {
         IconTitle(
             icon = Icons.Outlined.Poll,
@@ -62,19 +62,21 @@ fun NewThreadSiteStatus(
         Text(
             text = stringResource(
                 R.string.site_statistics_posters,
-                data.globalStat?.todayPosts.toString(),
-                data.globalStat?.yesterdayPosts.toString(),
-                data.globalStat?.totalPosts.toString(),
-                data.globalStat?.totalUsers.toString()
+                data.onlineNum.toString(),
+                data.indexEntity.globalStat?.todayPosts.toString(),
+                data.indexEntity.globalStat?.yesterdayPosts.toString(),
+                data.indexEntity.globalStat?.totalPosts.toString(),
+                data.indexEntity.globalStat?.totalUsers.toString()
             ),
             fontSize = 13.sp,
             maxLines = 1,
             modifier = Modifier
+                .alpha(alpha = 0.7f)
                 .horizontalScroll(rememberScrollState())
                 //.basicMarquee()
         )
 
-        if (!data.announcement.isNullOrEmpty()) {
+        if (data.indexEntity.announcement.isNotEmpty()) {
             Spacer(modifier = Modifier.height(1.dp))
             Spacer(modifier = Modifier
                 .fillMaxWidth()
@@ -92,21 +94,21 @@ fun NewThreadSiteStatus(
             )
 
             LoopBanner(
-                originDataSize = data.announcement.size,
+                originDataSize = data.indexEntity.announcement.size,
                 vertical = true,
                 userScrollEnabled = false,
                 modifier = Modifier.height(20.dp),
-                pageContent = { dataIndex, pageIndex ->
+                pageContent = { dataIndex, _ ->
                     Text(
-                        text = "(${dataIndex + 1}/${data.announcement.size}) " + data.announcement.getOrNull(dataIndex)?.title.toString(),
+                        text = "(${dataIndex + 1}/${data.indexEntity.announcement.size}) " + data.indexEntity.announcement.getOrNull(dataIndex)?.title.toString(),
                         fontSize = 13.sp,
                         textAlign = TextAlign.Start,
-                        color = data.announcement.getOrNull(dataIndex)?.highlightColor.hexToColor(LocalContentColor.current),
+                        color = data.indexEntity.announcement.getOrNull(dataIndex)?.highlightColor.hexToColor(LocalContentColor.current),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 linkNavigate(
-                                    url = data.announcement.getOrNull(dataIndex)?.href,
+                                    url = data.indexEntity.announcement.getOrNull(dataIndex)?.href,
                                     uriHandler = uriHandler,
                                     navHostController = navHostController
                                 )
