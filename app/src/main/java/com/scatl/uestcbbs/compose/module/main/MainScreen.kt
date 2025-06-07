@@ -5,8 +5,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
@@ -38,24 +36,20 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import androidx.navigation.NavHostController
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.eventbus.BaseEvent
 import com.scatl.uestcbbs.compose.eventbus.Event
 import com.scatl.uestcbbs.compose.eventbus.SharedFlowBus
-import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.manager.MessageManager
 import com.scatl.uestcbbs.compose.module.forum.ForumCategoryScreen
 import com.scatl.uestcbbs.compose.module.home.HomeScreen
 import com.scatl.uestcbbs.compose.module.message.MessageScreen
 import com.scatl.uestcbbs.compose.module.user.mine.MineScreen
-import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.theme.LocalCustomColors
 
 /**
  * Created by sca_tl at 2024/4/23 10:29:59
  */
-@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen() {
@@ -107,7 +101,11 @@ fun MainScreen() {
                             },
                             selected = currItem.intValue == index,
                             onClick = {
-                                currItem.intValue = index
+                                if (currItem.intValue == index && index == 0) {
+                                    SharedFlowBus.with(Event.HOME_REFRESH).tryEmit("")
+                                } else {
+                                    currItem.intValue = index
+                                }
                             },
                         )
                     }

@@ -44,7 +44,6 @@ import com.scatl.uestcbbs.compose.Constants
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.ext.clickable
 import com.scatl.uestcbbs.compose.ext.getVersionName
-import com.scatl.uestcbbs.compose.manager.ForumCategoryManager
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 
@@ -114,7 +113,7 @@ fun AboutScreen() {
             )
 
             Text(
-                text = getVersionName(context),
+                text = context.getVersionName(),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally),
                 fontSize = 14.sp

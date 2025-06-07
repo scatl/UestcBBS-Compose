@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.scatl.uestcbbs.compose.db.AppDataBase
@@ -29,6 +30,7 @@ import com.scatl.uestcbbs.compose.module.auth.AccountManageScreen
 import com.scatl.uestcbbs.compose.module.auth.AddAccountScreen
 import com.scatl.uestcbbs.compose.module.collection.CollectionDetailScreen
 import com.scatl.uestcbbs.compose.module.collection.CollectionScreen
+import com.scatl.uestcbbs.compose.module.darkroom.DarkRoomScreen
 import com.scatl.uestcbbs.compose.module.dayquestion.DayQuestionScreen
 import com.scatl.uestcbbs.compose.module.download.DownloadScreen
 import com.scatl.uestcbbs.compose.module.forum.detail.ForumDetailScreen
@@ -50,6 +52,7 @@ import com.scatl.uestcbbs.compose.module.snapshot.SnapShotScreen
 import com.scatl.uestcbbs.compose.module.user.UserProfileScreen
 import com.scatl.uestcbbs.compose.module.video.VideoPlayerScreen
 import com.scatl.uestcbbs.compose.module.watertask.WaterTaskScreen
+import com.scatl.uestcbbs.compose.module.wealth.MyWealthScreen
 import com.scatl.uestcbbs.compose.util.BBSLinkUtil
 import com.scatl.uestcbbs.compose.util.LinkType
 import com.scatl.uestcbbs.compose.widget.image.picker.MediaPickerConfig
@@ -212,6 +215,14 @@ fun NavGraph(
                     )
                 }
 
+                composable<Router.DarkRoomRouterEntity> {
+                    DarkRoomScreen()
+                }
+
+                composable<Router.MyWealthRouterEntity> {
+                    MyWealthScreen()
+                }
+
                 bottomSheet<Router.PostCommentAndRateRouterEntity> {
                     val entity: Router.PostCommentAndRateRouterEntity = it.toRoute()
                     CommentRateScreen(
@@ -248,61 +259,80 @@ fun linkNavigate(
 
     val linkType = BBSLinkUtil.getLinkType(url)
 
-    if (linkType != LinkType.Unknown) {
-        when (linkType) {
-            is LinkType.ThreadDetail -> {
-                navHostController.navigate(
-                    Router.ThreadDetailRouterEntity(
-                        id = linkType.id.toIntOrElse(),
-                        pid = linkType.pid
-                    )
+    when (linkType) {
+        is LinkType.ThreadDetail -> {
+            navHostController.navigate(
+                Router.ThreadDetailRouterEntity(
+                    id = linkType.id.toIntOrElse(),
+                    pid = linkType.pid
                 )
-            }
-            is LinkType.UserDetail -> {
-                navHostController.navigate(
-                    Router.UserProfileRouterEntity(
-                        uid = linkType.id,
-                        name = linkType.name
-                    )
-                )
-            }
-            is LinkType.ForumDetail -> {
-                navHostController.navigate(
-                    Router.ForumDetailRouterEntity(
-                        fid = linkType.id.toIntOrElse()
-                    )
-                )
-            }
-            is LinkType.Task -> {
-                navHostController.navigate(Router.WaterTaskRouterEntity)
-            }
-            is LinkType.Magic -> {
-                navHostController.navigate(Router.MagicShopRouterEntity)
-            }
-            is LinkType.Medal -> {
-                navHostController.navigate(Router.MedalRouterEntity)
-            }
-            is LinkType.Collection -> {
-                if (linkType.id > 0) {
-                    navHostController.navigate(
-                        Router.CollectionDetailRouterEntity(
-                            id = linkType.id
-                        )
-                    )
-                } else {
-                    navHostController.navigate(
-                        Router.CollectionListRouterEntity()
-                    )
-                }
-            }
-            else -> {
-
-            }
+            )
+            return true
         }
-        return true
+        is LinkType.UserDetail -> {
+            navHostController.navigate(
+                Router.UserProfileRouterEntity(
+                    uid = linkType.id,
+                    name = linkType.name
+                )
+            )
+            return true
+        }
+        is LinkType.ForumDetail -> {
+            navHostController.navigate(
+                Router.ForumDetailRouterEntity(
+                    fid = linkType.id.toIntOrElse()
+                )
+            )
+            return true
+        }
+        is LinkType.Task -> {
+            navHostController.navigate(Router.WaterTaskRouterEntity)
+            return true
+        }
+        is LinkType.Magic -> {
+            navHostController.navigate(Router.MagicShopRouterEntity)
+            return true
+        }
+        is LinkType.Medal -> {
+            navHostController.navigate(Router.MedalRouterEntity)
+            return true
+        }
+        is LinkType.Collection -> {
+            if (linkType.id > 0) {
+                navHostController.navigate(
+                    Router.CollectionDetailRouterEntity(
+                        id = linkType.id
+                    )
+                )
+            } else {
+                navHostController.navigate(
+                    Router.CollectionListRouterEntity()
+                )
+            }
+            return true
+        }
+        is LinkType.Attachment -> {
+
+        }
+        is LinkType.BlackList -> {
+
+        }
+        is LinkType.CreditHistory -> {
+
+        }
+        is LinkType.ResetPsw -> {
+
+        }
+        is LinkType.Unknown -> {
+
+        }
     }
+
     if (openBrowserIfNotMatch) {
-        uriHandler.openUri(url)
+        runCatching {
+            uriHandler.openUri(url)
+        }
         return true
     }
     return false

@@ -27,7 +27,7 @@
     <string name="need_login_dsp">You are not logged in, please log in again</string>
 
     <string name="site_statistics">Site statistics</string>
-    <string name="site_statistics_posters">Today\'s posts:%1$s \t\t Yesterday\'s posts:%2$s \t\t Total posts:%3$s \t\t Member count:%4$s</string>
+    <string name="site_statistics_posters">Online users:%1$s \t\t Today\'s posts:%2$s \t\t Yesterday\'s posts:%3$s \t\t Total posts:%4$s \t\t Member count:%5$s</string>
     <string name="announcement">Announcement</string>
     <string name="moderator">Moderator(s)</string>
     <string name="category_moderator">Section Moderator(s)</string>
@@ -255,7 +255,7 @@
     <string name="thread_detail_poll_ing">You can select up to %1$s item(s), with %1$s voter(s) participating</string>
     <string name="thread_detail_polled">You have voted, thank you for participating!</string>
     <string name="thread_detail_confidential">Internal communication, strictly confidential</string>
-    <string name="thread_detail_rate_dsp">%1$s people participated</string>
+    <string name="thread_detail_rate_dsp">%1$d people participated</string>
     <string name="thread_detail_replies_title">%1$d replies</string>
     <string name="thread_detail_reply_award">Reply reward: %1$s%2$s</string>
     <string name="thread_detail_reply_award_title">Reply reward</string>

@@ -26,8 +26,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.elvishew.xlog.XLog
 import com.scatl.uestcbbs.compose.api.entity.BingDailyPicEntity
 import com.scatl.uestcbbs.compose.ext.dp2px
 import com.scatl.uestcbbs.compose.router.LocalNavController

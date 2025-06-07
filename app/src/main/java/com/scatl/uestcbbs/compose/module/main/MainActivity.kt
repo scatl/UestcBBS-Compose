@@ -22,6 +22,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -117,9 +119,9 @@ private fun TheftProofWaterMarkBackground(
                 mTextSize = 100.sp2px
                 mRotation = 0f
             }
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp.dp.dp2px.toInt()
-            val screenHeight = configuration.screenHeightDp.dp.dp2px.toInt()
+            val windowInfo = LocalWindowInfo.current
+            val screenWidth = windowInfo.containerSize.width
+            val screenHeight = windowInfo.containerSize.height
             Image(
                 bitmap = drawable.toBitmap(screenWidth, screenHeight).asImageBitmap(),
                 contentDescription = null,

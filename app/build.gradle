@@ -37,24 +37,28 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
+
+        //解决安卓14 debug包卡顿
         prefab = true
     }
     packaging {
         resources {
-            excludes += ['/META-INF/{AL2.0,LGPL2.1}',
-                         'META-INF/LICENSE-LGPL-3.txt',
-                         'META-INF/DEPENDENCIES',
-                         'META-INF/LICENSE-W3C-TEST',
-                         'META-INF/LICENSE-LGPL-2.1.txt']
+            excludes += [
+                '/META-INF/{AL2.0,LGPL2.1}',
+                'META-INF/LICENSE-LGPL-3.txt',
+                'META-INF/DEPENDENCIES',
+                'META-INF/LICENSE-W3C-TEST',
+                'META-INF/LICENSE-LGPL-2.1.txt',
+            ]
         }
     }
 }
 
 dependencies {
-    //implementation(project(":material-color-utilities"))
     implementation(project(":hcaptcha"))
     implementation(project(":markdown"))
 

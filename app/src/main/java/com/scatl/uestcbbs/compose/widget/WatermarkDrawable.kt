@@ -7,6 +7,7 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import androidx.annotation.IntRange
 import kotlin.math.sqrt
+import androidx.core.graphics.withSave
 
 /**
  * Created by sca_tl at 2024/7/14 20:38
@@ -47,8 +48,7 @@ class WatermarkDrawable : Drawable() {
             positionY += diagonal / mYSpace
         }
 
-        canvas.save()
-        canvas.restore()
+        canvas.withSave { }
     }
 
     override fun setAlpha(@IntRange(from = 0, to = 255) alpha: Int) {
@@ -57,6 +57,7 @@ class WatermarkDrawable : Drawable() {
     override fun setColorFilter(colorFilter: ColorFilter?) {
     }
 
+    @Deprecated("Deprecated in Java", ReplaceWith("PixelFormat.TRANSLUCENT", "android.graphics.PixelFormat"))
     override fun getOpacity(): Int {
         return PixelFormat.TRANSLUCENT
     }

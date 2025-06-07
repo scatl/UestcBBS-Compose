@@ -6,9 +6,9 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class IndexEntity(
     @Json(name = "announcement")
-    val announcement: List<Announcement>? = listOf(),
+    val announcement: List<Announcement> = listOf(),
     @Json(name = "forum_list")
-    val forumList: List<Forum>? = listOf(),
+    val forumList: List<Forum> = listOf(),
     @Json(name = "global_stat")
     val globalStat: GlobalStat? = GlobalStat(),
 ) {

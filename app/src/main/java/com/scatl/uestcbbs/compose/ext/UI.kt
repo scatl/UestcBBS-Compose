@@ -1,6 +1,7 @@
 package com.scatl.uestcbbs.compose.ext
 
 import android.content.Context
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -50,7 +51,7 @@ fun lerpColor(progress: Float, startColor: Color, endColor: Color): Color {
     )
 }
 
-fun androidx.compose.ui.graphics.Color.toHexWithAlpha(): String {
+fun Color.toHexWithAlpha(): String {
     val argb = this.toArgb()
     val alpha = (argb shr 24) and 0xFF
     val red = (argb shr 16) and 0xFF
@@ -59,7 +60,7 @@ fun androidx.compose.ui.graphics.Color.toHexWithAlpha(): String {
     return String.format("#%02X%02X%02X%02X", alpha, red, green, blue)
 }
 
-fun androidx.compose.ui.graphics.Color.toHexNoAlpha(): String {
+fun Color.toHexNoAlpha(): String {
     val argb = this.toArgb()
     val red = (argb shr 16) and 0xFF
     val green = (argb shr 8) and 0xFF
@@ -85,6 +86,14 @@ fun getStatusBarHeight(context: Context): Dp {
     val insets = ViewCompat.getRootWindowInsets((context as ComponentActivity).window.decorView)
     val statusBarHeightPx = insets?.getInsets(WindowInsetsCompat.Type.statusBars())?.top ?: 0
     return statusBarHeightPx.px2dp
+}
+
+fun getScreenRefreshRate(context: Context): Float {
+    return if (isGTESdk30()) {
+        context.display.refreshRate
+    } else {
+        (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay?.refreshRate ?: 60F
+    }
 }
 
 val cardCorner = 6.dp

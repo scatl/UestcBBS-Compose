@@ -35,6 +35,7 @@ import coil.compose.AsyncImage
 import com.scatl.uestcbbs.compose.Constants
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.api.entity.CommonThreadEntity
+import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.ext.pagePadding
 import com.scatl.uestcbbs.compose.ext.toAvatarUrl
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
@@ -47,14 +48,14 @@ import com.scatl.uestcbbs.compose.router.LocalNavController
  */
 @Composable
 fun ForumThreadsStickItem (
-    data: List<CommonThreadEntity>,
+    data: List<CommonThreadEntity>
 ) {
     if (data.isEmpty()) {
         return
     }
     val navHostController = LocalNavController.current
-    val isExpanded = rememberSaveable { mutableStateOf(false) }
-    val arrowRotated = rememberSaveable { mutableStateOf(false) }
+    val isExpanded = rememberSaveable { mutableStateOf(DataStore.expandStickPost) }
+    val arrowRotated = rememberSaveable { mutableStateOf(DataStore.expandStickPost) }
     val latestStick = data.filter { System.currentTimeMillis() - it.dateline.toIntOrElse() * 1000L <= 30L * Constants.DAY_MILLIS }
 
     Column {

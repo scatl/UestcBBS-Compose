@@ -1,6 +1,5 @@
 package com.scatl.uestcbbs.compose.ext
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -71,7 +70,6 @@ fun Modifier.clickable(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Modifier.commonCardBg(
     bgColor: Color = MaterialTheme.colorScheme.surfaceContainer,

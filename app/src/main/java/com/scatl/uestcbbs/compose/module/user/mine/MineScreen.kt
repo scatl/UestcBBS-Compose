@@ -72,12 +72,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.UserLevel
 import com.scatl.uestcbbs.compose.api.entity.user.UserProfileEntity
-import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.db.entity.AccountDBEntity
 import com.scatl.uestcbbs.compose.eventbus.BaseEvent
 import com.scatl.uestcbbs.compose.eventbus.Event
@@ -113,7 +111,7 @@ fun MineScreen() {
         factory.create(signedInAccount?.uid, signedInAccount?.name)
     }
     val detailData by viewModel.detailData.collectAsStateWithLifecycle()
-    val navHostController = LocalNavController.current
+
     Box {
         BlurBg()
 
@@ -341,7 +339,7 @@ private fun SignedView(
                 Icon(
                     imageVector = Icons.Outlined.WaterDrop,
                     contentDescription = null,
-                    tint = LocalCustomColors.current.meWaterCardDsp.copy(alpha = 0.1f),
+                    tint = LocalCustomColors.current.meWaterCardDsp.copy(alpha = 0.05f),
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .offset(y = 30.dp, x = 25.dp)
@@ -641,26 +639,6 @@ private fun BBSTools() {
 
             item {
                 BBSToolItem(
-                    resId = R.drawable.ic_money_transfer,
-                    color = LocalCustomColors.current.meTransfer,
-                    text = stringResource(R.string.water_transfer_title)
-                ) {
-
-                }
-            }
-
-            item {
-                BBSToolItem(
-                    resId = R.drawable.ic_integral,
-                    color = LocalCustomColors.current.meCreditHistory,
-                    text = stringResource(R.string.score_history_title)
-                ) {
-
-                }
-            }
-
-            item {
-                BBSToolItem(
                     resId = R.drawable.ic_collection,
                     color = LocalCustomColors.current.meCollection,
                     text = stringResource(R.string.collection)
@@ -669,15 +647,25 @@ private fun BBSTools() {
                 }
             }
 
-//            item {
-//                BBSToolItem(
-//                    resId = R.drawable.ic_black_list,
-//                    color = LocalCustomColors.current.meCreditHistory,
-//                    text = "黑名单"
-//                ) {
-//
-//                }
-//            }
+            item {
+                BBSToolItem(
+                    resId = R.drawable.ic_wealth,
+                    color = LocalCustomColors.current.meWealth,
+                    text = "我的财富"
+                ) {
+                    navHostController.navigate(Router.MyWealthRouterEntity)
+                }
+            }
+
+            item {
+                BBSToolItem(
+                    resId = R.drawable.ic_black_list,
+                    color = LocalCustomColors.current.meCreditHistory,
+                    text = "小黑屋"
+                ) {
+                    navHostController.navigate(Router.DarkRoomRouterEntity)
+                }
+            }
         }
     }
 

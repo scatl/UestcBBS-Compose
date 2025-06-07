@@ -1,10 +1,8 @@
 package com.scatl.uestcbbs.compose.module.post
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -15,20 +13,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AddLink
 import androidx.compose.material.icons.outlined.AlternateEmail
 import androidx.compose.material.icons.outlined.Attachment
@@ -91,13 +84,10 @@ import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.OutlinedRichTextEditor
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditorDefaults
 import com.scatl.uestcbbs.compose.R
-import com.scatl.uestcbbs.compose.api.entity.ForumDetailEntity
 import com.scatl.uestcbbs.compose.api.entity.request.CreatePostRequestEntity
-import com.scatl.uestcbbs.compose.db.entity.FavoriteForumDBEntity
 import com.scatl.uestcbbs.compose.ext.clickable
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.pagePadding
-import com.scatl.uestcbbs.compose.ext.rememberMutableStateListOf
 import com.scatl.uestcbbs.compose.ext.showToast
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.ext.unboundClickable
@@ -107,7 +97,6 @@ import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.widget.CustomTextField
 import com.scatl.uestcbbs.compose.widget.EmotionPanel
-import com.scatl.uestcbbs.compose.widget.IconTitle
 import com.scatl.uestcbbs.compose.widget.RoundCheckBox
 import com.scatl.uestcbbs.compose.widget.RoundCheckBoxDefaults
 import com.scatl.uestcbbs.compose.widget.image.picker.MediaPickerConfig
@@ -335,7 +324,6 @@ private fun TopBar(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SelectForum(
     selectedForum: MutableState<SelectForumResult?>
@@ -522,7 +510,7 @@ fun BottomBar(
 
             RichTextStyleButton(
                 onClick = {
-                    navHostController.navigate(Router.WaterTaskRouterEntity)
+
                 },
                 isSelected = false,
                 icon = Icons.Outlined.Attachment

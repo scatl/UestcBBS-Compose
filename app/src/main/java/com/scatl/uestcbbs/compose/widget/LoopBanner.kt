@@ -39,6 +39,7 @@ fun LoopBanner(
             val targetPage = (currentPage + 1) % totalPageCount
             coroutineScope.launch {
                 if (currentPage == totalPageCount - 1) {
+                    delay(500)
                     pagerState.scrollToPage(0)
                 } else {
                     if (autoLoop) {

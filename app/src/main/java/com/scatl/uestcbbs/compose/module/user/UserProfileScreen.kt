@@ -68,6 +68,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
@@ -268,7 +269,7 @@ private fun HeadContent(
                     .size(90.dp)
                     .border(width = 2.dp, color = Color.White, shape = CircleShape)
                     .shadow(elevation = 10.dp, shape = CircleShape)
-                    .clip(RoundedCornerShape(50))
+                    .clip(CircleShape)
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -398,19 +399,6 @@ private fun HeadContent(
                 )
             }
 
-//            if (!data.signature?.removeAllBlank().isNullOrEmpty()) {
-//                Spacer(modifier = Modifier.height(10.dp))
-//                Text(
-//                    text = "${stringResource(id = R.string.signature)}：" + Html.fromHtml(data.signature).toString().removeAllBlank().toString(),
-//                    textAlign = TextAlign.Center,
-//                    fontSize = 13.sp,
-//                    lineHeight = 18.sp,
-//                    modifier = Modifier
-//                        .padding(horizontal = pagePadding)
-//                        .alpha(0.6f)
-//                )
-//            }
-
             BtnContent(
                 viewModel = viewModel ,
                 data = data
@@ -421,112 +409,47 @@ private fun HeadContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Box (
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Column (
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.align(Alignment.Center)
+                listOf(
+                    data.userSummary?.extCredits?.water,
+                    data.userSummary?.credits,
+                    data.userSummary?.extCredits?.weiWang,
+                    data.userSummary?.friends
+                ).forEachIndexed { index, i ->
+                    Box (
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Text(
-                            text = data.userSummary?.extCredits?.water.toString(),
-                            fontSize = 16.sp,
-                            lineHeight = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(id = R.string.water),
-                            fontSize = 14.sp,
-                            lineHeight = 14.sp,
-                            modifier = Modifier.alpha(0.6f)
-                        )
-                    }
-                    VerticalDivider(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .height(20.dp)
-                            .width(1.dp),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                    )
-                }
-
-                Box (
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Column (
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.align(Alignment.Center)
-                    ) {
-                        Text(
-                            text = data.userSummary?.credits.toString(),
-                            fontSize = 16.sp,
-                            lineHeight = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(id = R.string.credits),
-                            fontSize = 14.sp,
-                            lineHeight = 14.sp,
-                            modifier = Modifier.alpha(0.6f)
-                        )
-                    }
-                    VerticalDivider(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .height(20.dp)
-                            .width(1.dp),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                    )
-                }
-
-                Box (
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Column (
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.align(Alignment.Center)
-                    ) {
-                        Text(
-                            text = data.userSummary?.extCredits?.weiWang.toString(),
-                            fontSize = 16.sp,
-                            lineHeight = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(id = R.string.prestige),
-                            fontSize = 14.sp,
-                            lineHeight = 14.sp,
-                            modifier = Modifier.alpha(0.6f)
-                        )
-                    }
-                    VerticalDivider(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .height(20.dp)
-                            .width(1.dp),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                    )
-                }
-
-                Box (
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Column (
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.align(Alignment.Center)
-                    ) {
-                        Text(
-                            text = data.userSummary?.friends.toString(),
-                            fontSize = 16.sp,
-                            lineHeight = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(id = R.string.friend),
-                            fontSize = 14.sp,
-                            lineHeight = 14.sp,
-                            modifier = Modifier.alpha(0.6f)
-                        )
+                        Column (
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.align(Alignment.Center)
+                        ) {
+                            Text(
+                                text = i.toString(),
+                                fontSize = 16.sp,
+                                lineHeight = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Text(
+                                text = when(index) {
+                                    0 -> stringResource(id = R.string.water)
+                                    1 -> stringResource(id = R.string.credits)
+                                    2 -> stringResource(id = R.string.prestige)
+                                    else -> stringResource(id = R.string.friend)
+                                },
+                                fontSize = 14.sp,
+                                lineHeight = 14.sp,
+                                modifier = Modifier.alpha(0.6f)
+                            )
+                        }
+                        if (index < 3) {
+                            VerticalDivider(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .height(20.dp)
+                                    .width(1.dp),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                            )
+                        }
                     }
                 }
             }

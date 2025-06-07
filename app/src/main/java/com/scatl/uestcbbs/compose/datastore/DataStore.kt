@@ -37,6 +37,7 @@ object DataStore {
     var downloadFolderUri by DataStoreDelegate(App.context.settingsDataStore, stringPreferencesKey("downloadFolderUri"), "")
     var videoAutoPlay by DataStoreDelegate(App.context.settingsDataStore, booleanPreferencesKey("videoAutoPlay"), true)
     var autoDayQuestion by DataStoreDelegate(App.context.settingsDataStore, booleanPreferencesKey("autoDayQuestion"), true)
+    var expandStickPost by DataStoreDelegate(App.context.settingsDataStore, booleanPreferencesKey("expandStickPost"), true)
     var keyboardHeight by DataStoreDelegate(App.context.settingsDataStore, floatPreferencesKey("keyboardHeight"), 250f)
 
     var tipShowedId by DataStoreDelegate(App.context.bizDataStore, stringSetPreferencesKey("tipShowedId"), mutableSetOf())

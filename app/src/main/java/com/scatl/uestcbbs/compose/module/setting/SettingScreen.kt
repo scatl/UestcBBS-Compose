@@ -2,7 +2,6 @@ package com.scatl.uestcbbs.compose.module.setting
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,7 +72,6 @@ import com.scatl.uestcbbs.compose.widget.SingleSelectionDialog
 /**
  * Created by sca_tl at 2024/6/17 16:58:32
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SettingScreen(
     viewModel: SettingViewModel = hiltViewModel()
@@ -89,6 +87,7 @@ fun SettingScreen(
     val ignoreSSL = rememberSaveable { mutableStateOf(DataStore.ignoreSSL) }
     val videoAutoPlay = rememberSaveable { mutableStateOf(DataStore.videoAutoPlay) }
     val autoDayQuestion = rememberSaveable { mutableStateOf(DataStore.autoDayQuestion) }
+    val expandStickPost = rememberSaveable { mutableStateOf(DataStore.expandStickPost) }
 
     val showInterfaceLanguageDialog = rememberSaveable { mutableStateOf(false) }
     val showDayNightModeDialog = rememberSaveable { mutableStateOf(false) }
@@ -187,61 +186,26 @@ fun SettingScreen(
                             )
                         }
                         item {
-                            Column(
-                                modifier = Modifier
-                                    .clipToBounds()
-                                    .background(color = MaterialTheme.colorScheme.surface)
-                                    .wrapContentSize(align = Alignment.CenterStart)
-                                    .fillMaxWidth()
-                                    .unboundClickable {
-                                        showInterfaceLanguageDialog.value = true
-                                    }
-                                    .padding(
-                                        top = 10.dp,
-                                        bottom = 10.dp,
-                                        start = 15.dp,
-                                        end = 15.dp
-                                    )
+                            NormalItem(
+                                text = stringResource(id = R.string.setting_interface_language),
+                                dsp = stringResource(id = R.string.setting_interface_language_dsp)
                             ) {
-                                Text(
-                                    text = stringResource(id = R.string.setting_interface_language),
-                                    fontSize = 15.sp,
-                                )
-                                DspText(text = stringResource(id = R.string.setting_interface_language_dsp))
+                                showInterfaceLanguageDialog.value = true
                             }
                         }
                         item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 15.dp, vertical = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            SwitchItem(
+                                text = stringResource(id = R.string.setting_dynamic_color),
+                                dsp = stringResource(id = R.string.setting_dynamic_color_dsp),
+                                checked = dynamicTheme.value && customTheme.value.isEmpty(),
+                                enable = isGTESdk31(),
                             ) {
-                                Column(
-                                    modifier = Modifier.weight(1f, fill = false)
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.setting_dynamic_color),
-                                        fontSize = 15.sp
-                                    )
-                                    DspText(text = stringResource(id = R.string.setting_dynamic_color_dsp))
+                                if (it) {
+                                    ThemeManager.toggleCustomTheme("")
+                                    customTheme.value = ""
                                 }
-
-                                Spacer(modifier = Modifier.width(20.dp))
-                                Switch(
-                                    modifier = Modifier.align(Alignment.CenterVertically),
-                                    checked = dynamicTheme.value && customTheme.value.isEmpty(),
-                                    enabled = isGTESdk31(),
-                                    onCheckedChange = {
-                                        if (it) {
-                                            ThemeManager.toggleCustomTheme("")
-                                            customTheme.value = ""
-                                        }
-                                        ThemeManager.toggleUseDynamicColor(it)
-                                        dynamicTheme.value = it
-                                    }
-                                )
+                                ThemeManager.toggleUseDynamicColor(it)
+                                dynamicTheme.value = it
                             }
                         }
                         item {
@@ -290,61 +254,21 @@ fun SettingScreen(
                             }
                         }
                         item {
-                            Row(
-                                modifier = Modifier
-                                    .clipToBounds()
-                                    .wrapContentSize(align = Alignment.CenterStart)
-                                    .fillMaxWidth()
-                                    .unboundClickable {
-                                        showDayNightModeDialog.value = true
-                                    }
-                                    .padding(
-                                        top = 10.dp,
-                                        bottom = 10.dp,
-                                        start = 15.dp,
-                                        end = 15.dp
-                                    ),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            NormalItem(
+                                text = stringResource(id = R.string.setting_dark_mode),
+                                dsp = stringResource(id = R.string.setting_dark_mode_dsp)
                             ) {
-                                Column(
-                                    modifier = Modifier.weight(1f, fill = false)
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.setting_dark_mode),
-                                        fontSize = 15.sp
-                                    )
-                                    DspText(text = stringResource(id = R.string.setting_dark_mode_dsp))
-                                }
+                                showDayNightModeDialog.value = true
                             }
                         }
                         item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 15.dp, vertical = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            SwitchItem(
+                                text = stringResource(id = R.string.setting_hide_daily_pic),
+                                dsp = stringResource(id = R.string.setting_hide_daily_pic_dsp),
+                                checked = hideDailyPic.value
                             ) {
-                                Column(
-                                    modifier = Modifier.weight(1f, fill = false)
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.setting_hide_daily_pic),
-                                        fontSize = 15.sp
-                                    )
-                                    DspText(text = stringResource(id = R.string.setting_hide_daily_pic_dsp))
-                                }
-
-                                Spacer(modifier = Modifier.width(20.dp))
-                                Switch(
-                                    modifier = Modifier.align(Alignment.CenterVertically),
-                                    checked = hideDailyPic.value,
-                                    onCheckedChange = {
-                                        hideDailyPic.value = it
-                                        DataStore.hideDailyPic = it
-                                    }
-                                )
+                                hideDailyPic.value = it
+                                DataStore.hideDailyPic = it
                             }
                         }
 
@@ -362,61 +286,33 @@ fun SettingScreen(
                             )
                         }
                         item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 15.dp, vertical = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            SwitchItem(
+                                text = stringResource(R.string.setting_video_auto_play),
+                                dsp = stringResource(R.string.setting_video_auto_play_dsp),
+                                checked = videoAutoPlay.value
                             ) {
-                                Column(
-                                    modifier = Modifier.weight(1f, fill = false)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.setting_video_auto_play),
-                                        fontSize = 15.sp
-                                    )
-                                    DspText(text = stringResource(R.string.setting_video_auto_play_dsp))
-                                }
-
-                                Spacer(modifier = Modifier.width(20.dp))
-                                Switch(
-                                    modifier = Modifier.align(Alignment.CenterVertically),
-                                    checked = videoAutoPlay.value,
-                                    onCheckedChange = {
-                                        DataStore.videoAutoPlay = it
-                                        videoAutoPlay.value = it
-                                    }
-                                )
+                                videoAutoPlay.value = it
+                                DataStore.videoAutoPlay = it
                             }
                         }
                         item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 15.dp, vertical = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            SwitchItem(
+                                text = stringResource(R.string.setting_auto_day_question),
+                                dsp = stringResource(R.string.setting_auto_day_question_dsp),
+                                checked = autoDayQuestion.value
                             ) {
-                                Column(
-                                    modifier = Modifier.weight(1f, fill = false)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.setting_auto_day_question),
-                                        fontSize = 15.sp
-                                    )
-                                    DspText(text = stringResource(R.string.setting_auto_day_question_dsp))
-                                }
-
-                                Spacer(modifier = Modifier.width(20.dp))
-                                Switch(
-                                    modifier = Modifier.align(Alignment.CenterVertically),
-                                    checked = autoDayQuestion.value,
-                                    onCheckedChange = {
-                                        DataStore.autoDayQuestion = it
-                                        autoDayQuestion.value = it
-                                    }
-                                )
+                                autoDayQuestion.value = it
+                                DataStore.autoDayQuestion = it
+                            }
+                        }
+                        item {
+                            SwitchItem(
+                                text = "展开置顶帖",
+                                dsp = "开启后，板块的帖子列表会默认展示置顶帖",
+                                checked = expandStickPost.value
+                            ) {
+                                expandStickPost.value = it
+                                DataStore.expandStickPost = it
                             }
                         }
 
@@ -434,32 +330,13 @@ fun SettingScreen(
                             )
                         }
                         item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 15.dp, vertical = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            SwitchItem(
+                                text = stringResource(id = R.string.setting_ignore_ssl),
+                                dsp = stringResource(id = R.string.setting_ignore_ssl_dsp),
+                                checked = ignoreSSL.value
                             ) {
-                                Column(
-                                    modifier = Modifier.weight(1f, fill = false)
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.setting_ignore_ssl),
-                                        fontSize = 15.sp
-                                    )
-                                    DspText(text = stringResource(id = R.string.setting_ignore_ssl_dsp))
-                                }
-
-                                Spacer(modifier = Modifier.width(20.dp))
-                                Switch(
-                                    modifier = Modifier.align(Alignment.CenterVertically),
-                                    checked = ignoreSSL.value,
-                                    onCheckedChange = {
-                                        DataStore.ignoreSSL = it
-                                        ignoreSSL.value = it
-                                    }
-                                )
+                                ignoreSSL.value = it
+                                DataStore.ignoreSSL = it
                             }
                         }
 
@@ -477,72 +354,27 @@ fun SettingScreen(
                             )
                         }
                         item {
-                            Column (
-                                modifier = Modifier
-                                    .clipToBounds()
-                                    .wrapContentSize(align = Alignment.CenterStart)
-                                    .fillMaxWidth()
-                                    .unboundClickable {
-                                        goToAppNotificationSetting(context)
-                                    }
-                                    .padding(
-                                        top = 10.dp,
-                                        bottom = 10.dp,
-                                        start = 15.dp,
-                                        end = 15.dp
-                                    )
+                            NormalItem(
+                                text = stringResource(id = R.string.setting_notification_manage),
+                                dsp = stringResource(id = R.string.setting_notification_manage_dsp)
                             ) {
-                                Text(
-                                    text = stringResource(R.string.setting_notification_manage),
-                                    fontSize = 15.sp
-                                )
-                                DspText(text = stringResource(R.string.setting_notification_manage_dsp))
+                                context.goToAppNotificationSetting()
                             }
                         }
                         item {
-                            Column (
-                                modifier = Modifier
-                                    .clipToBounds()
-                                    .wrapContentSize(align = Alignment.CenterStart)
-                                    .fillMaxWidth()
-                                    .unboundClickable {
-                                        goToAppNotificationChannelSetting(context, DayQuestionService.CHANNEL_ID.toString())
-                                    }
-                                    .padding(
-                                        top = 10.dp,
-                                        bottom = 10.dp,
-                                        start = 15.dp,
-                                        end = 15.dp
-                                    )
+                            NormalItem(
+                                text = stringResource(id = R.string.setting_notification_day_question),
+                                dsp = stringResource(id = R.string.setting_notification_day_question_dsp)
                             ) {
-                                Text(
-                                    text = stringResource(R.string.setting_notification_day_question),
-                                    fontSize = 15.sp
-                                )
-                                DspText(text = stringResource(R.string.setting_notification_day_question_dsp))
+                                context.goToAppNotificationChannelSetting(DayQuestionService.CHANNEL_ID.toString())
                             }
                         }
                         item {
-                            Column (
-                                modifier = Modifier
-                                    .clipToBounds()
-                                    .wrapContentSize(align = Alignment.CenterStart)
-                                    .fillMaxWidth()
-                                    .unboundClickable {
-                                        goToAppNotificationChannelSetting(context, DownloadTask.CHANNEL_ID)
-                                    }
-                                    .padding(
-                                        top = 10.dp,
-                                        bottom = 10.dp,
-                                        start = 15.dp,
-                                        end = 15.dp
-                                    )
+                            NormalItem(
+                                text = stringResource(id = R.string.setting_notification_download),
+                                dsp = stringResource(id = R.string.setting_notification_download_dsp)
                             ) {
-                                Text(
-                                    text = stringResource(R.string.setting_notification_download),
-                                    fontSize = 15.sp
-                                )
-                                DspText(text = stringResource(R.string.setting_notification_download_dsp))
+                                context.goToAppNotificationChannelSetting(DownloadTask.CHANNEL_ID)
                             }
                         }
 
@@ -560,72 +392,27 @@ fun SettingScreen(
                             )
                         }
                         item {
-                            Column (
-                                modifier = Modifier
-                                    .clipToBounds()
-                                    .wrapContentSize(align = Alignment.CenterStart)
-                                    .fillMaxWidth()
-                                    .unboundClickable {
+                            NormalItem(
+                                text = stringResource(id = R.string.setting_check_update),
+                                dsp = stringResource(id = R.string.setting_check_update_dsp, context.getVersionName())
+                            ) {
 
-                                    }
-                                    .padding(
-                                        top = 10.dp,
-                                        bottom = 10.dp,
-                                        start = 15.dp,
-                                        end = 15.dp
-                                    )
-                            ) {
-                                Text(
-                                    text = stringResource(id = R.string.setting_check_update),
-                                    fontSize = 15.sp
-                                )
-                                DspText(text = stringResource(id = R.string.setting_check_update_dsp, getVersionName(context)))
                             }
                         }
                         item {
-                            Column (
-                                modifier = Modifier
-                                    .clipToBounds()
-                                    .wrapContentSize(align = Alignment.CenterStart)
-                                    .fillMaxWidth()
-                                    .unboundClickable {
-                                        viewModel.deleteCache()
-                                    }
-                                    .padding(
-                                        top = 10.dp,
-                                        bottom = 10.dp,
-                                        start = 15.dp,
-                                        end = 15.dp
-                                    )
+                            NormalItem(
+                                text = stringResource(id = R.string.setting_clear_cache),
+                                dsp = stringResource(id = R.string.setting_clear_cache_dsp, cacheSize.value)
                             ) {
-                                Text(
-                                    text = stringResource(id = R.string.setting_clear_cache),
-                                    fontSize = 15.sp
-                                )
-                                DspText(text = stringResource(id = R.string.setting_clear_cache_dsp, cacheSize.value))
+                                viewModel.deleteCache()
                             }
                         }
                         item {
-                            Column (
-                                modifier = Modifier
-                                    .clipToBounds()
-                                    .wrapContentSize(align = Alignment.CenterStart)
-                                    .fillMaxWidth()
-                                    .unboundClickable {
-                                        navHostController.navigate(Router.AboutRouterEntity)
-                                    }
-                                    .padding(
-                                        top = 10.dp,
-                                        bottom = 10.dp,
-                                        start = 15.dp,
-                                        end = 15.dp
-                                    )
+                            NormalItem(
+                                text = stringResource(id = R.string.setting_about),
+                                dsp = stringResource(id = R.string.setting_about_dsp)
                             ) {
-                                Text(
-                                    text = stringResource(id = R.string.setting_about),
-                                    fontSize = 15.sp
-                                )
-                                DspText(text = stringResource(id = R.string.setting_about_dsp))
+                                navHostController.navigate(Router.AboutRouterEntity)
                             }
                         }
                     }
@@ -739,6 +526,72 @@ fun SettingScreen(
             ThemeManager.toggleUseDynamicColor(false)
         }
     )
+}
+
+@Composable
+fun NormalItem(
+    text: String,
+    dsp: String,
+    onClick: () -> Unit
+) {
+    Column (
+        modifier = Modifier
+            .clipToBounds()
+            .wrapContentSize(align = Alignment.CenterStart)
+            .fillMaxWidth()
+            .unboundClickable {
+                onClick.invoke()
+            }
+            .padding(
+                top = 10.dp,
+                bottom = 10.dp,
+                start = 15.dp,
+                end = 15.dp
+            )
+    ) {
+        Text(
+            text = text,
+            fontSize = 15.sp
+        )
+        DspText(text = dsp)
+    }
+}
+
+@Composable
+fun SwitchItem(
+    text: String,
+    dsp: String,
+    checked: Boolean = true,
+    enable: Boolean = true,
+    onCheckedChange: ((Boolean) -> Unit)?,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 15.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f, fill = false)
+        ) {
+            Text(
+                text = text,
+                fontSize = 15.sp
+            )
+            DspText(text = dsp)
+        }
+
+        Spacer(modifier = Modifier.width(20.dp))
+        Switch(
+            modifier = Modifier.align(Alignment.CenterVertically),
+            checked = checked,
+            enabled = enable,
+            onCheckedChange = {
+                onCheckedChange?.invoke(it)
+            }
+        )
+    }
 }
 
 @Composable

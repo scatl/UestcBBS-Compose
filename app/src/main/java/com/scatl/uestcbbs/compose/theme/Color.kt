@@ -12,12 +12,12 @@ val LightCustomColors = CustomColors(
 
     meLevelCardBg = Color(color = 0xFFE8F3E8),
     meLevelCardDsp = Color(color = 0xFF2E8B57),
-    meWaterCardBg = Color(color = 0xFFCFE8F6),
+    meWaterCardBg = Color(color = 0xFFE0F0F6),
     meWaterCardDsp = Color(color = 0xFF0D47A1),
     meWaterTask = Color(color = 0xFF59B2D1),
     meMagicShop = Color(color = 0xFFFF9C87),
     meMedalCenter = Color(color = 0xFFC9A6D1),
-    meTransfer = Color(color = 0xFF0BBCB3),
+    meWealth = Color(color = 0xFF0BBCB3),
     meCreditHistory = Color(color = 0xFF4BB3FF),
     meBrowserHistory = Color(color = 0xFF5B9FAB),
     meSnapshot = Color(color = 0xFFCC8B54),
@@ -41,6 +41,9 @@ val LightCustomColors = CustomColors(
     threadTitleRecommendEnd = Color(color = 0xF56C6C99),
     threadTitleReplyAwardStart = Color(color = 0xFFD37622),
     threadTitleReplyAwardEnd = Color(color = 0xFFD05024),
+
+    darkRoomWarning = Color(color = 0xFFCCAF12),
+    darkRoomError = Color(color = 0xFFCC4347)
 )
 
 val DarkCustomColors = CustomColors(
@@ -56,7 +59,7 @@ val DarkCustomColors = CustomColors(
     meWaterTask = Color(color = 0xFF59B2D1),
     meMagicShop = Color(color = 0xFFF48E78),
     meMedalCenter = Color(color = 0xFFC9A6D1),
-    meTransfer = Color(color = 0xFF0BBCB3),
+    meWealth = Color(color = 0xFF0BBCB3),
     meCreditHistory = Color(color = 0xFF4BB3FF),
     meBrowserHistory = Color(color = 0xFF5B9FAB),
     meSnapshot = Color(color = 0xFFCC8B54),
@@ -80,6 +83,9 @@ val DarkCustomColors = CustomColors(
     threadTitleRecommendEnd = Color(color = 0xF56C6C99),
     threadTitleReplyAwardStart = Color(color = 0xFFD37622),
     threadTitleReplyAwardEnd = Color(color = 0xFFD05024),
+
+    darkRoomWarning = Color(color = 0xFFCCAF12),
+    darkRoomError = Color(color = 0xFFCC4347)
 )
 
 @Immutable
@@ -96,7 +102,7 @@ data class CustomColors(
     val meWaterTask: Color = Color.Unspecified,
     val meMagicShop: Color = Color.Unspecified,
     val meMedalCenter: Color = Color.Unspecified,
-    val meTransfer: Color = Color.Unspecified,
+    val meWealth: Color = Color.Unspecified,
     val meCreditHistory: Color = Color.Unspecified,
     val meCollection: Color = Color.Unspecified,
     val meBrowserHistory: Color = Color.Unspecified,
@@ -120,6 +126,9 @@ data class CustomColors(
     val threadTitleRecommendEnd: Color = Color.Unspecified,
     val threadTitleReplyAwardStart: Color = Color.Unspecified,
     val threadTitleReplyAwardEnd: Color = Color.Unspecified,
+
+    val darkRoomWarning: Color = Color.Unspecified,
+    val darkRoomError: Color = Color.Unspecified
 )
 
 val LocalCustomColors = staticCompositionLocalOf { CustomColors() }

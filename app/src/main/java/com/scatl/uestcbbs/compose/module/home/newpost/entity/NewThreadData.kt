@@ -25,7 +25,7 @@ sealed class NewThreadData: SwipeRefreshItem {
     ): NewThreadData()
 
     class SiteStatus(
-        var data: IndexEntity,
+        var data: SiteStatusData,
         override var itemType: NewThreadDataType = NewThreadDataType.SITE_STATUS
     ): NewThreadData()
 

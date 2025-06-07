@@ -28,12 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.scatl.uestcbbs.compose.ext.launchSafety
+import com.scatl.uestcbbs.compose.ext.px2dp
 import com.scatl.uestcbbs.compose.ext.unboundClickable
 
 /**
@@ -50,8 +51,9 @@ fun <T> SingleSelectionDialog(
     onSelect: (data: T) -> Unit
 ) {
     if (showDialog) {
-        val configuration = LocalConfiguration.current
-        val screenHeight = configuration.screenHeightDp.dp
+        val windowInfo = LocalWindowInfo.current
+        val screenWidth = windowInfo.containerSize.width
+        val screenHeight = windowInfo.containerSize.height
 
         val listState = rememberLazyListState()
         val coroutineScope = rememberCoroutineScope()
@@ -70,7 +72,7 @@ fun <T> SingleSelectionDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    .heightIn(0.dp, screenHeight * 0.6f)
+                    .heightIn(0.dp, screenHeight.px2dp * 0.6f)
                     .background(
                         color = MaterialTheme.colorScheme.surface,
                         shape = RoundedCornerShape(10.dp)

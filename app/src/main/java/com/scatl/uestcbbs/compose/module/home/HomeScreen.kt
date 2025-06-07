@@ -24,7 +24,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -50,7 +50,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import androidx.navigation.NavHostController
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.api.service.TopListService
 import com.scatl.uestcbbs.compose.eventbus.BaseEvent
@@ -67,7 +66,7 @@ import com.scatl.uestcbbs.compose.module.home.toplist.TopListScreen
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import kotlin.math.min
-import androidx.compose.ui.unit.Density
+
 /**
  * Created by sca_tl at 2024/7/10 16:42:07
  */
@@ -167,7 +166,6 @@ fun HomeScreen() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HomeTab(
     pageTitles: List<String>,
@@ -180,7 +178,7 @@ private fun HomeTab(
     val tabRowVerticalPadding = remember { mutableFloatStateOf(0f) }
     tabRowVerticalPadding.floatValue = 10.dp.dp2px
 
-    ScrollableTabRow(
+    PrimaryScrollableTabRow(
         selectedTabIndex = pagerState.currentPage,
         contentColor = Color.Transparent,
         containerColor = Color.Transparent,
@@ -203,8 +201,12 @@ private fun HomeTab(
             Tab(
                 selected = selected,
                 onClick = {
-                    scope.launchSafety {
-                        pagerState.animateScrollToPage(index)
+                    if (selected) {
+                        SharedFlowBus.with(Event.HOME_REFRESH).tryEmit("")
+                    } else {
+                        scope.launchSafety {
+                            pagerState.animateScrollToPage(index)
+                        }
                     }
                 }
             ) {
@@ -219,7 +221,6 @@ private fun HomeTab(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HomeTabItem(
     pagerState: PagerState,

@@ -32,7 +32,7 @@
     <string name="need_login_dsp">当前未登录，请重新登录</string>
 
     <string name="site_statistics">站点统计</string>
-    <string name="site_statistics_posters">今日发帖：%1$s \t\t 昨日发帖：%2$s \t\t  总发帖：%3$s \t\t 会员数：%4$s</string>
+    <string name="site_statistics_posters">在线人数：%1$s \t\t 今日发帖：%2$s \t\t 昨日发帖：%3$s \t\t  总发帖：%4$s \t\t 会员数：%5$s</string>
     <string name="announcement">公告</string>
     <string name="moderator">版主</string>
     <string name="category_moderator">分区版主</string>

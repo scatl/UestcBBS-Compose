@@ -160,16 +160,6 @@ fun ShopListScreen(
                 tip = stringResource(R.string.magic_shop_dsp),
                 tipId = TIP_ID_MAGIC_SHOP
             )
-//            if (magicData.data?.dsp.isNotNullAndEmpty()) {
-//                Text(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(horizontal = 20.dp)
-//                        .padding(bottom = 10.dp),
-//                    fontSize = 15.sp,
-//                    text = magicData.data?.dsp.toString()
-//                )
-//            }
             SwipeRefresh(
                 uiState = magicListData,
                 modifier = Modifier
