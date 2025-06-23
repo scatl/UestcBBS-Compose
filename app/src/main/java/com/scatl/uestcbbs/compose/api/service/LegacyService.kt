@@ -195,10 +195,23 @@ interface LegacyService {
 
     // <editor-fold desc="积分">
 
-    @GET("https://bbs.uestc.edu.cn/home.php?mod=spacecp&ac=credit")
+    @GET("home.php?mod=spacecp&ac=credit")
     suspend fun creditInfo(
         @Query("op") op: String
     ): String
+
+    @Multipart
+    @POST("home.php?mod=spacecp&ac=credit&op=transfer")
+    suspend fun waterTransfer(
+        @PartMap map: MutableMap<String, RequestBody>
+    ): String?
+
+    @Multipart
+    @POST("home.php?mod=spacecp&ac=credit&op=log")
+    suspend fun wealthHistory(
+        @Query("page") page: Int,
+        @PartMap map: MutableMap<String, RequestBody>
+    ): String?
 
     // </editor-fold>
 

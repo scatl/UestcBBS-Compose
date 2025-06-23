@@ -53,4 +53,13 @@ object ThreadSnapshotManager {
         return dir
     }
 
+    fun deleteAllTid(tid: String): Boolean {
+        val dir = File(getSnapshotDir(), tid)
+        return FileUtil.deleteDir(dir, false)
+    }
+
+    fun deleteAll(): Boolean {
+        return FileUtil.deleteDir(getSnapshotDir(), false)
+    }
+
 }

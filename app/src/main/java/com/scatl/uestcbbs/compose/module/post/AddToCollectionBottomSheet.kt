@@ -109,8 +109,7 @@ fun AddToCollectionBottomSheet(
                     hide()
                 } else {
                     (addToCollectionData.errorData?.message ?:
-                    ContextCompat.getString(context, R.string.collection_add_to_fail)
-                            ).showToast(context)
+                    ContextCompat.getString(context, R.string.collection_add_to_fail)).showToast(context)
                 }
                 viewModel.resetAddToCollectionData()
             }

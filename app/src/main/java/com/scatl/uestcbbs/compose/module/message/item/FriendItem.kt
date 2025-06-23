@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -16,6 +18,7 @@ import com.scatl.uestcbbs.compose.ext.toAvatarUrl
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
+import com.scatl.uestcbbs.compose.router.linkNavigate
 import com.scatl.uestcbbs.compose.widget.CommonIconNameView
 
 /**
@@ -27,16 +30,12 @@ fun FriendItem(
     data: MessageEntity.Row
 ) {
     val navHostController = LocalNavController.current
+    val uriHandler = LocalUriHandler.current
+
     Column (
         verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = modifier
-            .commonCardBg {
-                navHostController.navigate(
-                    Router.ThreadDetailRouterEntity(
-                        id = data.threadId.toIntOrElse()
-                    )
-                )
-            }
+            .commonCardBg()
     ) {
         CommonIconNameView(
             iconUrl = data.authorId.toAvatarUrl(),
@@ -52,7 +51,16 @@ fun FriendItem(
         }
 
         Text(
-            text = AnnotatedString.Companion.fromHtml(htmlString = data.htmlMessage.toString()),
+            text = AnnotatedString.Companion.fromHtml(
+                htmlString = data.htmlMessage.toString(),
+                linkInteractionListener = {
+                    linkNavigate(
+                        uriHandler = uriHandler,
+                        url = (it as? LinkAnnotation.Url?)?.url,
+                        navHostController = navHostController
+                    )
+                }
+            ),
             fontSize = 14.sp
         )
     }

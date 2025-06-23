@@ -47,7 +47,8 @@ fun AtItem(
             .commonCardBg {
                 navHostController.navigate(
                     Router.ThreadDetailRouterEntity(
-                        id = data.postId.toIntOrElse()
+                        id = data.threadId.toIntOrElse(),
+                        pid = data.postId.toIntOrElse()
                     )
                 )
             }

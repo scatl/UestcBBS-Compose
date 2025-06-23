@@ -28,7 +28,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +54,7 @@ import com.scatl.uestcbbs.compose.ext.clickable
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.pagePadding
 import com.scatl.uestcbbs.compose.ext.unboundClickable
+import com.scatl.uestcbbs.compose.module.watertask.WaterTaskScreen
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.widget.StatusLayout
@@ -70,6 +73,7 @@ fun MyWealthScreen() {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val baseWealthData by viewModel.baseData.collectAsStateWithLifecycle()
+    val showWaterTransferBottomSheet = rememberSaveable { mutableStateOf(false) }
 
     LoadInitialDataIfNeeded(context) {
         scope.launchSafety {
@@ -305,7 +309,7 @@ fun MyWealthScreen() {
                     ) {
                         FunctionItem(
                             icon = R.drawable.ic_water_task,
-                            name = "水滴小任务"
+                            name = "水滴任务"
                         ) {
                             navHostController.navigate(Router.WaterTaskRouterEntity)
                         }
@@ -314,21 +318,14 @@ fun MyWealthScreen() {
                             icon = R.drawable.ic_money_transfer,
                             name = "水滴转账"
                         ) {
-
-                        }
-
-                        FunctionItem(
-                            icon = R.drawable.ic_money_transfer,
-                            name = "水滴，威望和奖励券互换"
-                        ) {
-
+                            showWaterTransferBottomSheet.value = true
                         }
 
                         FunctionItem(
                             icon = R.drawable.ic_integral,
                             name = "积分记录"
                         ) {
-
+                            navHostController.navigate(Router.WealthHistoryRouterEntity)
                         }
                     }
                 }
@@ -337,6 +334,9 @@ fun MyWealthScreen() {
 
     }
 
+    WaterTransferBottomSheet(
+        show = showWaterTransferBottomSheet
+    )
 }
 
 @Composable

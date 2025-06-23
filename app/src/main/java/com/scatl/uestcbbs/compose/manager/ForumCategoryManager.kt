@@ -47,14 +47,4 @@ object ForumCategoryManager {
         }
         return if (current?.parent != null) current else null
     }
-
-//    fun getSelectForumData(): List<Forum> {
-//        val root = mutableListOf<Forum>()
-//        originData.forEach {
-//            root.add(it)
-//            if (it.children == null) {
-//                it.children = mutableListOf()
-//            }
-//        }
-//    }
 }

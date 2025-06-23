@@ -39,6 +39,8 @@ object DataStore {
     var autoDayQuestion by DataStoreDelegate(App.context.settingsDataStore, booleanPreferencesKey("autoDayQuestion"), true)
     var expandStickPost by DataStoreDelegate(App.context.settingsDataStore, booleanPreferencesKey("expandStickPost"), true)
     var keyboardHeight by DataStoreDelegate(App.context.settingsDataStore, floatPreferencesKey("keyboardHeight"), 250f)
+    var customFontScale by DataStoreDelegate(App.context.settingsDataStore, floatPreferencesKey("customFontScale"), 1f)
+    var useSystemFontScale by DataStoreDelegate(App.context.settingsDataStore, booleanPreferencesKey("useSystemFontScale"), true)
 
     var tipShowedId by DataStoreDelegate(App.context.bizDataStore, stringSetPreferencesKey("tipShowedId"), mutableSetOf())
     var legacyForumHash by DataStoreDelegate(App.context.bizDataStore, stringPreferencesKey("legacyForumHash"), "")

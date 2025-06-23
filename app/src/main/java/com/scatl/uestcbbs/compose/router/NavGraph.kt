@@ -53,6 +53,7 @@ import com.scatl.uestcbbs.compose.module.user.UserProfileScreen
 import com.scatl.uestcbbs.compose.module.video.VideoPlayerScreen
 import com.scatl.uestcbbs.compose.module.watertask.WaterTaskScreen
 import com.scatl.uestcbbs.compose.module.wealth.MyWealthScreen
+import com.scatl.uestcbbs.compose.module.wealth.WealthHistoryScreen
 import com.scatl.uestcbbs.compose.util.BBSLinkUtil
 import com.scatl.uestcbbs.compose.util.LinkType
 import com.scatl.uestcbbs.compose.widget.image.picker.MediaPickerConfig
@@ -223,6 +224,10 @@ fun NavGraph(
                     MyWealthScreen()
                 }
 
+                composable<Router.WealthHistoryRouterEntity> {
+                    WealthHistoryScreen()
+                }
+
                 bottomSheet<Router.PostCommentAndRateRouterEntity> {
                     val entity: Router.PostCommentAndRateRouterEntity = it.toRoute()
                     CommentRateScreen(
@@ -313,7 +318,7 @@ fun linkNavigate(
             return true
         }
         is LinkType.Attachment -> {
-
+            return false
         }
         is LinkType.BlackList -> {
 

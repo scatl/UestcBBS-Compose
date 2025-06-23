@@ -24,6 +24,7 @@ object Router {
     @Serializable object WaterTaskRouterEntity
     @Serializable object DarkRoomRouterEntity
     @Serializable object MyWealthRouterEntity
+    @Serializable object WealthHistoryRouterEntity
 
     @Serializable
     data class ChatDetailRouterEntity(

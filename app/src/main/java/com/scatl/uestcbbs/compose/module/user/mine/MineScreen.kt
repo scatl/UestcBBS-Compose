@@ -247,6 +247,7 @@ private fun SignedView(
                 gap = 0.dp,
                 textStyle = TextStyle(),
                 modifier = Modifier
+                    .alpha(0.6f)
                     .unboundClickable {
                         navHostController.navigate(
                             Router.UserProfileRouterEntity(

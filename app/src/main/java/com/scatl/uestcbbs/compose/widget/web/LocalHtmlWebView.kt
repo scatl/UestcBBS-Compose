@@ -264,54 +264,6 @@ private fun webViewClient(
 
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
         return super.shouldInterceptRequest(view, request)
-//        return request?.url?.let { url ->
-//            if (url.toString().endsWith(".jpg", true)
-//                || url.toString().endsWith(".jpeg", true)
-//                || url.toString().endsWith(".png", true)
-//                || url.toString().endsWith(".gif", true)
-//                || url.toString().endsWith(".heic", true)
-//                || url.toString().endsWith(".heif", true)
-//                || url.toString().endsWith(".webp", true)
-//            ) {
-//                return@let runBlocking {
-//                    interceptRequest(context, url)
-//                }
-//            } else {
-//                super.shouldInterceptRequest(view, request)
-//            }
-//        }
-    }
-}
-
-private suspend fun interceptRequest(context: Context, uri: Uri): WebResourceResponse? {
-    return withContext(Dispatchers.IO) {
-        try {
-            val loader = context.imageLoader
-            val coilRequest = ImageRequest.Builder(context)
-                .data(uri.toString())
-                .allowHardware(false)
-                .build()
-
-            val result = (loader.execute(coilRequest) as? SuccessResult)
-
-            val inputStream = when (result) {
-                is SuccessResult -> {
-                    val outputStream = ByteArrayOutputStream()
-                    result.drawable.toBitmap().compress(Bitmap.CompressFormat.PNG, 20, outputStream)
-                    ByteArrayInputStream(outputStream.toByteArray())
-                }
-                else -> null
-            }
-
-            if (inputStream != null) {
-                WebResourceResponse("image/jpeg", null, inputStream)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
     }
 }
 

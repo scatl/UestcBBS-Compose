@@ -45,10 +45,4 @@ class SnapshotViewModel @Inject constructor(
         }
     }
 
-    suspend fun deleteAllSnapshot(): Boolean {
-        return withContext(Dispatchers.IO) {
-            snapshotRepository.deleteAllSnapshot()
-        }
-    }
-
 }

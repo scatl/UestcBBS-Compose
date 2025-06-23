@@ -1,5 +1,6 @@
 package com.scatl.uestcbbs.compose.widget
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.WarningAmber
@@ -28,7 +29,7 @@ fun CommonAlertDialog(
     title: String,
     text: String,
     confirmText: String = stringResource(id = R.string.confirm),
-    cancelText: String? = null,
+    cancelText: String? = "取消",
     onDismissRequest: () -> Unit,
     onConfirmClick: () -> Unit,
     onCancelClick: (() -> Unit)? = null
@@ -78,8 +79,13 @@ fun CommonAlertDialog(
                             .clickable(
                                 unbound = true
                             ) {
-                                onCancelClick?.invoke()
+                                if (onCancelClick == null) {
+                                    onDismissRequest.invoke()
+                                } else {
+                                    onCancelClick.invoke()
+                                }
                             }
+                            .padding(end = 30.dp)
                     )
                 }
             }

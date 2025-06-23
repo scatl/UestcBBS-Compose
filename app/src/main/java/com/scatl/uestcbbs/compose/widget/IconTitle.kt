@@ -30,7 +30,7 @@ fun IconTitle(
     iconTint: Color = LocalContentColor.current,
     iconPosition: IconPosition = IconPosition.LEFT,
     text: String,
-    textStyle: TextStyle,
+    textStyle: TextStyle = TextStyle(),
     gap: Dp = 5.dp,
 ) {
     Row(

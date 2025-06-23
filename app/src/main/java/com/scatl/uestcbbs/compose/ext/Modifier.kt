@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -74,6 +75,7 @@ fun Modifier.clickable(
 fun Modifier.commonCardBg(
     bgColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     containerColor: Color = MaterialTheme.colorScheme.background,
+    padding: PaddingValues = PaddingValues(pagePadding + 5.dp),
     onLongClick: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null
 ): Modifier {
@@ -93,5 +95,5 @@ fun Modifier.commonCardBg(
                 onClick?.invoke()
             }
         )
-        .padding(pagePadding + 5.dp)
+        .padding(padding)
 }
