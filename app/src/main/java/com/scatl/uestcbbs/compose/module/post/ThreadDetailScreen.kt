@@ -185,6 +185,9 @@ import okhttp3.internal.toLongOrDefault
 /**
  * Created by sca_tl at 2024/7/15 10:00:21
  */
+
+const val TAG = "ThreadDetailScreen"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThreadDetailScreen(
@@ -643,14 +646,15 @@ private fun BodyContent(
         return
     }
 
-    val tag = "BodyContent"
     val scope = rememberCoroutineScope()
     val repliesData by viewModel.repliesData.collectAsStateWithLifecycle()
     val threadDetailData by viewModel.threadDetailData.collectAsStateWithLifecycle()
     val sortType = remember { mutableStateOf<ReplySortType?>(ReplySortType.DEFAULT) }
     val currentReplyAuthorId = rememberSaveable { mutableStateOf("") }
     val currentReplyAuthorName = rememberSaveable { mutableStateOf("") }
-    val showFindPidDialog = rememberSaveable { mutableStateOf(targetPid.toIntOrElse() > 0 && data.total.toIntOrElse() < 20 * 15) }
+
+    //要是超过15页就不寻找了
+    val showFindPidDialog = rememberSaveable { mutableStateOf(targetPid.toIntOrElse() > 0 && data.total.toIntOrElse() <= 20 * 15) }
 
     fun loadMore() {
         viewModel.getReplies(
@@ -685,12 +689,12 @@ private fun BodyContent(
             if (showFindPidDialog.value) {
                 val value = it?.find { it.postId == targetPid }
                 if (value == null) {
-                    if ((threadDetailData.data?.total ?: 0) - 1 >= (repliesData.data?.size ?: 0)) {
+                    if (repliesData.hasMore) {
                         loadMore()
-                        XLog.tag(tag).d("not find target pid, auto load more")
+                        XLog.tag(TAG).d("not find target pid, auto load more")
                     } else {
                         showFindPidDialog.value = false
-                        XLog.tag(tag).d("not find target pid, no more data")
+                        XLog.tag(TAG).d("not find target pid, no more data")
                     }
                 } else {
                     scope.launchSafety {
@@ -701,8 +705,10 @@ private fun BodyContent(
                         showFindPidDialog.value = false
                         value.highLight.value = true
                     }
-                    XLog.tag(tag).d("find target pid, position = ${value.position}")
+                    XLog.tag(TAG).d("find target pid, position = ${value.position}")
                 }
+            } else {
+                XLog.tag(TAG).d("do not find target pid, targetPid = ${targetPid}, total size = ${data.total}")
             }
         }
     }
@@ -1308,8 +1314,6 @@ private fun PollInfo(
         return
     }
 
-    val tag = "PollInfo"
-
     val scope = rememberCoroutineScope()
     val voteRequestData by viewModel.voteData.collectAsStateWithLifecycle()
     val pollData = rememberSaveable { mutableStateOf(if (voteRequestData.data != null) voteRequestData.data else data.thread.poll) }
@@ -1547,7 +1551,7 @@ private fun PollInfo(
 
                 Button(
                     onClick = {
-                        XLog.tag(tag).d(selectedOptions.value)
+                        XLog.tag(TAG).d(selectedOptions.value)
                         viewModel.vote(
                             VoteRequestEntity(
                                 threadId = data.thread.threadId ?: 0,
@@ -1619,7 +1623,6 @@ private fun Collection(
                     }
                     .padding(pagePadding + 5.dp)
             ) {
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),

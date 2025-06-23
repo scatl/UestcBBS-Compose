@@ -167,7 +167,9 @@ class ForumViewModel @Inject constructor(
                         if (loadMore) {
                             it.rows?.forEach { row ->
                                 finaleData.add(ForumThreadsData.Thread(
-                                    data = row
+                                    data = row.apply {
+                                        displayForumName = false
+                                    }
                                 ))
                             }
                             _forumThreadsData?.value?.success(
@@ -179,7 +181,11 @@ class ForumViewModel @Inject constructor(
                                 data = it.forum
                             ))
 
-                            val sticks = it.rows?.filter { row -> (row.displayOrder ?: 0) > 0 }
+                            val sticks = it.rows
+                                ?.filter { row -> (row.displayOrder ?: 0) > 0 }
+                            sticks?.forEach {
+                                it.displayForumName = false
+                            }
                             if (!sticks.isNullOrEmpty()) {
                                 finaleData.add(ForumThreadsData.Stick(data = sticks))
                             }
@@ -191,7 +197,13 @@ class ForumViewModel @Inject constructor(
                                     (row.displayOrder ?: 0) <= 0
                                 }
                                 ?.forEach { row ->
-                                    finaleData.add(ForumThreadsData.Thread(data = row))
+                                    finaleData.add(
+                                        ForumThreadsData.Thread(
+                                            data = row.apply {
+                                                displayForumName = false
+                                            }
+                                        )
+                                    )
                                 }
 
                             _forumThreadsData?.value?.success(

@@ -96,7 +96,6 @@ import kotlinx.coroutines.delay
  */
 @Composable
 fun SearchScreen() {
-
     val viewModel: SearchViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current

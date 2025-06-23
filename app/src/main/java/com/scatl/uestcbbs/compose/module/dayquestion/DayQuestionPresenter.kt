@@ -153,7 +153,7 @@ class DayQuestionPresenter @Inject constructor(
             if (entity != null) {
                 view?.onGetQuestionAnswerSuccess(entity.answer)
             } else {
-                view?.onGetQuestionAnswerError("没有找到答案，请先手动记录！")
+                view?.onGetQuestionAnswerError("没有找到答案，请先手动记录！当前题目为：\n${question}")
             }
         } else {
             view?.onGetQuestionAnswerError("获取答案失败，对应的题目为NULL")

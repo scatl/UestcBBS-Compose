@@ -1,5 +1,9 @@
 package com.scatl.uestcbbs.compose.module.setting
 
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -15,20 +19,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +51,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -60,18 +69,22 @@ import com.scatl.uestcbbs.compose.ext.goToAppNotificationChannelSetting
 import com.scatl.uestcbbs.compose.ext.goToAppNotificationSetting
 import com.scatl.uestcbbs.compose.ext.hexToColor
 import com.scatl.uestcbbs.compose.ext.isGTESdk31
+import com.scatl.uestcbbs.compose.ext.showToast
 import com.scatl.uestcbbs.compose.ext.unboundClickable
 import com.scatl.uestcbbs.compose.manager.LanguageManager
 import com.scatl.uestcbbs.compose.manager.ThemeManager
 import com.scatl.uestcbbs.compose.module.dayquestion.DayQuestionService
+import com.scatl.uestcbbs.compose.module.download.DownLoadManager
 import com.scatl.uestcbbs.compose.module.download.DownloadTask
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.widget.SingleSelectionDialog
+import kotlin.math.round
 
 /**
  * Created by sca_tl at 2024/6/17 16:58:32
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScreen(
     viewModel: SettingViewModel = hiltViewModel()
@@ -88,6 +101,29 @@ fun SettingScreen(
     val videoAutoPlay = rememberSaveable { mutableStateOf(DataStore.videoAutoPlay) }
     val autoDayQuestion = rememberSaveable { mutableStateOf(DataStore.autoDayQuestion) }
     val expandStickPost = rememberSaveable { mutableStateOf(DataStore.expandStickPost) }
+    val useSystemFontScale = rememberSaveable { mutableStateOf(DataStore.useSystemFontScale) }
+    val customFontScale = rememberSaveable { mutableFloatStateOf(DataStore.customFontScale) }
+
+    val isDownloadFolderUriAccessible = rememberSaveable {
+        mutableStateOf(DownLoadManager.isDownloadFolderUriAccessible(context))
+    }
+    val downloadFolder = rememberSaveable {
+        mutableStateOf(DownLoadManager.getDownloadFolder())
+    }
+    val requestFolderPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == Activity.RESULT_OK && it.data != null) {
+            runCatching {
+                val uriTree = it.data?.data
+                val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                context.contentResolver.takePersistableUriPermission(uriTree!!, takeFlags)
+                DataStore.downloadFolderUri = uriTree.toString()
+                isDownloadFolderUriAccessible.value = true
+                downloadFolder.value = DownLoadManager.getDownloadFolder()
+            }.onFailure { e ->
+                "授权失败:${e.message}".showToast(context)
+            }
+        }
+    }
 
     val showInterfaceLanguageDialog = rememberSaveable { mutableStateOf(false) }
     val showDayNightModeDialog = rememberSaveable { mutableStateOf(false) }
@@ -172,10 +208,9 @@ fun SettingScreen(
                             }
                         }
 
-                        //appearance
                         stickyHeader {
                             Text(
-                                text = stringResource(id = R.string.setting_appearance_title),
+                                text = "语言",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
@@ -192,6 +227,19 @@ fun SettingScreen(
                             ) {
                                 showInterfaceLanguageDialog.value = true
                             }
+                        }
+
+                        stickyHeader {
+                            Text(
+                                text = "主题",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(color = MaterialTheme.colorScheme.surface)
+                                    .padding(start = 15.dp, top = 10.dp, bottom = 10.dp)
+                            )
                         }
                         item {
                             SwitchItem(
@@ -261,18 +309,111 @@ fun SettingScreen(
                                 showDayNightModeDialog.value = true
                             }
                         }
+
+                        stickyHeader {
+                            Text(
+                                text = "字体",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(color = MaterialTheme.colorScheme.surface)
+                                    .padding(start = 15.dp, top = 10.dp, bottom = 10.dp)
+                            )
+                        }
                         item {
                             SwitchItem(
-                                text = stringResource(id = R.string.setting_hide_daily_pic),
-                                dsp = stringResource(id = R.string.setting_hide_daily_pic_dsp),
-                                checked = hideDailyPic.value
+                                text = "使用系统字体大小",
+                                dsp = "应用内字体大小跟随系统设置，开启后，会忽略应用内自定义字体大小。",
+                                checked = useSystemFontScale.value
                             ) {
-                                hideDailyPic.value = it
-                                DataStore.hideDailyPic = it
+                                ThemeManager.toggleUseSystemFontScale(it)
+                                useSystemFontScale.value = it
+                            }
+                        }
+                        item {
+                            Column {
+                                NormalItem(
+                                    text = "自定义字体缩放",
+                                    dsp = if (useSystemFontScale.value) {
+                                        "自定义应用内字体缩放，当前被禁用，你需要先关闭“使用系统字体大小”"
+                                    } else {
+                                        "自定义应用内字体缩放"
+                                    }
+                                ) { }
+                                Slider(
+                                    modifier = Modifier,
+                                    enabled = useSystemFontScale.value.not(),
+                                    value = customFontScale.floatValue,
+                                    steps = 14,
+                                    valueRange = 0.5f..2.0f,
+                                    onValueChange = {
+                                        val v = round(it * 10) / 10
+                                        DataStore.customFontScale = v
+                                        customFontScale.floatValue = v
+                                    },
+                                    onValueChangeFinished = {
+                                        ThemeManager.toggleCustomFontScale(customFontScale.floatValue)
+                                    },
+                                    thumb = {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(30.dp)
+                                                .background(
+                                                    color = if (useSystemFontScale.value) {
+                                                        MaterialTheme.colorScheme.onBackground.copy(0.5f)
+                                                    } else {
+                                                        MaterialTheme.colorScheme.primary
+                                                    },
+                                                    shape = CircleShape
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = customFontScale.floatValue.toString(),
+                                                color = Color.White,
+                                                fontSize = 10.sp,
+                                                lineHeight = 10.sp,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
+                                    },
+                                )
                             }
                         }
 
-                        //browser
+                        stickyHeader {
+                            Text(
+                                text = "下载",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(color = MaterialTheme.colorScheme.surface)
+                                    .padding(start = 15.dp, top = 10.dp, bottom = 10.dp)
+                            )
+                        }
+                        item {
+                            NormalItem(
+                                text = "修改下载目录",
+                                dsp = if (isDownloadFolderUriAccessible.value.not()) {
+                                    "点击选择下载目录"
+                                } else {
+                                    "当前下载目录：${downloadFolder.value}"
+                                }
+                            ) {
+                                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                            or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                            or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                                    )
+                                }
+                                requestFolderPermissionLauncher.launch(intent)
+                            }
+                        }
+
                         stickyHeader {
                             Text(
                                 text = stringResource(R.string.setting_function_title),
@@ -284,6 +425,16 @@ fun SettingScreen(
                                     .background(color = MaterialTheme.colorScheme.surface)
                                     .padding(start = 15.dp, top = 10.dp, bottom = 10.dp)
                             )
+                        }
+                        item {
+                            SwitchItem(
+                                text = stringResource(id = R.string.setting_hide_daily_pic),
+                                dsp = stringResource(id = R.string.setting_hide_daily_pic_dsp),
+                                checked = hideDailyPic.value
+                            ) {
+                                hideDailyPic.value = it
+                                DataStore.hideDailyPic = it
+                            }
                         }
                         item {
                             SwitchItem(
@@ -539,14 +690,13 @@ fun NormalItem(
             .clipToBounds()
             .wrapContentSize(align = Alignment.CenterStart)
             .fillMaxWidth()
+            .background(color = MaterialTheme.colorScheme.surface)
             .unboundClickable {
                 onClick.invoke()
             }
             .padding(
-                top = 10.dp,
-                bottom = 10.dp,
-                start = 15.dp,
-                end = 15.dp
+                vertical = 10.dp,
+                horizontal = 15.dp
             )
     ) {
         Text(
@@ -568,6 +718,7 @@ fun SwitchItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(color = MaterialTheme.colorScheme.surface)
             .padding(horizontal = 15.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

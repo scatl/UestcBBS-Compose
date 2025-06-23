@@ -27,6 +27,7 @@ import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.manager.AccountManager
+import com.scatl.uestcbbs.compose.module.user.collect.UserCollectionData
 import com.scatl.uestcbbs.compose.module.user.post.UserPostData
 import com.scatl.uestcbbs.compose.net.onFailure
 import com.scatl.uestcbbs.compose.net.onSuccess
@@ -60,8 +61,8 @@ class UserViewModel @AssistedInject constructor(
     private val _detailData = MutableStateFlow(UiState<UserProfileEntity>().init())
     val detailData: StateFlow<UiState<UserProfileEntity>> = _detailData
 
-    private val _collectionData = MutableStateFlow(UiState<SnapshotStateList<UserCollectionEntity.Row>>().init())
-    val collectionData: StateFlow<UiState<SnapshotStateList<UserCollectionEntity.Row>>> = _collectionData
+    private val _collectionData = MutableStateFlow(UiState<SnapshotStateList<UserCollectionData>>().init())
+    val collectionData: StateFlow<UiState<SnapshotStateList<UserCollectionData>>> = _collectionData
 
     private val _friendData = MutableStateFlow(UiState<SnapshotStateList<UserFriendEntity.Row>>().init())
     val friendData: StateFlow<UiState<SnapshotStateList<UserFriendEntity.Row>>> = _friendData
@@ -296,18 +297,41 @@ class UserViewModel @AssistedInject constructor(
                             additional = additional
                         )
                 }.onSuccess {
-                    if (it != null && it.rows.isNotNullAndEmpty()) {
-                        val finalData = SnapshotStateList<UserCollectionEntity.Row>().apply {
-                            addAll(it.rows.filter { it.targetType == "tid" })
-                        }
+                    if (it != null && (it.rows.isNotNullAndEmpty() || it.collections.isNotNullAndEmpty())) {
+                        val finalData = SnapshotStateList<UserCollectionData>()
                         val hasMore = (it.total ?: 0) > (it.page ?: 0) * (it.pageSize ?: 0)
 
-                        if (!loadMore) {
+                        if (loadMore.not()) {
+                            if (it.collections.isNullOrEmpty().not()) {
+                                finalData.add(UserCollectionData.CollectionTitle(""))
+                                it.collections?.forEach { collection ->
+                                    finalData.add(UserCollectionData.Collection(collection))
+                                }
+                            }
+
+                            if (it.rows.isNullOrEmpty().not()) {
+                                finalData.add(UserCollectionData.ThreadTitle(""))
+                                it.rows?.forEach { row ->
+                                    if (row.targetType == "tid") {
+                                        finalData.add(UserCollectionData.Thread(row))
+                                    }
+                                }
+                            }
+
                             _collectionData.value.success(
                                 data = finalData,
                                 hasMore = hasMore
                             )
                         } else {
+                            if (it.rows.isNullOrEmpty().not()) {
+                                finalData.add(UserCollectionData.ThreadTitle(""))
+                                it.rows?.forEach { row ->
+                                    if (row.targetType == "tid") {
+                                        finalData.add(UserCollectionData.Thread(row))
+                                    }
+                                }
+                            }
+
                             _collectionData.value.success(
                                 data = _collectionData.value.data?.apply { addAll(finalData) },
                                 hasMore = hasMore

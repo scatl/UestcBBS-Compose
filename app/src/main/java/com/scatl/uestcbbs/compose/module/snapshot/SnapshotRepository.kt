@@ -56,9 +56,4 @@ class SnapshotRepository @Inject constructor(): BaseRepository() {
         }
         return result
     }
-
-    fun deleteAllSnapshot(): Boolean {
-        val dir = ThreadSnapshotManager.getSnapshotDir()
-        return FileUtil.deleteDir(dir, false)
-    }
 }

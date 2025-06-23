@@ -1,5 +1,6 @@
 package com.scatl.uestcbbs.compose.module.post.item
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,10 +27,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -45,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.api.entity.CommonThreadEntity
 import com.scatl.uestcbbs.compose.ext.cardCorner
+import com.scatl.uestcbbs.compose.ext.clickable
 import com.scatl.uestcbbs.compose.ext.commonCardBg
 import com.scatl.uestcbbs.compose.ext.dp2Sp
 import com.scatl.uestcbbs.compose.ext.hexToColor
@@ -54,6 +59,7 @@ import com.scatl.uestcbbs.compose.ext.pagePadding
 import com.scatl.uestcbbs.compose.ext.toAvatarUrl
 import com.scatl.uestcbbs.compose.ext.toBBSImgUrl
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
+import com.scatl.uestcbbs.compose.manager.ForumCategoryManager
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.widget.image.viewer.ImageViewerConfig
 import com.scatl.uestcbbs.compose.router.Router
@@ -68,8 +74,12 @@ import com.scatl.uestcbbs.compose.widget.NinePicGridLayout
  */
 @Composable
 fun CommonThreadItem (
-    data: CommonThreadEntity,
+    data: CommonThreadEntity?,
 ) {
+    if (data == null) {
+        return
+    }
+
     val navHostController = LocalNavController.current
     Column (
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -223,33 +233,44 @@ fun CommonThreadItem (
             modifier = Modifier.alpha(0.5f)
         )
 
-        if (!data.forumName.isNullOrEmpty()) {
+        if (data.displayForumName && (data.forumName.isNullOrEmpty().not() || data.forumId.toIntOrElse() > 0)) {
             Spacer(modifier = Modifier.height(3.dp))
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        shape = RoundedCornerShape(3.dp)
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(20.dp)
                     )
-                    .padding(vertical = 3.dp, horizontal = 4.dp)
+                    .clip(
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .clickable(unbound = false) {
+                        navHostController.navigate(
+                            Router.ForumDetailRouterEntity(
+                                fid = data.forumId.toIntOrElse()
+                            )
+                        )
+                    }
+                    .padding(vertical = 4.dp, horizontal = 8.dp)
             ) {
-//            if (ForumPicture[data.forumId] != null) {
-//                AsyncImage(
-//                    model = ForumPicture[data.forumId],
-//                    contentDescription = null,
-//                    contentScale = ContentScale.Crop,
-//                    modifier = Modifier
-//                        .size(13.dp)
-//                        .clip(shape = RoundedCornerShape(50))
-//                )
-//            }
-
+                Image(
+                    painter = painterResource(id = R.drawable.ic_topic),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.size(13.dp)
+                )
                 Text(
-                    text = data.forumName.toString(),
-                    fontSize = 11.sp,
-                    lineHeight = 11.sp
+                    text = if (data.forumName.isNullOrEmpty().not()) {
+                        data.forumName.toString()
+                    } else {
+                        ForumCategoryManager.getForum(data.forumId)?.name.toString()
+                    },
+                    fontSize = 12.sp,
+                    lineHeight = 12.sp,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }

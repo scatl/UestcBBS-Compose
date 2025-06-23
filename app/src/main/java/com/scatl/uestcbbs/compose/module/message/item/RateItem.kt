@@ -47,7 +47,8 @@ fun RateItem(
             .commonCardBg {
                 navHostController.navigate(
                     Router.ThreadDetailRouterEntity(
-                        id = data.threadId.toIntOrElse()
+                        pid = data.threadId.toIntOrElse(), //todo api 接口这两个数据反了
+                        id = data.postId.toIntOrElse()
                     )
                 )
             }
@@ -66,6 +67,7 @@ fun RateItem(
         }
 
         Text(
+            fontSize = 14.sp,
             text = buildAnnotatedString {
                 val text = LocalContext.current.getString(R.string.message_rate_dsp, data.subject, data.reason)
 
@@ -121,9 +123,7 @@ fun RateItem(
                         )
                     }
                 }
-
-            },
-            fontSize = 14.sp
+            }
         )
     }
 }

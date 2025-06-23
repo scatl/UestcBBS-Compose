@@ -70,8 +70,8 @@ fun StickyLayout(
     var headContentHeight by rememberSaveable { mutableFloatStateOf(0f) }
     val headContentScrollState = rememberScrollState()
     val nestedScrollDispatcher = remember { NestedScrollDispatcher() }
-    val decay = remember { ExponentialDecay(friction = 0.075f * (60f / getScreenRefreshRate(context))) }
-    var flingJob by remember { mutableStateOf<Job?>(null) }
+//    val decay = remember { ExponentialDecay(friction = 0.075f * (60f / getScreenRefreshRate(context))) }
+//    var flingJob by remember { mutableStateOf<Job?>(null) }
     var maxUpPx by rememberSaveable { mutableFloatStateOf(0f) }
     var offset by rememberSaveable { mutableFloatStateOf(0f) }
     var bodyScrollableState: ScrollableState? = null
@@ -201,68 +201,68 @@ fun StickyLayout(
                 return Offset.Zero
             }
 
-            override suspend fun onPreFling(available: Velocity): Velocity {
-                return Velocity.Zero
-            }
+//            override suspend fun onPreFling(available: Velocity): Velocity {
+//                return Velocity.Zero
+//            }
+//
+//            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+//                XLog.tag(tag).d("onPostFling, available.y:${available.y}")
+//                if (handleFling(available)) {
+//                    fling(available)
+//                    return available
+//                }
+//                return Velocity.Zero
+//            }
 
-            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                XLog.tag(tag).d("onPostFling, available.y:${available.y}")
-                if (handleFling(available)) {
-                    fling(available)
-                    return available
-                }
-                return Velocity.Zero
-            }
-
-            private fun handleFling(available: Velocity): Boolean {
-                //手指从屏幕由上往下滑动
-                val condition1 = available.y > 0 && offset < 0f && bodyScrollableState?.canScrollBackward == false
-                //头部内容或者下面内容不能滑动时
-                val condition2 = headContentScrollState.canScrollForward.not() || bodyScrollableState?.canScrollForward?.not() == true
-                return condition1 || condition2
-            }
-
-            private fun fling(available: Velocity) {
-                flingJob?.cancel()
-                flingJob = scope.launchSafety {
-                    var remainingVelocity = available.y
-                    val frameDuration = (1000f / getScreenRefreshRate(context)).toLong()
-
-                    while (abs(remainingVelocity) > 0.5f) {
-                        // 计算位移（像素/秒 → 像素/帧）
-                        val delta = remainingVelocity * (frameDuration / 1000f)
-
-                        // 应用位移（自动处理边界）
-                        calculateOffset(delta)
-
-                        // 速度衰减
-                        remainingVelocity = decay.calculateTargetValue(remainingVelocity)
-
-                        // 精确帧延迟
-                        delay(frameDuration)
-
-                        // 如果到达边界，提前终止
-                        if (delta > 0f && offset >= 0f) break
-                        if (delta < 0f && offset <= -maxUpPx) break
-                    }
-                }
-            }
+//            private fun handleFling(available: Velocity): Boolean {
+//                //手指从屏幕由上往下滑动
+//                val condition1 = available.y > 0 && offset < 0f && bodyScrollableState?.canScrollBackward == false
+//                //头部内容或者下面内容不能滑动时
+//                val condition2 = headContentScrollState.canScrollForward.not() || bodyScrollableState?.canScrollForward?.not() == true
+//                return condition1 || condition2
+//            }
+//
+//            private fun fling(available: Velocity) {
+//                flingJob?.cancel()
+//                flingJob = scope.launchSafety {
+//                    var remainingVelocity = available.y
+//                    val frameDuration = (1000f / getScreenRefreshRate(context)).toLong()
+//
+//                    while (abs(remainingVelocity) > 0.5f) {
+//                        // 计算位移（像素/秒 → 像素/帧）
+//                        val delta = remainingVelocity * (frameDuration / 1000f)
+//
+//                        // 应用位移（自动处理边界）
+//                        calculateOffset(delta)
+//
+//                        // 速度衰减
+//                        remainingVelocity = decay.calculateTargetValue(remainingVelocity)
+//
+//                        // 精确帧延迟
+//                        delay(frameDuration)
+//
+//                        // 如果到达边界，提前终止
+//                        if (delta > 0f && offset >= 0f) break
+//                        if (delta < 0f && offset <= -maxUpPx) break
+//                    }
+//                }
+//            }
         }
     }
 
     Box(
         contentAlignment = contentAlignment,
         modifier = modifier
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        if (event.changes.any { it.pressed }) {
-                            flingJob?.cancel()
-                        }
-                    }
-                }
-            }
+//            .pointerInput(Unit) {
+//                awaitPointerEventScope {
+//                    while (true) {
+//                        val event = awaitPointerEvent()
+//                        if (event.changes.any { it.pressed }) {
+//                            flingJob?.cancel()
+//                        }
+//                    }
+//                }
+//            }
             .nestedScroll(
                 connection = nestedScrollConnection,
                 dispatcher = nestedScrollDispatcher

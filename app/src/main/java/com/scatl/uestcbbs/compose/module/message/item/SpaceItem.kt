@@ -32,8 +32,9 @@ fun SpaceItem(
         modifier = modifier
             .commonCardBg {
                 navHostController.navigate(
-                    Router.ThreadDetailRouterEntity(
-                        id = data.threadId.toIntOrElse()
+                    Router.UserProfileRouterEntity(
+                        uid = data.authorId,
+                        name = data.author.toString()
                     )
                 )
             }
@@ -43,12 +44,7 @@ fun SpaceItem(
             name = data.author.toString(),
             date = data.dateline
         ) {
-            navHostController.navigate(
-                Router.UserProfileRouterEntity(
-                    uid = data.authorId,
-                    name = data.author.toString()
-                )
-            )
+
         }
 
         Text(

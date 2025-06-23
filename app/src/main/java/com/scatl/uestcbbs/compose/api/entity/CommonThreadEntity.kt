@@ -102,7 +102,8 @@ data class CommonThreadEntity(
 
     var isFavorite: Boolean = false,
     var postId: Int? = 0,
-    var summaries: MutableList<String>? = null
+    var summaries: MutableList<String>? = null,
+    var displayForumName: Boolean = true
 ) : SwipeRefreshItem {
     override var isStickerHeader = false
 

@@ -604,10 +604,13 @@ object HtmlUtil {
                         val item = EmotionManager.getEmotionById(dsp)
                         "<img class=\"emoji\" src=\"${item?.aPath}\" />"
                     } else {
-                        val attachment = attachments
-                            ?.find {
-                                it.attachmentId.toString() == url.replace("i:", "")
-                            }
+                        val attachment = if (url.startsWith("i:")) {
+                            attachments?.find { it.attachmentId.toString() == url.replaceFirst("i:", "") }
+                        } else if (url.startsWith("a:")) {
+                            attachments?.find { it.attachmentId.toString() == url.replaceFirst("a:", "") }
+                        } else {
+                            null
+                        }
                         if (attachment?.isImage == 1) {
                             imageViewerConfig.images.add(
                                 ImageViewerConfig.ImageViewerItem(attachment.path, attachment.thumbnailUrl)

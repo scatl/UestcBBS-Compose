@@ -50,11 +50,14 @@ import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.pagePadding
 import com.scatl.uestcbbs.compose.ext.showToast
 import com.scatl.uestcbbs.compose.ext.unboundClickable
+import com.scatl.uestcbbs.compose.manager.ThreadSnapshotManager
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.widget.CommonAlertDialog
 import com.scatl.uestcbbs.compose.widget.TIP_ID_THREAD_SNAPSHOT
 import com.scatl.uestcbbs.compose.widget.Tip
 import com.scatl.uestcbbs.compose.widget.refresh.SwipeRefresh
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Created by sca_tl at 2024/9/14 15:30:20
@@ -182,7 +185,9 @@ fun SnapShotScreen() {
         },
         onConfirmClick = {
             scope.launchSafety {
-                val success = viewModel.deleteAllSnapshot()
+                val success = withContext(Dispatchers.IO) {
+                    ThreadSnapshotManager.deleteAll()
+                }
                 ContextCompat
                     .getString(context, if (success) R.string.delete_success else R.string.delete_fail)
                     .showToast(context)

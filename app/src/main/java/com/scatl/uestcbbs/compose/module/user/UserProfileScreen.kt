@@ -1,13 +1,13 @@
 package com.scatl.uestcbbs.compose.module.user
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +28,6 @@ import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.PersonAddAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +39,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -61,31 +61,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.google.android.renderscript.Toolkit
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.api.entity.user.UserProfileEntity
-import com.scatl.uestcbbs.compose.db.entity.AccountDBEntity
 import com.scatl.uestcbbs.compose.ext.isGTESdk31
 import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.pagePadding
@@ -101,6 +97,7 @@ import com.scatl.uestcbbs.compose.module.user.collect.UserCollectionScreen
 import com.scatl.uestcbbs.compose.module.user.friend.UserFriendScreen
 import com.scatl.uestcbbs.compose.module.user.messageboard.UserMessageBoardScreen
 import com.scatl.uestcbbs.compose.module.user.post.UserPostsScreen
+import com.scatl.uestcbbs.compose.module.wealth.WaterTransferBottomSheet
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.theme.LocalCustomColors
@@ -128,6 +125,7 @@ fun UserProfileScreen(
     val detailData by viewModel.detailData.collectAsStateWithLifecycle()
     val stickyLayoutController = rememberUpdatedState(remember { StickyLayoutController() })
     val progress = rememberSaveable { mutableFloatStateOf(0f) }
+    val showWaterTransferBottomSheet = rememberSaveable { mutableStateOf(false) }
 
     StatusLayout(
         uiState = detailData,
@@ -151,7 +149,8 @@ fun UserProfileScreen(
             barContent = {
                 BarContent(
                     data = detailData.data,
-                    progress = progress
+                    progress = progress,
+                    showWaterTransferBottomSheet = showWaterTransferBottomSheet
                 )
             },
             bodyContent = {
@@ -168,6 +167,11 @@ fun UserProfileScreen(
                 progress.floatValue = percent
             }
         )
+
+        WaterTransferBottomSheet(
+            show = showWaterTransferBottomSheet,
+            defaultUserName = detailData.data?.userSummary?.username
+        )
     }
 }
 
@@ -175,12 +179,15 @@ fun UserProfileScreen(
 @Composable
 private fun BarContent(
     data: UserProfileEntity?,
-    progress: MutableFloatState
+    progress: MutableFloatState,
+    showWaterTransferBottomSheet: MutableState<Boolean>,
 ) {
     if (data == null) {
         return
     }
     val navHostController = LocalNavController.current
+    val self = rememberSaveable { mutableStateOf(AccountManager.getSignedInAccount()?.uid == data.userSummary?.uid.toString()) }
+
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors().copy(containerColor = Color.Transparent),
         modifier = Modifier
@@ -208,12 +215,27 @@ private fun BarContent(
             )
         },
         actions = {
-
+            Row {
+                if (self.value.not()) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_money_transfer),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(color = lerp(Color.White, MaterialTheme.colorScheme.onBackground, progress.floatValue)),
+                        modifier = Modifier
+                            .padding(end = 5.dp)
+                            .size(35.dp)
+                            .padding(5.dp)
+                            .unboundClickable {
+                                showWaterTransferBottomSheet.value = true
+                            }
+                    )
+                }
+            }
         }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HeadContent(
     data: UserProfileEntity?,
@@ -471,6 +493,7 @@ private fun BtnContent(
     val navHostController = LocalNavController.current
     val addFriendData by viewModel.addFriendData.collectAsStateWithLifecycle()
     val showDialog = rememberSaveable { mutableStateOf(false) }
+    val self = rememberSaveable { mutableStateOf(AccountManager.getSignedInAccount()?.uid == data.userSummary?.uid.toString()) }
 
     LaunchedEffect(key1 = addFriendData) {
         if (addFriendData.isSuccess) {
@@ -480,7 +503,7 @@ private fun BtnContent(
         }
     }
 
-    if (AccountManager.getSignedInAccount()?.uid != data.userSummary?.uid.toString()) {
+    if (self.value.not()) {
         Spacer(modifier = Modifier.height(20.dp))
 
         if (data.userSummary?.blocked == true) {

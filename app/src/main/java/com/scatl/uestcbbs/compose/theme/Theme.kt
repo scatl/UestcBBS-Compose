@@ -15,7 +15,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Density
 import androidx.core.view.WindowCompat
 import com.elvishew.xlog.XLog
 import com.materialkolor.PaletteStyle
@@ -34,8 +36,11 @@ fun AppTheme(
     val customTheme by ThemeManager.customTheme.collectAsState()
     val customThemeScheme by ThemeManager.customThemeScheme.collectAsState()
     val dayNightMode by ThemeManager.dayNightMode.collectAsState()
+    val customFontScale by ThemeManager.customFontScale.collectAsState()
+    val useSystemFontScale by ThemeManager.useSystemFontScale.collectAsState()
     val systemDark = isSystemInDarkTheme()
     val context = LocalContext.current
+    val view = LocalView.current
 
     val useDarkMode = rememberUpdatedState(
         newValue = (systemDark && dayNightMode == ThemeManager.DayNightMode.FOLLOW_SYSTEM.value) ||
@@ -64,7 +69,6 @@ fun AppTheme(
 
     var colorScheme = getColorScheme()
 
-    val view = LocalView.current
     if (view.isInEditMode.not()) {
         SideEffect {
             val window = (view.context as Activity).window
@@ -78,12 +82,15 @@ fun AppTheme(
     }
 
     CompositionLocalProvider(
-        LocalCustomColors provides if (useDarkMode.value) DarkCustomColors else LightCustomColors
+        LocalCustomColors provides if (useDarkMode.value) DarkCustomColors else LightCustomColors,
+        LocalDensity provides Density(
+            density = LocalDensity.current.density,
+            fontScale = if (useSystemFontScale) LocalDensity.current.fontScale else customFontScale
+        )
     ) {
         MaterialTheme(
             colorScheme = animateColorScheme(
-                colorScheme = colorScheme,
-                animationSpec = spring()
+                colorScheme = colorScheme
             ),
             content = content,
         )
@@ -97,6 +104,8 @@ fun DarkTheme(
     val useDynamicColor by ThemeManager.useDynamicColor.collectAsState()
     val customTheme by ThemeManager.customTheme.collectAsState()
     val customThemeScheme by ThemeManager.customThemeScheme.collectAsState()
+    val customFontScale by ThemeManager.customFontScale.collectAsState()
+    val useSystemFontScale by ThemeManager.useSystemFontScale.collectAsState()
     val context = LocalContext.current
 
     @Composable
@@ -115,14 +124,6 @@ fun DarkTheme(
         }
     }
 
-//    val view = LocalView.current
-//    if (view.isInEditMode.not()) {
-//        SideEffect {
-//            val window = (view.context as Activity).window
-//            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-//        }
-//    }
-
     var colorScheme = getColorScheme()
 
     key (useDynamicColor, customTheme, customThemeScheme) {
@@ -130,7 +131,11 @@ fun DarkTheme(
     }
 
     CompositionLocalProvider(
-        LocalCustomColors provides DarkCustomColors
+        LocalCustomColors provides DarkCustomColors,
+        LocalDensity provides Density(
+            density = LocalDensity.current.density,
+            fontScale = if (useSystemFontScale) LocalDensity.current.fontScale else customFontScale
+        )
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

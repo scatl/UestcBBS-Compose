@@ -32,8 +32,24 @@ object ThemeManager {
     private val _appDarkMode = MutableStateFlow(false)
     val appDarkMode: StateFlow<Boolean> = _appDarkMode
 
+    private val _customFontScale = MutableStateFlow(DataStore.customFontScale)
+    val customFontScale: StateFlow<Float> = _customFontScale
+
+    private val _useSystemFontScale = MutableStateFlow(DataStore.useSystemFontScale)
+    val useSystemFontScale: StateFlow<Boolean> = _useSystemFontScale
+
     var isAppDarkMode = false
         private set
+
+    fun toggleCustomFontScale(scale: Float) {
+        _customFontScale.value = scale
+        DataStore.useSystemFontScale = false
+    }
+
+    fun toggleUseSystemFontScale(enable: Boolean) {
+        _useSystemFontScale.value = enable
+        DataStore.useSystemFontScale = enable
+    }
 
     fun toggleUseDynamicColor(enable: Boolean) {
         _useDynamicColor.value = enable

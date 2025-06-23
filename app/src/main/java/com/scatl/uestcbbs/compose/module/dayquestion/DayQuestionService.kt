@@ -46,7 +46,7 @@ class DayQuestionService : Service(), DayQuestionView {
     }
 
     override fun onGetDayQuestionSuccess(dayQuestionBean: DayQuestionEntity) {
-        sendNotification("获取题目成功，正在获取答案", questionNumber)
+        sendNotification("获取题目成功，正在获取答案。当前题目：\n${dayQuestionBean.questionTitle}", questionNumber)
         mDayQuestionBean = dayQuestionBean
         mPresenter.getQuestionAnswer(dayQuestionBean.questionTitle)
         questionNumber = dayQuestionBean.questionNum
