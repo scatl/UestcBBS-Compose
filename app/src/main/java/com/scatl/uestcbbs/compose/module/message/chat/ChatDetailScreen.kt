@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,7 +25,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -47,18 +44,19 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.api.entity.message.ChatDetailEntity
 import com.scatl.uestcbbs.compose.ext.LoadInitialDataIfNeeded
 import com.scatl.uestcbbs.compose.ext.clickable
 import com.scatl.uestcbbs.compose.ext.pagePadding
+import com.scatl.uestcbbs.compose.ext.px2dp
 import com.scatl.uestcbbs.compose.ext.unboundClickable
 import com.scatl.uestcbbs.compose.manager.KeyboardManager
 import com.scatl.uestcbbs.compose.module.message.MessageViewModel
@@ -102,13 +100,13 @@ fun ChatDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh
+                    color = MaterialTheme.colorScheme.surfaceContainerLow
                 )
                 .padding(paddingValues),
         ) {
             Box (
                 modifier = Modifier
-                    .background(color = MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .background(color = MaterialTheme.colorScheme.surfaceContainer)
                     .weight(1f),
             ) {
                 List(
@@ -235,6 +233,7 @@ private fun BottomBar(
 
     val keyboardHeight by KeyboardManager.keyboardHeight.collectAsState()
     val keyboardVisibility by KeyboardManager.keyboardVisibility.collectAsState()
+    val navHeight = WindowInsets.navigationBars.getBottom(LocalDensity.current).px2dp
 
     LaunchedEffect(keyboardVisibility) {
         if (keyboardVisibility.not()) {
@@ -338,7 +337,7 @@ private fun BottomBar(
         ) {
             Box(
                 modifier = Modifier
-                    .height(keyboardHeight.dp)
+                    .height(keyboardHeight.dp - navHeight)
             )
 
             AnimatedVisibility(
@@ -349,7 +348,7 @@ private fun BottomBar(
                         .background(
                             color = MaterialTheme.colorScheme.surfaceContainerLow
                         )
-                        .height(keyboardHeight.dp)
+                        .height(keyboardHeight.dp - navHeight)
                         .fillMaxWidth()
                 ) {
                     //state.addTextAfterSelection("![${it.id}](s)")

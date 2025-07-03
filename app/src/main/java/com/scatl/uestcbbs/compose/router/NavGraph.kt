@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.scatl.uestcbbs.compose.db.AppDataBase
@@ -41,8 +40,8 @@ import com.scatl.uestcbbs.compose.module.magic.MagicShopScreen
 import com.scatl.uestcbbs.compose.module.main.MainScreen
 import com.scatl.uestcbbs.compose.module.medal.MedalCenterScreen
 import com.scatl.uestcbbs.compose.module.message.chat.ChatDetailScreen
-import com.scatl.uestcbbs.compose.module.post.CreateThreadScreen
-import com.scatl.uestcbbs.compose.module.post.ThreadDetailScreen
+import com.scatl.uestcbbs.compose.module.post.screen.CreateThreadScreen
+import com.scatl.uestcbbs.compose.module.post.screen.ThreadDetailScreen
 import com.scatl.uestcbbs.compose.module.post.commentrate.CommentRateScreen
 import com.scatl.uestcbbs.compose.module.search.SearchScreen
 import com.scatl.uestcbbs.compose.module.setting.AboutScreen

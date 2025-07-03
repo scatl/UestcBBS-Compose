@@ -40,6 +40,8 @@ import com.scatl.uestcbbs.compose.module.home.newpost.item.NewThreadSiteStatus
 import com.scatl.uestcbbs.compose.module.home.toplist.ItemTopListPost
 import com.scatl.uestcbbs.compose.widget.refresh.RetryType
 import com.scatl.uestcbbs.compose.widget.refresh.SwipeRefresh
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 
 /**
  * Created by sca_tl at 2024/7/11 9:07:23
@@ -51,6 +53,7 @@ fun NewThreadScreen(
     pagerState: PagerState,
     onAlphaChanged: (Float) -> Unit,
     showRefreshBtn: MutableState<Boolean>,
+    hazeState: HazeState
 ) {
     val tag = "NewPostScreen"
 

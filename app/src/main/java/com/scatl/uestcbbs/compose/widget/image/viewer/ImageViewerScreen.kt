@@ -7,13 +7,14 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.SnapSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -43,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -51,28 +53,29 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.navigation.NavHostController
 import coil.request.ImageRequest
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.ext.clickable
+import com.scatl.uestcbbs.compose.ext.hasPermission
 import com.scatl.uestcbbs.compose.ext.isGTESdk29
 import com.scatl.uestcbbs.compose.ext.launchSafety
-import com.scatl.uestcbbs.compose.ext.showToast
+import com.scatl.uestcbbs.compose.ext.px2dp
 import com.scatl.uestcbbs.compose.ext.unboundClickable
-import com.scatl.uestcbbs.compose.module.download.DownloadService
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.theme.DarkTheme
-import com.scatl.uestcbbs.compose.util.ImageSaveUtil
 import com.scatl.uestcbbs.compose.widget.LoadingDialog
+import kotlinx.coroutines.flow.collectLatest
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
+import java.io.File
 
 /**
  * Created by sca_tl at 2024/8/26 15:28:53
@@ -112,7 +115,9 @@ fun ImageViewerScreen(
                     model = config.images[pageNum],
                     isActivePage = pagerState.settledPage == pageNum,
                     onLongClick = {
-                        openBottomSheet.value = true
+                        if (File(config.images[pageNum].originUrl ?: "").exists().not()) {
+                            openBottomSheet.value = true
+                        }
                     }
                 )
             }
@@ -125,7 +130,8 @@ fun ImageViewerScreen(
 
             BottomBar(
                 modifier = Modifier
-                    .align(Alignment.BottomEnd),
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = WindowInsets.navigationBars.getBottom(LocalDensity.current).px2dp),
                 config = config,
                 pagerState = pagerState,
                 showSavingDialog = showSavingDialog
@@ -203,7 +209,7 @@ private fun ImageItem(
 
         if (!isActivePage) {
             LaunchedEffect(Unit) {
-                zoomableState.resetZoom(animationSpec = SnapSpec())
+                zoomableState.resetZoom()
             }
         }
     }
@@ -259,6 +265,13 @@ private fun BottomBar(
 ) {
 
     val context = LocalContext.current
+    val showSaveBtn = rememberSaveable { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { pagerState.currentPage }.collectLatest { currentPage ->
+            showSaveBtn.value = File(config.images[currentPage].originUrl ?: "").exists().not()
+        }
+    }
 
     fun downloadCurrentImg() {
         showSavingDialog.value = false
@@ -294,30 +307,32 @@ private fun BottomBar(
     }
 
     LaunchedEffect(context) {
-        val currentPermissionStatus = ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        hasWritePermission = currentPermissionStatus == PackageManager.PERMISSION_GRANTED
+        hasWritePermission = context.hasPermission(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))
     }
 
-    Text(
-        text = stringResource(id = R.string.save),
-        color = Color.White,
-        fontSize = 14.sp,
-        modifier = modifier
-            .padding(30.dp)
-            .background(
-                color = Color.Gray.copy(alpha = 0.4f),
-                shape = RoundedCornerShape(50)
-            )
-            .padding(vertical = 5.dp)
-            .padding(start = 20.dp, end = 20.dp)
-            .unboundClickable {
-                if (isGTESdk29() || hasWritePermission) {
-                    downloadCurrentImg()
-                } else {
-                    launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    if (showSaveBtn.value) {
+        Text(
+            text = stringResource(id = R.string.save),
+            color = Color.White,
+            fontSize = 14.sp,
+            modifier = modifier
+                .padding(30.dp)
+                .background(
+                    color = Color.Gray.copy(alpha = 0.4f),
+                    shape = RoundedCornerShape(50)
+                )
+                .padding(vertical = 5.dp)
+                .padding(start = 20.dp, end = 20.dp)
+                .unboundClickable {
+                    if (isGTESdk29() || hasWritePermission) {
+                        downloadCurrentImg()
+                    } else {
+                        launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    }
                 }
-            }
-    )
+        )
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -362,8 +377,7 @@ private fun MoreOptions(
     }
 
     LaunchedEffect(context) {
-        val currentPermissionStatus = ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        hasWritePermission = currentPermissionStatus == PackageManager.PERMISSION_GRANTED
+        hasWritePermission = context.hasPermission(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))
     }
 
     BackHandler(enabled = openSheet.value) {

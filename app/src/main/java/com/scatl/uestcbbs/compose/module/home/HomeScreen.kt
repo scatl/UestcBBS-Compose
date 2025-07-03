@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,14 +56,18 @@ import com.scatl.uestcbbs.compose.eventbus.Event
 import com.scatl.uestcbbs.compose.eventbus.SharedFlowBus
 import com.scatl.uestcbbs.compose.ext.dp2px
 import com.scatl.uestcbbs.compose.ext.dpSaver
+import com.scatl.uestcbbs.compose.ext.isGTESdk33
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.lerpColor
 import com.scatl.uestcbbs.compose.ext.pagePadding
 import com.scatl.uestcbbs.compose.ext.px2dp
+import com.scatl.uestcbbs.compose.ext.rememberMutableStateListOf
 import com.scatl.uestcbbs.compose.module.home.newpost.NewThreadScreen
 import com.scatl.uestcbbs.compose.module.home.toplist.TopListScreen
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import kotlin.math.min
 
 /**
@@ -78,6 +81,7 @@ fun HomeScreen() {
 
     val searchBarDefaultHeightDp = SearchBarDefaults.windowInsets.getTop(LocalDensity.current).px2dp +
             15.dp + SearchBarDefaults.InputFieldHeight
+    val hazeState = remember { HazeState() }
 
     val searchBarDefaultHeight = rememberSaveable(
         stateSaver = dpSaver
@@ -92,29 +96,28 @@ fun HomeScreen() {
     val alpha1 = rememberSaveable { mutableFloatStateOf(1f) }
     val showRefreshBtn = rememberSaveable { mutableStateOf(false) }
 
-    val titleNewPost = stringResource(id = R.string.new_post_title)
-    val titleNewReply = stringResource(id = R.string.new_reply_title)
-    val titleHot = stringResource(id = R.string.today_hot_post_title)
-    val titleDigest = stringResource(id = R.string.digest_post_title)
-    val titleLife = stringResource(id = R.string.life_post_title)
-
-    //todo
-    val pageTitles = rememberSaveable {
-        arrayListOf(titleNewPost, titleNewReply, titleHot, titleDigest, titleLife)
-    }
+    val pageTitles = rememberMutableStateListOf(listOf(
+        stringResource(id = R.string.new_post_title),
+        stringResource(id = R.string.new_reply_title),
+        stringResource(id = R.string.today_hot_post_title),
+        stringResource(id = R.string.digest_post_title),
+        stringResource(id = R.string.life_post_title)
+    ))
 
     val pagerState = rememberPagerState(
         pageCount = { pageTitles.size }
     )
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize(),
         contentAlignment = Alignment.TopCenter
     ) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
+                .hazeSource(hazeState)
         ) { page ->
             when (page) {
                 0 -> {
@@ -123,6 +126,7 @@ fun HomeScreen() {
                         page = page,
                         pagerState = pagerState,
                         showRefreshBtn = showRefreshBtn,
+                        hazeState = hazeState,
                         onAlphaChanged = {
                             alpha.floatValue = it
                         }
@@ -155,7 +159,8 @@ fun HomeScreen() {
 
         HomeSearchBar(
             backgroundAlpha = if (pagerState.currentPage == 0) alpha else alpha1,
-            searchBarHeight = searchBarDefaultHeight.value
+            searchBarHeight = searchBarDefaultHeight.value,
+            hazeState = hazeState
         )
 
         BottomBtn(

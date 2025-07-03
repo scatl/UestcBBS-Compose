@@ -63,6 +63,7 @@ fun LocalHtmlWebView(
     format: Int?,
     uniqueId: String,
     modifier: Modifier = Modifier,
+    enableLongClick: Boolean = true,
     attachments: List<AttachmentEntity>? = null,
     defaultFontSize: Int,
     backgroundColor: Color = MaterialTheme.colorScheme.background,
@@ -120,6 +121,7 @@ fun LocalHtmlWebView(
                             )
                         }
                     },
+                    enableLongClick = enableLongClick,
                     backgroundColor = backgroundColorHex,
                     textColor = textColorHex,
                     linkColor = linkColorHex,

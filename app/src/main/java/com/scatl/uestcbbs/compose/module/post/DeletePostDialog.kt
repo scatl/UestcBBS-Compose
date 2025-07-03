@@ -15,6 +15,8 @@ import com.elvishew.xlog.XLog
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.showToast
+import com.scatl.uestcbbs.compose.router.LocalNavController
+import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.widget.CommonAlertDialog
 import com.scatl.uestcbbs.compose.widget.LoadingDialog
 import kotlinx.coroutines.delay
@@ -23,7 +25,7 @@ import kotlinx.coroutines.delay
  * Created by sca_tl at 2024/10/8 10:32:43
  */
 @Composable
-fun DeletePost(
+fun DeletePostDialog(
     showDialog: MutableState<Boolean>,
     pid: String?,
     tid: String?,
@@ -33,6 +35,7 @@ fun DeletePost(
     val tag = "DeletePost"
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val navHostController = LocalNavController.current
     val showLoadingDialog = rememberSaveable { mutableStateOf(false) }
     val showAlertDialog = rememberSaveable { mutableStateOf(true) }
     val confirmDeleteData by viewModel.confirmDeleteData.collectAsStateWithLifecycle()
@@ -48,6 +51,10 @@ fun DeletePost(
                 (confirmDeleteData.errorData?.message
                     ?: ContextCompat.getString(context, R.string.magic_use_fail_dsp)
                 ).showToast(context)
+
+                if (confirmDeleteData.errorData?.message?.contains("您需要先购买") == true) {
+                    navHostController.navigate(Router.MagicShopRouterEntity)
+                }
             }
 
             viewModel.resetDeleteData()

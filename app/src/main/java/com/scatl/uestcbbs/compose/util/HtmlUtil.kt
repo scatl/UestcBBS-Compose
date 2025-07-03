@@ -20,6 +20,7 @@ object HtmlUtil {
     fun generateStyledHtmlContent(
         content: String,
         defaultFontSize: Int,
+        enableLongClick: Boolean,
         backgroundColor: String,
         textColor: String,
         linkColor: String,
@@ -35,6 +36,15 @@ object HtmlUtil {
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
+                    ${if (enableLongClick.not()) {
+                     """
+                        * {
+                            -webkit-user-select: none; 
+                            -webkit-touch-callout: none; 
+                        }
+                    """
+                    } else { "" }}
+                    
                     body {
                         font-size: ${defaultFontSize}px;
                         margin: 0;
@@ -112,6 +122,18 @@ object HtmlUtil {
                         width: calc(100% - 2px); 
                         height: 200px;
                         box-sizing: border-box;
+                    }
+                    .download-btn {       
+                        font-size: 0.8em;
+                        display: inline-block;
+                        padding: 4px 16px;
+                        background-color: ${quoteBgColor};
+                        color: ${linkColor};
+                        text-decoration: none !important;
+                        border-radius: 30px; 
+                        font-weight: bold;
+                        margin-top: 8px;
+                        -webkit-tap-highlight-color: transparent;
                     }
                     pre code {
                         display: block;
@@ -726,7 +748,7 @@ object HtmlUtil {
                 "<div class=\"attachment\">" +
                     "<strong>${attachment.filename}</strong>" +
                     "<br/>" +
-                    "<a href=\"${url}\" onclick=\"onAttachmentClick('${url}', '${attachment.filename}')\">${ContextCompat.getString(context, R.string.download)}</a>" +
+                    "<a href=\"${url}\" class=\"download-btn\" onclick=\"onAttachmentClick('${url}', '${attachment.filename}')\">${ContextCompat.getString(context, R.string.download)}</a>" +
                 "</div>"
             }
         } else {

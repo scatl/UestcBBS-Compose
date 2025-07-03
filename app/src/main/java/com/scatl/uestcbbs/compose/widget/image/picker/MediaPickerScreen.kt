@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.animateBounds
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -70,6 +71,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.scatl.uestcbbs.compose.ext.LoadInitialDataIfNeeded
 import com.scatl.uestcbbs.compose.ext.clickable
+import com.scatl.uestcbbs.compose.ext.hasPermission
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.rememberMutableStateListOf
 import com.scatl.uestcbbs.compose.ext.showToast
@@ -140,9 +142,7 @@ fun MediaPickerScreen(
     }
 
     LoadInitialDataIfNeeded(context) {
-        val granted = permissions.all {
-            ActivityCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-        }
+        val granted = context.hasPermission(permissions)
         if (granted) {
             loadMedia()
         } else {
@@ -488,9 +488,9 @@ private fun BottomBar(
                             }
                         }
                         //.animateContentSize()
-//                        .animateBounds(
-//                            lookaheadScope = this@LookaheadScope
-//                        )
+                        .animateBounds(
+                            lookaheadScope = this@LookaheadScope
+                        )
                         .padding(
                             vertical = 5.dp,
                             horizontal = 20.dp

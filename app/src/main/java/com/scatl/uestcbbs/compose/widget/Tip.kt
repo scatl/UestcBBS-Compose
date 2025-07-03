@@ -82,11 +82,7 @@ fun Tip (
                         .align(Alignment.End)
                         .clickable(unbound = true) {
                             show.value = false
-                            val value = mutableSetOf<String>().apply {
-                                addAll(DataStore.tipShowedId)
-                                add(tipId)
-                            }
-                            DataStore.tipShowedId = value
+                            DataStore.saveTipShowedId(tipId)
                         }
                 )
             }
@@ -99,3 +95,4 @@ const val TIP_ID_MAGIC_SHOP = "TIP_ID_MAGIC_SHOP"
 const val TIP_ID_RATE = "TIP_ID_RATE"
 const val TIP_ID_ACCOUNT_MANAGE = "TIP_ID_ACCOUNT_MANAGE"
 const val TIP_ID_DAY_QUESTION = "TIP_ID_DAY_QUESTION"
+const val TIP_ID_NOTIFICATION_PERMISSION = "TIP_ID_NOTIFICATION_PERMISSION"

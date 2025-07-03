@@ -17,13 +17,8 @@ android {
         targetSdk = libs.versions.targetSdkVersion.get().toInteger()
         versionCode = libs.versions.versionCode.get().toInteger()
         versionName = libs.versions.versionName.get()
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
-
     buildTypes {
         release {
             minifyEnabled = false
@@ -34,10 +29,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = '17'
+    kotlin {
+        jvmToolchain(17)
     }
-
     buildFeatures {
         compose = true
         buildConfig = true
@@ -46,8 +40,8 @@ android {
         prefab = true
     }
     packaging {
-        resources {
-            excludes += [
+        resources { res ->
+            res.excludes += [
                 '/META-INF/{AL2.0,LGPL2.1}',
                 'META-INF/LICENSE-LGPL-3.txt',
                 'META-INF/DEPENDENCIES',
@@ -75,6 +69,7 @@ dependencies {
     implementation(libs.richText)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.materialKolor)
+    implementation(libs.haze)
 
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.compose)
