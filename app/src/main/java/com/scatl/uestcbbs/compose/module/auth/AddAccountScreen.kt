@@ -33,11 +33,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -170,6 +173,7 @@ fun AddAccountScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 40.dp)
+                        .semantics { contentType = ContentType.Username }
                 )
 
                 Text(
@@ -208,6 +212,7 @@ fun AddAccountScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 40.dp)
+                        .semantics { contentType = ContentType.Password }
                 )
                 Text(
                     text = if (password.isEmpty()) stringResource(R.string.password_empty_hint) else "",

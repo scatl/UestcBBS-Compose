@@ -74,6 +74,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.elvishew.xlog.XLog
 import com.scatl.uestcbbs.compose.R
+import com.scatl.uestcbbs.compose.datastore.DataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import retrofit2.HttpException

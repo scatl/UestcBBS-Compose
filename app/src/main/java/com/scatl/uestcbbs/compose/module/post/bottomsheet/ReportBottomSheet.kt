@@ -1,4 +1,4 @@
-package com.scatl.uestcbbs.compose.module.post
+package com.scatl.uestcbbs.compose.module.post.bottomsheet
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,6 +38,7 @@ import com.scatl.uestcbbs.compose.ext.cardCorner
 import com.scatl.uestcbbs.compose.ext.clickable
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.showToast
+import com.scatl.uestcbbs.compose.module.post.PostViewModel
 import com.scatl.uestcbbs.compose.widget.CustomTextField
 import com.scatl.uestcbbs.compose.widget.RoundCheckBox
 import com.scatl.uestcbbs.compose.widget.RoundCheckBoxDefaults

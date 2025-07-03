@@ -1,4 +1,4 @@
-package com.scatl.uestcbbs.compose.module.post
+package com.scatl.uestcbbs.compose.module.post.bottomsheet
 
 import android.os.Parcelable
 import androidx.activity.compose.BackHandler

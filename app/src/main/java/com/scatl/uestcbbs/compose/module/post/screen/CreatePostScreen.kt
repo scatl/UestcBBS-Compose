@@ -1,4 +1,4 @@
-package com.scatl.uestcbbs.compose.module.post
+package com.scatl.uestcbbs.compose.module.post.screen
 
 import android.os.Parcelable
 import androidx.activity.compose.BackHandler
@@ -20,12 +20,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Fullscreen
-import androidx.compose.material.icons.outlined.FullscreenExit
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -60,11 +56,10 @@ import com.scatl.uestcbbs.compose.ext.getStatusBarHeight
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.showToast
 import com.scatl.uestcbbs.compose.manager.KeyboardManager
-import com.scatl.uestcbbs.compose.widget.IconTitle
+import com.scatl.uestcbbs.compose.module.post.PostViewModel
+import com.scatl.uestcbbs.compose.module.post.CreatePostBottomBar
 import com.scatl.uestcbbs.compose.widget.LoadingDialog
 import com.scatl.uestcbbs.compose.widget.ReplyCreditDialog
-import com.scatl.uestcbbs.compose.widget.RoundCheckBox
-import com.scatl.uestcbbs.compose.widget.RoundCheckBoxDefaults
 import kotlinx.coroutines.delay
 import kotlinx.parcelize.Parcelize
 
@@ -75,6 +70,7 @@ import kotlinx.parcelize.Parcelize
 @Composable
 fun CreatePostScreen(
     show: MutableState<Boolean>,
+    bgColor: Color = MaterialTheme.colorScheme.surface,
     data: CreatePostEntity
 ) {
     val scope = rememberCoroutineScope()
@@ -163,14 +159,13 @@ fun CreatePostScreen(
                     ).value
                 )
             )
-            .navigationBarsPadding()
             .clickable(
                 unbound = true,
                 enable = show.value,
                 radius = 0.dp
             ) {
                 //暂时屏蔽，点击键盘enter莫名其妙会调用
-                //hide()
+                hide()
             }
     ) {
         AnimatedVisibility(
@@ -187,17 +182,17 @@ fun CreatePostScreen(
                     .clickable(radius = 0.dp) { }
                     .align(Alignment.BottomCenter)
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        color = bgColor,
                         shape = RoundedCornerShape(
                             topStart = animateDpAsState(
                                 targetValue = if (fullScreenMode.value) 0.dp else 20.dp,
                                 animationSpec = tween(durationMillis = 500),
-                                label = "corner_size"
+                                label = "corner_size_ts"
                             ).value,
                             topEnd = animateDpAsState(
                                 targetValue = if (fullScreenMode.value) 0.dp else 20.dp,
                                 animationSpec = tween(durationMillis = 500),
-                                label = "corner_size"
+                                label = "corner_size_te"
                             ).value
                         )
                     )
@@ -281,62 +276,20 @@ fun CreatePostScreen(
                         }
                 )
 
-                Row (
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 15.dp)
-                        .padding(vertical = 5.dp)
-                ) {
-                    Row (
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                        modifier = Modifier
-                            .clickable(unbound = true) {
-                                anonymousChecked.value = anonymousChecked.value.not()
-                            }
-                    ) {
-                        if (data.allowAnonymous) {
-                            RoundCheckBox(
-                                isChecked = anonymousChecked.value,
-                                radius = 8.dp,
-                                onClick = null,
-                                color = RoundCheckBoxDefaults.colors(
-                                    borderColor = MaterialTheme.colorScheme.primary,
-                                    selectedColor = MaterialTheme.colorScheme.primary
-                                ),
-                                modifier = Modifier.padding(0.dp)
-                            )
-                            Text(
-                                text = "匿名发帖",
-                                fontSize = 15.sp
-                            )
-                        }
-                    }
-
-                    IconTitle(
-                        icon = if (fullScreenMode.value) Icons.Outlined.FullscreenExit else Icons.Outlined.Fullscreen,
-                        iconSize = 24.dp,
-                        text = if (fullScreenMode.value) "退出全屏" else "全屏编辑",
-                        gap = 2.dp,
-                        textStyle = TextStyle(),
-                        modifier = Modifier
-                            .clickable(unbound = true) {
-                                fullScreenMode.value = fullScreenMode.value.not()
-                            }
-                    )
-                }
-
-                BottomBar(
+                CreatePostBottomBar(
                     state = richTextState,
                     showBottomPanel = showBottomPanel,
                     showEmotionPanel = showEmotionPanel,
-                    showReplyCredit = false,
-                    showVote = false,
+                    showFullScreen = true,
+                    isFullScreen = fullScreenMode,
+                    showAnonymous = data.allowAnonymous,
+                    isAnonymous = anonymousChecked.value,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 5.dp)
+                        .padding(vertical = 5.dp),
+                    onFullScreenClick = {
+                        fullScreenMode.value = fullScreenMode.value.not()
+                    }
                 )
             }
         }

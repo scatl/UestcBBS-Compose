@@ -231,7 +231,7 @@ fun SettingScreen(
 
                         stickyHeader {
                             Text(
-                                text = "主题",
+                                text = "个性化",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
@@ -309,19 +309,6 @@ fun SettingScreen(
                                 showDayNightModeDialog.value = true
                             }
                         }
-
-                        stickyHeader {
-                            Text(
-                                text = "字体",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(color = MaterialTheme.colorScheme.surface)
-                                    .padding(start = 15.dp, top = 10.dp, bottom = 10.dp)
-                            )
-                        }
                         item {
                             SwitchItem(
                                 text = "使用系统字体大小",
@@ -382,6 +369,14 @@ fun SettingScreen(
                                 )
                             }
                         }
+//                        item {
+//                            NormalItem(
+//                                text = "自定义Loading动画",
+//                                dsp = "选一个你喜欢的Loading动画吧！"
+//                            ) {
+//
+//                            }
+//                        }
 
                         stickyHeader {
                             Text(

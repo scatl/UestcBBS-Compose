@@ -1,4 +1,4 @@
-package com.scatl.uestcbbs.compose.module.post
+package com.scatl.uestcbbs.compose.module.post.screen
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -24,10 +24,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -110,8 +112,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -120,13 +122,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -141,7 +143,6 @@ import com.scatl.uestcbbs.compose.ext.LoadInitialDataIfNeeded
 import com.scatl.uestcbbs.compose.ext.cardCorner
 import com.scatl.uestcbbs.compose.ext.clickable
 import com.scatl.uestcbbs.compose.ext.copyToClipBoard
-import com.scatl.uestcbbs.compose.ext.dp2px
 import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.pagePadding
@@ -154,6 +155,10 @@ import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.ext.unboundClickable
 import com.scatl.uestcbbs.compose.manager.AccountManager
 import com.scatl.uestcbbs.compose.manager.ForumCategoryManager
+import com.scatl.uestcbbs.compose.module.post.DeletePostDialog
+import com.scatl.uestcbbs.compose.module.post.PostViewModel
+import com.scatl.uestcbbs.compose.module.post.bottomsheet.AddToCollectionBottomSheet
+import com.scatl.uestcbbs.compose.module.post.bottomsheet.ReportBottomSheet
 import com.scatl.uestcbbs.compose.module.post.commentrate.CommentBottomSheet
 import com.scatl.uestcbbs.compose.module.post.commentrate.CommentRateType
 import com.scatl.uestcbbs.compose.module.post.commentrate.RateBottomSheet
@@ -270,6 +275,7 @@ fun ThreadDetailScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+
                 .navigationBarsPadding()
         ) {
             WaterMark(
@@ -341,7 +347,8 @@ fun ThreadDetailScreen(
                     openCreatePostScreen = openCreatePostScreen,
                     currentCreatePostData = currentCreatePostData,
                     scrollDirection = scrollDirection,
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
                 )
             }
 
@@ -457,6 +464,7 @@ private fun HeadContent(
 
             Content(
                 data = data,
+                showSnapshot = showSnapshot,
                 viewModel = viewModel
             )
 
@@ -954,6 +962,7 @@ private fun ReplyTitle(
 @Composable
 private fun Content(
     data: ThreadDetailEntity?,
+    showSnapshot: MutableState<Boolean>,
     viewModel: PostViewModel
 ) {
     if (data == null) {
@@ -970,6 +979,7 @@ private fun Content(
     LocalHtmlWebView(
         content = row.value?.message,
         format = row.value?.format,
+        enableLongClick = showSnapshot.value.not(),
         uniqueId = row.value?.postId.toString(),
         attachments = row.value?.attachments,
         defaultFontSize = 16,
@@ -1040,7 +1050,12 @@ private fun ThreadInfo(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp, horizontal = 20.dp)
+                .padding(vertical = 10.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(3.dp)
+                )
+                .padding(vertical = 10.dp)
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -1629,38 +1644,11 @@ private fun Collection(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row (
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    Text(
+                        text = collectionEntity.name.toString(),
                         modifier = Modifier
                             .weight(1f, false)
-                            .horizontalScroll(rememberScrollState())
-                    ) {
-                        Text(
-                            text = collectionEntity.name.toString(),
-                        )
-
-                        if (collectionEntity.keyword.isNotNullAndEmpty()) {
-                            Row (
-                                horizontalArrangement = Arrangement.spacedBy(3.dp),
-                                modifier = Modifier
-                            ) {
-                                collectionEntity.keyword.split(",").forEach {
-                                    Text(
-                                        text = it,
-                                        fontSize = 12.sp,
-                                        lineHeight = 12.sp,
-                                        modifier = Modifier
-                                            .background(
-                                                color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                                shape = RoundedCornerShape(2.dp)
-                                            )
-                                            .padding(horizontal = 4.dp, vertical = 2.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    )
 
                     Spacer(modifier = Modifier.width(20.dp))
 
@@ -1682,8 +1670,32 @@ private fun Collection(
                     Text(
                         text = collectionEntity.description.toString(),
                         fontSize = 14.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.alpha(alpha = 0.5f)
                     )
+                }
+
+                if (collectionEntity.keyword.isNotNullAndEmpty()) {
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Row (
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                        modifier = Modifier
+                    ) {
+                        collectionEntity.keyword.split(",").forEach {
+                            Text(
+                                text = it,
+                                fontSize = 12.sp,
+                                lineHeight = 12.sp,
+                                modifier = Modifier
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                        shape = RoundedCornerShape(2.dp)
+                                    )
+                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -2083,7 +2095,6 @@ private fun SupportInfo(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomBar(
     data: ThreadDetailEntity?,
@@ -2127,12 +2138,7 @@ private fun BottomBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .clickable(
-                    interactionSource = null,
-                    indication = null,
-                ) {
-
-                }
+                .padding(top = WindowInsets.navigationBars.getBottom(LocalDensity.current).px2dp)
                 .padding(20.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -2142,6 +2148,10 @@ private fun BottomBar(
                     horizontal = 20.dp,
                     vertical = 15.dp
                 )
+                .clickable(
+                    interactionSource = null,
+                    indication = null,
+                ) { }
         ) {
             IconTitle(
                 icon = Icons.Outlined.EditNote,
@@ -2438,7 +2448,7 @@ private fun MoreOptions(
     )
 
     if (showDeleteDialog.value) {
-        DeletePost(
+        DeletePostDialog(
             showDialog = showDeleteDialog,
             pid = row.value?.postId.toString(),
             tid = data?.thread?.threadId.toString(),

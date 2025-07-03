@@ -57,7 +57,6 @@ class MainActivity : ComponentActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, insets -> insets }
         initInterfaceLanguage()
         startService()
-        requestPermission()
         setContent {
             AppTheme {
                 TheftProofWaterMarkBackground {
@@ -89,12 +88,6 @@ class MainActivity : ComponentActivity() {
                 && dataBase.getDayQuestionDao().getAll().isNotNullAndEmpty()) {
                 startService(Intent(this@MainActivity, DayQuestionService::class.java))
             }
-        }
-    }
-
-    private fun requestPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
         }
     }
 }

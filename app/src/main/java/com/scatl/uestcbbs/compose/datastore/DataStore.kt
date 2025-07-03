@@ -44,6 +44,14 @@ object DataStore {
 
     var tipShowedId by DataStoreDelegate(App.context.bizDataStore, stringSetPreferencesKey("tipShowedId"), mutableSetOf())
     var legacyForumHash by DataStoreDelegate(App.context.bizDataStore, stringPreferencesKey("legacyForumHash"), "")
+
+    fun saveTipShowedId(tipId: String) {
+        val value = mutableSetOf<String>().apply {
+            addAll(tipShowedId)
+            add(tipId)
+        }
+        tipShowedId = value
+    }
 }
 
 class DataStoreDelegate<T>(

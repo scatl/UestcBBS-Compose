@@ -1,6 +1,10 @@
 package com.scatl.uestcbbs.compose.module.main
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInVertically
@@ -22,10 +26,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
@@ -33,19 +39,30 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.scatl.uestcbbs.compose.R
+import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.eventbus.BaseEvent
 import com.scatl.uestcbbs.compose.eventbus.Event
 import com.scatl.uestcbbs.compose.eventbus.SharedFlowBus
+import com.scatl.uestcbbs.compose.ext.findActivity
+import com.scatl.uestcbbs.compose.ext.hasPermission
+import com.scatl.uestcbbs.compose.ext.isGTESdk29
+import com.scatl.uestcbbs.compose.ext.isGTESdk33
+import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.manager.MessageManager
 import com.scatl.uestcbbs.compose.module.forum.ForumCategoryScreen
 import com.scatl.uestcbbs.compose.module.home.HomeScreen
 import com.scatl.uestcbbs.compose.module.message.MessageScreen
 import com.scatl.uestcbbs.compose.module.user.mine.MineScreen
 import com.scatl.uestcbbs.compose.theme.LocalCustomColors
+import com.scatl.uestcbbs.compose.widget.LottieDialog
+import com.scatl.uestcbbs.compose.widget.TIP_ID_NOTIFICATION_PERMISSION
+import kotlinx.coroutines.delay
 
 /**
  * Created by sca_tl at 2024/4/23 10:29:59
@@ -145,6 +162,8 @@ fun MainScreen() {
             }
         }
     }
+
+    RequestNotificationPermission()
 }
 
 @Composable
@@ -181,4 +200,46 @@ private fun Icon(
             contentDescription = item.first
         )
     }
+}
+
+@Composable
+private fun RequestNotificationPermission() {
+    val context = LocalContext.current
+
+    if (isGTESdk33().not() || DataStore.tipShowedId.contains(TIP_ID_NOTIFICATION_PERMISSION)) {
+        return
+    }
+
+    if (context.hasPermission(arrayOf(Manifest.permission.POST_NOTIFICATIONS))) {
+        return
+    }
+
+    val scope = rememberCoroutineScope()
+    val showDialog = rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(context) {
+        DataStore.saveTipShowedId(TIP_ID_NOTIFICATION_PERMISSION)
+        scope.launchSafety {
+            delay(2000)
+            showDialog.value = true
+        }
+    }
+
+    LottieDialog(
+        showDialog = showDialog,
+        lottieFileName = "notification",
+        text = "邀请你申请通知权限，通知权限申请成功后，你可以通过通知栏方便了解下载进度，每日答题等情况，你也可以在系统通知管理中细化设置通知功能。是否申请通知权限？",
+        confirmText = "申请",
+        cancelText = "取消",
+        onConfirmClick = {
+            if (isGTESdk33()) {
+                ActivityCompat.requestPermissions(context.findActivity(), arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
+            }
+            showDialog.value = false
+        },
+        onCancelClick = {
+            showDialog.value = false
+        }
+    )
+
 }

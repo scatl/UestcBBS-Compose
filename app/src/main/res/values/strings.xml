@@ -269,7 +269,7 @@
     <string name="thread_detail_reply_award_dsp_possibility">回复本帖可获得%1$s%2$s奖励，每人可获得%3$s次奖励，中奖概率%4$s%%，当前剩余%5$s%2$s</string>
     <string name="thread_detail_rush_reply_dsp">本帖为抢楼活动帖，积分大于%1$s可参与活动\n开始时间：%2$s\n结束时间：%3$s\n截止楼层：%4$s\n奖励楼层：%5$s</string>
     <string name="thread_detail_reply_win_target_floor">抢中楼层</string>
-    <string name="thread_detail_post_blocked">此帖内容已被屏蔽</string>
+    <string name="thread_detail_post_blocked">此帖内容已被屏蔽，请注意文明用语</string>
     <string name="thread_detail_author_post_only">只看TA的回复</string>
     <string name="thread_detail_author_post_only_my">只看我的回复</string>
     <string name="thread_detail_delete_post">删除帖子</string>

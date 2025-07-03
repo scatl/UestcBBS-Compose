@@ -88,5 +88,11 @@
 		"author": "jordond",
 		"link": "https://github.com/jordond/MaterialKolor",
 		"description": "\uD83C\uDFA8 Generate a dynamic Material3 color sheme from a seed color"
+	},
+	{
+		"name": "haze",
+		"author": "chrisbanes",
+		"link": "https://github.com/chrisbanes/haze",
+		"description": "Background blurring for Compose Multiplatform / Jetpack Compose"
 	}
 ]

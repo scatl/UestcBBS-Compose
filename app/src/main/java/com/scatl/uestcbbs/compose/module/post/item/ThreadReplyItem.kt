@@ -88,12 +88,12 @@ import com.scatl.uestcbbs.compose.ext.toAvatarUrl
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.manager.AccountManager
 import com.scatl.uestcbbs.compose.module.post.commentrate.CommentBottomSheet
-import com.scatl.uestcbbs.compose.module.post.CommentInfo
-import com.scatl.uestcbbs.compose.module.post.DeletePost
-import com.scatl.uestcbbs.compose.module.post.MoreOptionItem
+import com.scatl.uestcbbs.compose.module.post.screen.CommentInfo
+import com.scatl.uestcbbs.compose.module.post.DeletePostDialog
+import com.scatl.uestcbbs.compose.module.post.screen.MoreOptionItem
 import com.scatl.uestcbbs.compose.module.post.PostViewModel
-import com.scatl.uestcbbs.compose.module.post.RateInfo
-import com.scatl.uestcbbs.compose.module.post.ReportBottomSheet
+import com.scatl.uestcbbs.compose.module.post.screen.RateInfo
+import com.scatl.uestcbbs.compose.module.post.bottomsheet.ReportBottomSheet
 import com.scatl.uestcbbs.compose.module.post.commentrate.RateBottomSheet
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
@@ -730,7 +730,7 @@ private fun MoreOptions(
     }
 
     if (showDeleteDialog.value) {
-        DeletePost(
+        DeletePostDialog(
             showDialog = showDeleteDialog,
             pid = data.postId.toString(),
             tid = data.threadId.toString(),
