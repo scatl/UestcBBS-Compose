@@ -44,6 +44,11 @@ class PostRepository @Inject constructor(): BaseRepository() {
         support: Boolean
     ) = postService.support(tid, pid, support)
 
+    suspend fun supportThread(
+        tid: String,
+        support: Boolean
+    ) = postService.supportThread(tid, support)
+
     suspend fun beforeUseRegretMagic(id: String?) = legacyService.beforeUseRegretMagic(id)
 
     suspend fun confirmUseRegretMagic(pid: String?, tid: String?): String? {

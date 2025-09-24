@@ -55,7 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -241,19 +241,20 @@ fun SettingScreen(
                                     .padding(start = 15.dp, top = 10.dp, bottom = 10.dp)
                             )
                         }
-                        item {
-                            SwitchItem(
-                                text = stringResource(id = R.string.setting_dynamic_color),
-                                dsp = stringResource(id = R.string.setting_dynamic_color_dsp),
-                                checked = dynamicTheme.value && customTheme.value.isEmpty(),
-                                enable = isGTESdk31(),
-                            ) {
-                                if (it) {
-                                    ThemeManager.toggleCustomTheme("")
-                                    customTheme.value = ""
+                        if (isGTESdk31()) {
+                            item {
+                                SwitchItem(
+                                    text = stringResource(id = R.string.setting_dynamic_color),
+                                    dsp = stringResource(id = R.string.setting_dynamic_color_dsp),
+                                    checked = dynamicTheme.value && customTheme.value.isEmpty(),
+                                ) {
+                                    if (it) {
+                                        ThemeManager.toggleCustomTheme("")
+                                        customTheme.value = ""
+                                    }
+                                    ThemeManager.toggleUseDynamicColor(it)
+                                    dynamicTheme.value = it
                                 }
-                                ThemeManager.toggleUseDynamicColor(it)
-                                dynamicTheme.value = it
                             }
                         }
                         item {

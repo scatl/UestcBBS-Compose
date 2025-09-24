@@ -25,7 +25,7 @@
     <string name="switch_account">切换账号</string>
     <string name="add_account_already_exist">账号已存在，可直接登录</string>
     <string name="sign_in_after_account_added">添加成功后登录账号</string>
-    <string name="account_manage_dsp">账号登录状态一段时间后会自动失效，你可以重新登录账号</string>
+    <string name="account_manage_dsp">账号登录状态一段时间后会自动失效，你需要重新登录账号</string>
     <string name="account_delete_success">删除账号成功</string>
     <string name="account_delete_dialog_dsp">确认要删除“%1$s”这个账号吗？</string>
     <string name="account_delete_dialog_dsp_logged">确认要删除“%1$s”这个账号吗？"由于该账号当前已登录，删除后会退出登录该账号。</string>
@@ -205,7 +205,7 @@
     <string name="setting_interface_language">界面语言</string>
     <string name="setting_interface_language_dsp">设置软件界面交互语言</string>
     <string name="setting_dynamic_color">动态主题</string>
-    <string name="setting_dynamic_color_dsp">根据壁纸颜色动态设置软件主题（支持安卓12及以上）</string>
+    <string name="setting_dynamic_color_dsp">根据壁纸颜色动态设置软件主题</string>
     <string name="setting_custom_theme">自定义主题</string>
     <string name="setting_custom_theme_dsp">你可以通过选择一种颜色来生成主题色</string>
     <string name="setting_custom_theme_dialog_dsp">拖动圆点选择颜色</string>

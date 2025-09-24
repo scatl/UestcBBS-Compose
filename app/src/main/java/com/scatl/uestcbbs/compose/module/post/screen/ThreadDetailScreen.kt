@@ -47,6 +47,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.CardGiftcard
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CollectionsBookmark
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
@@ -129,7 +130,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.elvishew.xlog.XLog
@@ -1110,6 +1111,33 @@ private fun ThreadInfo(
         Spacer(modifier = Modifier.height(10.dp))
     }
 
+    if (data.thread?.isClosed == 1) {
+        Box (
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(cardCorner)
+                )
+                .padding(vertical = 15.dp)
+        ) {
+            IconTitle(
+                icon = Icons.Outlined.Close,
+                iconTint = MaterialTheme.colorScheme.error,
+                gap = 2.dp,
+                iconSize = 18.dp,
+                text = "本帖已关闭，不再接受新回复",
+                textStyle = TextStyle(
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.error
+                )
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+    }
+
     CommonThreadTitle(
         data = data.thread,
         labelTextStyle = TextStyle(
@@ -1623,7 +1651,7 @@ private fun Collection(
                 .alpha(0.6f)
         )
 
-        data?.thread?.collections?.fastForEachIndexed { i, collectionEntity ->
+        data.thread.collections.fastForEachIndexed { i, collectionEntity ->
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -2019,7 +2047,7 @@ fun RateInfo(
                     }
                     if (it.reason.isNotNullAndEmpty()) {
                         Text(
-                            text = it.reason.toString(),
+                            text = it.reason,
                             fontSize = 15.sp,
                             modifier = Modifier.alpha(alpha = 0.8f)
                         )
@@ -2044,18 +2072,31 @@ private fun SupportInfo(
         return
     }
 
+    val context = LocalContext.current
     val row = remember { mutableStateOf(data.rows?.getOrNull(0)) }
 
-    val supportData by viewModel.supportData(row.value?.postId.toString()).collectAsStateWithLifecycle()
+    val supportData by viewModel.threadSupportData(row.value?.postId.toString()).collectAsStateWithLifecycle()
     val supportCount = rememberSaveable { mutableIntStateOf(data.thread?.recommendAdd.toIntOrElse()) }
     val againstCount = rememberSaveable { mutableIntStateOf(data.thread?.recommendSub.toIntOrElse()) }
 
     LaunchedEffect(supportData.data) {
-        if (supportData.data != null && supportData.data?.success == true) {
-            if (supportData.data?.support == true) {
-                supportCount.intValue += 1
+        if (supportData.data != null) {
+            if (supportData.data?.type == 3) {
+                "您已评论过本帖".showToast(context)
             } else {
-                againstCount.intValue += 1
+                if (supportData.data?.support == true) {
+                    if (supportData.data?.type == 0) {
+                        supportCount.intValue += 1
+                    } else {
+                        supportCount.intValue -= 1
+                    }
+                } else {
+                    if (supportData.data?.type == 0) {
+                        againstCount.intValue += 1
+                    } else {
+                        againstCount.intValue -= 1
+                    }
+                }
             }
         }
     }
@@ -2076,7 +2117,7 @@ private fun SupportInfo(
             .height(35.dp),
         onLeftClick = {
             if (!showSnapshot.value) {
-                viewModel.support(
+                viewModel.supportThread(
                     tid = data.thread?.threadId.toString(),
                     pid = row.value?.postId.toString(),
                     support = false
@@ -2085,7 +2126,7 @@ private fun SupportInfo(
         },
         onRightClick = {
             if (!showSnapshot.value) {
-                viewModel.support(
+                viewModel.supportThread(
                     tid = data.thread?.threadId.toString(),
                     pid = row.value?.postId.toString(),
                     support = true
@@ -2162,7 +2203,11 @@ private fun BottomBar(
                     fontSize = 14.sp
                 ),
                 modifier = Modifier
+                    .alpha(if (data?.thread?.isClosed == 1) 0.5f else 1f)
                     .unboundClickable {
+                        if (data?.thread?.isClosed == 1) {
+                            return@unboundClickable
+                        }
                         currentCreatePostData.value = CreatePostEntity(
                             threadId = data?.thread?.threadId.toIntOrElse(),
                             postId = data?.thread?.postId.toIntOrElse(),
@@ -2185,7 +2230,11 @@ private fun BottomBar(
                 text = "点评",
                 fontSize = 14.sp,
                 modifier = Modifier
+                    .alpha(if (data?.thread?.isClosed == 1) 0.5f else 1f)
                     .unboundClickable {
+                        if (data?.thread?.isClosed == 1) {
+                            return@unboundClickable
+                        }
                         openCommentBottomSheet.value = true
                     }
             )

@@ -52,9 +52,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.scatl.uestcbbs.compose.api.entity.ForumDetailEntity
+import com.scatl.uestcbbs.compose.api.entity.ForumDetailEntity.ThreadType
 import com.scatl.uestcbbs.compose.api.entity.IndexEntity
 import com.scatl.uestcbbs.compose.db.entity.FavoriteForumDBEntity
 import com.scatl.uestcbbs.compose.ext.cardCorner
@@ -380,7 +381,15 @@ private fun Content2(
 
     LaunchedEffect(forumDetailData.data) {
         categories.clear()
-        forumDetailData.data?.threadTypes?.let { categories.addAll(it) }
+        forumDetailData.data?.threadTypes?.let {
+            categories.addAll(it)
+            if (it.isEmpty()) {
+                categories.add(ThreadType(
+                    name = selectedChildForum.value?.name,
+                    typeId = selectedChildForum.value?.fid
+                ))
+            }
+        }
     }
 
     Column (

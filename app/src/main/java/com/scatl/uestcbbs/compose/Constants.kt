@@ -65,11 +65,13 @@ object ForumPicture {
         208 to "https://bbs.uestc.edu.cn/assets/%E7%A4%BE%E5%9B%A2%E4%BA%A4%E6%B5%81%E4%B8%AD%E5%BF%83-BoMTJvPr.jpg",
 
         2   to "https://bbs.uestc.edu.cn/assets/%E7%AB%99%E5%8A%A1%E5%85%AC%E5%91%8A-BgVmak4C.jpg",
-        46  to "https://bbs.uestc.edu.cn/assets/%E7%AB%99%E5%8A%A1%E7%BB%BC%E5%90%88--bpgsGJP.jpg"
+        46  to "https://bbs.uestc.edu.cn/assets/%E7%AB%99%E5%8A%A1%E7%BB%BC%E5%90%88--bpgsGJP.jpg",
+
+        -1 to "https://bbs.uestc.edu.cn/assets/default-DklHFxMh.jpg"
     )
 
     operator fun get(id: Int?): String? {
-        return urlMapping[id]
+        return urlMapping[id] ?: urlMapping[-1]
     }
 }
 

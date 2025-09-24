@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.scatl.uestcbbs.compose.R
@@ -92,7 +92,7 @@ fun AccountManageScreen() {
         )
 
         LazyColumn {
-            itemsIndexed(accounts) { _, item ->
+            itemsIndexed(accounts.sortedBy { it.signedIn?.not() }) { _, item ->
                 Row (
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -124,7 +124,7 @@ fun AccountManageScreen() {
                             Text(
                                 text = stringResource(id = R.string.logout),
                                 fontSize = 11.sp,
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.error,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier
                                     .clickable (unbound = false) {
@@ -132,8 +132,8 @@ fun AccountManageScreen() {
                                         navHostController.navigateAndClean(Router.AccountManageRouterEntity)
                                     }
                                     .background(
-                                        color = Color.Red.copy(alpha = 0.5f),
-                                        shape = RoundedCornerShape(cardCorner)
+                                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(50)
                                     )
                                     .padding(horizontal = 15.dp, vertical = 2.dp)
                             )
@@ -141,7 +141,7 @@ fun AccountManageScreen() {
                             Text(
                                 text = stringResource(id = R.string.login),
                                 fontSize = 11.sp,
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier
                                     .clickable (
@@ -151,8 +151,8 @@ fun AccountManageScreen() {
                                         navHostController.navigateAndClean(Router.MainRouterEntity)
                                     }
                                     .background(
-                                        color = MaterialTheme.colorScheme.primary,
-                                        shape = RoundedCornerShape(cardCorner)
+                                        color = MaterialTheme.colorScheme.primary.copy(0.1f),
+                                        shape = RoundedCornerShape(50)
                                     )
                                     .padding(horizontal = 15.dp, vertical = 2.dp)
                             )
@@ -163,6 +163,7 @@ fun AccountManageScreen() {
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
+                                .size(18.dp)
                                 .clickable(unbound = true) {
                                     longPressAccount.value = item
                                     showDeleteDialog.value = true

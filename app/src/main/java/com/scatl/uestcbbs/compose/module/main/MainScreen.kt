@@ -2,9 +2,7 @@ package com.scatl.uestcbbs.compose.module.main
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInVertically
@@ -40,8 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.scatl.uestcbbs.compose.R
@@ -49,9 +46,7 @@ import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.eventbus.BaseEvent
 import com.scatl.uestcbbs.compose.eventbus.Event
 import com.scatl.uestcbbs.compose.eventbus.SharedFlowBus
-import com.scatl.uestcbbs.compose.ext.findActivity
 import com.scatl.uestcbbs.compose.ext.hasPermission
-import com.scatl.uestcbbs.compose.ext.isGTESdk29
 import com.scatl.uestcbbs.compose.ext.isGTESdk33
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.manager.MessageManager
@@ -205,6 +200,7 @@ private fun Icon(
 @Composable
 private fun RequestNotificationPermission() {
     val context = LocalContext.current
+    val activity = LocalActivity.current
 
     if (isGTESdk33().not() || DataStore.tipShowedId.contains(TIP_ID_NOTIFICATION_PERMISSION)) {
         return
@@ -233,7 +229,7 @@ private fun RequestNotificationPermission() {
         cancelText = "取消",
         onConfirmClick = {
             if (isGTESdk33()) {
-                ActivityCompat.requestPermissions(context.findActivity(), arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
+                ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
             }
             showDialog.value = false
         },
