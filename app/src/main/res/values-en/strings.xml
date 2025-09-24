@@ -199,7 +199,7 @@
     <string name="setting_interface_language">Interface Language</string>
     <string name="setting_interface_language_dsp">Set the software interface interaction language</string>
     <string name="setting_dynamic_color">Dynamic color</string>
-    <string name="setting_dynamic_color_dsp">Dynamically set the software theme according to the wallpaper color (supports Android 12 and above)</string>
+    <string name="setting_dynamic_color_dsp">Dynamically set the software theme according to the wallpaper color</string>
     <string name="setting_custom_theme">Custom theme</string>
     <string name="setting_custom_theme_dsp">You can generate theme colors by selecting a color</string>
     <string name="setting_custom_theme_dialog_dsp">Drag the dots to select a color</string>

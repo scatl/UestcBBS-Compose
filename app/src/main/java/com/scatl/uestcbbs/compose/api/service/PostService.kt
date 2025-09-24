@@ -62,6 +62,12 @@ interface PostService {
         @Query("support") support: Boolean?
     ): BaseApiResult<Boolean?>
 
+    @POST("post/review")
+    suspend fun supportThread(
+        @Query("tid") tid: String,
+        @Query("support") support: Boolean?
+    ): BaseApiResult<Int?>
+
     //点评
     @POST("post/comment")
     suspend fun comment(

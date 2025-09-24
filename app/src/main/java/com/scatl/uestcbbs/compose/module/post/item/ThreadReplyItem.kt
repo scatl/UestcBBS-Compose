@@ -199,6 +199,9 @@ fun ThreadReplyItem(
                     openBottomSheet.value = true
                 },
                 onClick = {
+                    if (data.thread?.isClosed == 1) {
+                        return@combinedClickable
+                    }
                     onCreatePost.invoke()
                 }
             )

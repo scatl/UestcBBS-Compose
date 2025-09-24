@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.os.Parcelable
 import android.view.MotionEvent
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.LinearEasing
@@ -71,12 +72,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.scatl.uestcbbs.compose.ext.LoadInitialDataIfNeeded
 import com.scatl.uestcbbs.compose.ext.clickable
-import com.scatl.uestcbbs.compose.ext.findActivity
 import com.scatl.uestcbbs.compose.ext.getStatusBarHeight
 import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
@@ -97,7 +97,7 @@ fun VideoPlayerScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val activity = LocalContext.current.findActivity()
+    val activity = LocalActivity.current
     val navHostController = LocalNavController.current
     val configuration = LocalConfiguration.current
     val player by playerViewModel.playerState.collectAsState()
@@ -111,7 +111,7 @@ fun VideoPlayerScreen(
 
     BackHandler {
         if (isFullscreen.value && isPortraitInit.value) {
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
         } else {
             navHostController.popBackStack()
         }
@@ -212,7 +212,7 @@ fun VideoPlayerScreen(
                         modifier = Modifier
                             .size(30.dp)
                             .clickable(unbound = true) {
-                                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
                                 navHostController.popBackStack()
                             }
                     )
@@ -388,7 +388,7 @@ private fun BottomControls(
     isControlShow: MutableState<Boolean>,
     currentSpeed: MutableState<Speed>
 ) {
-    val activity = LocalContext.current.findActivity()
+    val activity = LocalActivity.current
     val showSpeedSelect = rememberSaveable { mutableStateOf(false) }
     AnimatedVisibility(
         visible = isControlShow.value,
@@ -483,9 +483,9 @@ private fun BottomControls(
                         modifier = Modifier
                             .clickable(unbound = true) {
                                 if (isFullscreen.value) {
-                                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                                    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
                                 } else {
-                                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                                    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                                 }
                                 isFullscreen.value = isFullscreen.value.not()
                             }
