@@ -326,21 +326,10 @@ private fun Content1(
                                 shape = RoundedCornerShape(cardCorner)
                             )
                             .clickable(unbound = false) {
-                                if (child.canPostThread == false) {
-                                    "你无法在此板块发帖".showToast(context)
-                                } else {
-                                    showContent2.value = true
-                                    selectedParent.value = child
-                                }
+                                showContent2.value = true
+                                selectedParent.value = child
                             }
                             .padding(horizontal = 5.dp)
-                            .alpha(
-                                if (child.canPostThread == false) {
-                                    0.5f
-                                } else {
-                                    1f
-                                }
-                            )
                     )
                 }
             }
@@ -545,5 +534,5 @@ private fun Line(text: String) {
 @Parcelize
 data class SelectForumResult(
     var detail: ForumDetailEntity,
-    var category: ForumDetailEntity.ThreadType
+    var category: ThreadType
 ): Parcelable

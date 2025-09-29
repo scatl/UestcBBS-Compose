@@ -231,7 +231,7 @@ fun AddToCollectionBottomSheet(
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally),
                             onClick = {
-                                viewModel.confirmAddToCollection(currentSelected.value?.collectionId.toIntOrElse(), tid)
+                                viewModel.addThreadToCollection(currentSelected.value?.collectionId.toIntOrElse(), tid)
                             }
                         ) {
                             IconTitle(

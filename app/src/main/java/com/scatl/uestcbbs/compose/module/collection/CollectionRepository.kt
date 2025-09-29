@@ -60,18 +60,4 @@ class CollectionRepository @Inject constructor(): BaseRepository() {
     ) = userService.deleteFavorite(requestEntity)
 
     suspend fun getMyCollectionList(tid: String) = postService.getFavoriteStatus(tid)
-
-    suspend fun confirmAddToCollection(tid: Int, ctid: Int, reason: String): String? {
-        val map = mutableMapOf<String, RequestBody>()
-        map["ctid"] = ctid.toString().toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        map["reason"] = reason.toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        map["tids[]"] = tid.toString().toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        map["inajax"] = "0".toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        map["handlekey"] = "".toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        map["formhash"] = DataStore.legacyForumHash.toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        map["addthread"] = "1".toRequestBody("multipart/form-data".toMediaTypeOrNull())
-        map["submitaddthread"] = "".toRequestBody("multipart/form-data".toMediaTypeOrNull())
-
-        return legacyService.confirmAddToCollection(map)
-    }
 }

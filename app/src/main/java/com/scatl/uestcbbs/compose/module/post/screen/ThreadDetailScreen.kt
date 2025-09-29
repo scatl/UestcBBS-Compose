@@ -1,7 +1,13 @@
 package com.scatl.uestcbbs.compose.module.post.screen
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.view.View
+import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -50,6 +56,7 @@ import androidx.compose.material.icons.outlined.CardGiftcard
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CollectionsBookmark
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.ContentCut
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.ErrorOutline
@@ -103,11 +110,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -129,6 +139,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -169,6 +180,7 @@ import com.scatl.uestcbbs.compose.module.snapshot.SnapshotViewModel
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.theme.LocalCustomColors
+import com.scatl.uestcbbs.compose.util.ImageSaveUtil
 import com.scatl.uestcbbs.compose.util.formatTimestamp
 import com.scatl.uestcbbs.compose.util.formatTimestampYMDHMS
 import com.scatl.uestcbbs.compose.widget.CommonConfirmDialog
@@ -185,7 +197,9 @@ import com.scatl.uestcbbs.compose.widget.WatermarkDrawable
 import com.scatl.uestcbbs.compose.widget.refresh.RetryType
 import com.scatl.uestcbbs.compose.widget.refresh.SwipeRefresh
 import com.scatl.uestcbbs.compose.widget.web.LocalHtmlWebView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import okhttp3.internal.toLongOrDefault
 
 /**
@@ -218,7 +232,6 @@ fun ThreadDetailScreen(
     val openReportBottomSheet = rememberSaveable { mutableStateOf(false) }
 
     val showSnapshotData = rememberSaveable { mutableStateOf(false) }
-    val headGraphicsLayer = rememberGraphicsLayer()
     val scrollDirection = rememberSaveable { mutableStateOf<Int?>(null) }
 
     val currentCreatePostData = rememberSaveable { mutableStateOf(CreatePostEntity()) }
@@ -296,7 +309,6 @@ fun ThreadDetailScreen(
                         viewModel = viewModel,
                         progress = progress,
                         barHeight = barContentHeight,
-                        headGraphicsLayer = headGraphicsLayer,
                         showSnapshot = showSnapshotData
                     )
                 },
@@ -360,7 +372,6 @@ fun ThreadDetailScreen(
                 data = threadDetailData.data,
                 viewModel = viewModel,
                 showSnapshot = showSnapshotData,
-                headGraphicsLayer = headGraphicsLayer
             )
 
             if (openCommentBottomSheet.value) {
@@ -431,8 +442,7 @@ private fun HeadContent(
     viewModel: PostViewModel,
     progress: MutableFloatState,
     barHeight: MutableFloatState,
-    showSnapshot: MutableState<Boolean>,
-    headGraphicsLayer: GraphicsLayer
+    showSnapshot: MutableState<Boolean>
 ) {
     if (data == null) {
         return
@@ -440,12 +450,6 @@ private fun HeadContent(
 
     Box (
         modifier = Modifier
-//            .drawWithContent {
-//                headGraphicsLayer.record {
-//                    this@drawWithContent.drawContent()
-//                }
-//                drawLayer(headGraphicsLayer)
-//            }
             .background(color = MaterialTheme.colorScheme.background)
             .padding(top = barHeight.floatValue.px2dp)
     ) {
@@ -2085,16 +2089,22 @@ private fun SupportInfo(
                 "您已评论过本帖".showToast(context)
             } else {
                 if (supportData.data?.support == true) {
-                    if (supportData.data?.type == 0) {
-                        supportCount.intValue += 1
-                    } else {
-                        supportCount.intValue -= 1
+                    when (supportData.data?.type) {
+                        0 -> supportCount.intValue += 1
+                        1 -> supportCount.intValue -= 1
+                        2 -> {
+                            againstCount.intValue -= 1
+                            supportCount.intValue += 1
+                        }
                     }
                 } else {
-                    if (supportData.data?.type == 0) {
-                        againstCount.intValue += 1
-                    } else {
-                        againstCount.intValue -= 1
+                    when (supportData.data?.type) {
+                        0 -> againstCount.intValue += 1
+                        1 -> againstCount.intValue -= 1
+                        2 -> {
+                            supportCount.intValue -= 1
+                            againstCount.intValue += 1
+                        }
                     }
                 }
             }
@@ -2327,13 +2337,13 @@ private fun MoreOptions(
     openReportBottomSheet: MutableState<Boolean>,
     data: ThreadDetailEntity?,
     viewModel: PostViewModel,
-    showSnapshot: MutableState<Boolean>,
-    headGraphicsLayer: GraphicsLayer
+    showSnapshot: MutableState<Boolean>
 ) {
     val scope = rememberCoroutineScope()
     val navHostController = LocalNavController.current
     val snapshotViewModel: SnapshotViewModel = hiltViewModel()
     val context = LocalContext.current
+    val activity = LocalActivity.current
     val uriHandler = LocalUriHandler.current
     val showSnapshotDialog = rememberSaveable { mutableStateOf(false) }
     val showDeleteDialog = rememberSaveable { mutableStateOf(false) }
@@ -2374,7 +2384,7 @@ private fun MoreOptions(
                 state = rememberLazyGridState(),
                 userScrollEnabled = false
             ) {
-                //todo 内容太长时，截出的内容不完整，或者崩溃。。。和webView有关，有时间再看
+                //todo 添加水印
 //                item {
 //                    MoreOptionItem(
 //                        text = "截取内容",
@@ -2382,12 +2392,27 @@ private fun MoreOptions(
 //                        enable = !Constants.INTERNAL_FIDS.contains(data?.thread?.forumId ?: 0)
 //                    ) {
 //                        scope.launchSafety {
+//                            hide()
+//                            delay(500)
 //                            withContext(Dispatchers.IO) {
-//                                val bitmap = headGraphicsLayer.toImageBitmap().asAndroidBitmap()
-//                                ImageSaveUtil.saveToAlbum(bitmap, context)
+//                                (activity?.findViewById<View?>(R.id.thread_detail_webview) as? WebView?)?.let { webView ->
+//                                    runCatching {
+//                                        webView.measure(
+//                                            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+//                                            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+//                                        )
+//                                        webView.layout(0, 0, webView.measuredWidth, webView.measuredHeight)
+//                                        val bitmap = createBitmap(webView.measuredWidth, webView.measuredHeight, Bitmap.Config.RGB_565)
+//                                        Canvas(bitmap).apply {
+//                                            webView.draw(this)
+//                                        }
+//                                        ImageSaveUtil.saveToAlbum(bitmap, activity)
+//                                        bitmap.recycle()
+//                                    }.onFailure {
+//                                        XLog.tag(TAG).d(it)
+//                                    }
+//                                }
 //                            }
-//                            sheetState.hide()
-//                            openSheet.value = false
 //                        }
 //                    }
 //                }

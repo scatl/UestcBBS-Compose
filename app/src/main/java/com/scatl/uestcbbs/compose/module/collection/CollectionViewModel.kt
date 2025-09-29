@@ -2,13 +2,11 @@ package com.scatl.uestcbbs.compose.module.collection
 
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.scatl.uestcbbs.compose.App
-import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.api.entity.CollectionEntity
 import com.scatl.uestcbbs.compose.api.entity.request.DeleteFavoriteRequestEntity
+import com.scatl.uestcbbs.compose.api.entity.request.FavoriteRequestEntity
 import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.toAvatarUrl
@@ -16,7 +14,6 @@ import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.module.collection.entity.CollectionDetailData
 import com.scatl.uestcbbs.compose.module.collection.entity.CollectionDetailEntity
 import com.scatl.uestcbbs.compose.module.collection.entity.CollectionListEntity
-import com.scatl.uestcbbs.compose.module.collection.entity.MyCollectionList
 import com.scatl.uestcbbs.compose.net.onFailure
 import com.scatl.uestcbbs.compose.net.onSuccess
 import com.scatl.uestcbbs.compose.util.BBSLinkUtil
@@ -26,7 +23,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -506,7 +502,7 @@ class CollectionViewModel @Inject constructor(
         }
     }
 
-    fun confirmAddToCollection(ctid: Int, tid: Int) {
+    fun addThreadToCollection(ctid: Int, tid: Int) {
         fun error(e: Throwable) {
             _addToCollectionData.value = UiState<Boolean?>().apply {
                 isSuccess = false
@@ -516,16 +512,18 @@ class CollectionViewModel @Inject constructor(
         }
 
         viewModelScope.launchSafety {
-            val html = collectionRepository.confirmAddToCollection(tid, ctid, "") ?: ""
-            val info = Jsoup.parse(html).select("div[id=messagetext]").text()
-            if (info.contains("淘帖成功")) {
-                _addToCollectionData.value = UiState<Boolean?>().apply {
-                    isSuccess = true
-                    data = true
+            collectionRepository
+                .collectionService
+                .addThreadToCollection(FavoriteRequestEntity(false, ctid), tid)
+                .onSuccess {
+                    _addToCollectionData.value = UiState<Boolean?>().apply {
+                        isSuccess = true
+                        data = true
+                    }
                 }
-            } else {
-                error(Throwable(info))
-            }
+                .onFailure {
+                    error(it)
+                }
         }.onCatch {
             error(it)
         }

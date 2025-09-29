@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import com.scatl.uestcbbs.compose.Constants
 import com.scatl.uestcbbs.compose.api.service.AuthService
 import com.scatl.uestcbbs.compose.api.service.BingService
+import com.scatl.uestcbbs.compose.api.service.CollectionService
 import com.scatl.uestcbbs.compose.api.service.ForumService
 import com.scatl.uestcbbs.compose.api.service.IndexService
 import com.scatl.uestcbbs.compose.api.service.MessageService
@@ -148,4 +149,9 @@ class ApiModule {
     fun provideMsgService(
         @BindBBSApiRetrofit retrofit: Retrofit
     ): MessageService = retrofit.create(MessageService::class.java)
+
+    @Provides
+    fun provideCollectionService(
+        @BindBBSApiRetrofit retrofit: Retrofit
+    ): CollectionService = retrofit.create(CollectionService::class.java)
 }

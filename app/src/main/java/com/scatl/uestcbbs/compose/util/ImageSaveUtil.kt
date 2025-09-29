@@ -150,7 +150,7 @@ object ImageSaveUtil {
 
     @JvmStatic
     fun saveToAlbum(inputStream: InputStream, context: Context): Boolean {
-        val tempFile = File.createTempFile("temp_image_${UUID.randomUUID()}", ".tmp", context.cacheDir)
+        val tempFile = File.createTempFile("temp_image_${UUID.randomUUID()}", ".tmp", context.externalCacheDir)
 
         try {
             FileOutputStream(tempFile).use { output ->
@@ -180,7 +180,7 @@ object ImageSaveUtil {
             XLog.tag(TAG).d(e)
             return false
         } finally {
-            tempFile.delete()
+            //tempFile.delete()
         }
     }
 

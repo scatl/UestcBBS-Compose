@@ -120,7 +120,6 @@ fun UserPostsScreen(
         SwipeRefresh(
             uiState = userPostData,
             listState = state,
-            enableRefresh = false,
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surfaceContainer),

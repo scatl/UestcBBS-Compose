@@ -2,6 +2,7 @@ package com.scatl.uestcbbs.compose.base
 
 import com.scatl.uestcbbs.compose.api.service.AuthService
 import com.scatl.uestcbbs.compose.api.service.BingService
+import com.scatl.uestcbbs.compose.api.service.CollectionService
 import com.scatl.uestcbbs.compose.api.service.ForumService
 import com.scatl.uestcbbs.compose.api.service.IndexService
 import com.scatl.uestcbbs.compose.api.service.LegacyService
@@ -31,6 +32,7 @@ open class BaseRepository @Inject constructor() {
     @Inject lateinit var formService: ForumService
     @Inject lateinit var messageService: MessageService
     @Inject lateinit var legacyService: LegacyService
+    @Inject lateinit var collectionService: CollectionService
 
     @Inject lateinit var dataBase: AppDataBase
 

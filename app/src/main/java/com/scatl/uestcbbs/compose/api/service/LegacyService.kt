@@ -174,12 +174,6 @@ interface LegacyService {
         @Field("formhash") formHash: String,
     ): String?
 
-    @Multipart
-    @POST("forum.php?mod=collection&action=edit&op=addthread")
-    suspend fun confirmAddToCollection(
-        @PartMap map: MutableMap<String, RequestBody>
-    ): String?
-
     // </editor-fold>
 
     // <editor-fold desc="用户主页">

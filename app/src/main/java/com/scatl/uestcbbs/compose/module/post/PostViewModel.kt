@@ -393,12 +393,12 @@ class PostViewModel @Inject constructor(
             postRepository
                 .supportThread(tid, support)
                 .onSuccess {
-                    _supportThreadDataMap[pid]?.value?.success(
+                    _supportThreadDataMap[pid]?.value = UiState<ThreadSupportEntity>().apply {
                         data = ThreadSupportEntity(
                             type = it,
                             support = support
                         )
-                    )
+                    }
                 }
                 .onFailure {
                     _supportThreadDataMap[pid]?.value?.error(Throwable(it.message))
