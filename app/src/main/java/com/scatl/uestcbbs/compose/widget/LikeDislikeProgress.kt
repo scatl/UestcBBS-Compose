@@ -1,23 +1,33 @@
 package com.scatl.uestcbbs.compose.widget
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ThumbDownOffAlt
 import androidx.compose.material.icons.filled.ThumbUpOffAlt
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -53,19 +63,39 @@ fun LikeDislikeProgressBar(
     onLeftClick: (() -> Unit) ? = null,
     onRightClick: (() -> Unit) ? = null,
 ) {
+    val (leftCorrectNum, rightCorrectNum) = remember (leftNum, rightNum) {
+        when {
+            leftNum == 0 && rightNum == 0 -> Pair(1, 1)
+            leftNum == 0 && rightNum != 0 -> Pair(1, 3)
+            leftNum != 0 && rightNum == 0 -> Pair(3, 1)
+            leftNum.toFloat() / rightNum.toFloat() <= 0.25f -> Pair(1, 3)
+            leftNum.toFloat() / rightNum.toFloat() >= 4 -> Pair(3, 1)
+            else -> Pair(leftNum, rightNum)
+        }
+    }
+
+    val targetLeftRatio = remember(leftCorrectNum, rightCorrectNum) {
+        leftCorrectNum.toFloat() / (leftCorrectNum + rightCorrectNum).toFloat()
+    }
+    val targetRightRatio = remember(leftCorrectNum, rightCorrectNum) {
+        rightCorrectNum.toFloat() / (leftCorrectNum + rightCorrectNum).toFloat()
+    }
+
+    val animatedLeftRatio by animateFloatAsState(
+        animationSpec = tween(durationMillis = 500),
+        targetValue = targetLeftRatio,
+        label = "leftRatio"
+    )
+    val animatedRightRatio by animateFloatAsState(
+        animationSpec = tween(durationMillis = 500),
+        targetValue = targetRightRatio,
+        label = "rightRatio"
+    )
+
     Box(modifier = modifier) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val w = size.width
             val h = size.height
-
-            val (leftCorrectNum, rightCorrectNum) = when {
-                leftNum == 0 && rightNum == 0 -> Pair(1, 1)
-                leftNum == 0 && rightNum != 0 -> Pair(1, 3)
-                leftNum != 0 && rightNum == 0 -> Pair(3, 1)
-                leftNum.toFloat() / rightNum.toFloat() < 0.25f -> Pair(1, 3)
-                leftNum.toFloat() / rightNum.toFloat() > 4 -> Pair(3, 1)
-                else -> Pair(leftNum, rightNum)
-            }
 
             val offset = when {
                 rightCorrectNum == 0 -> h * progress
@@ -73,8 +103,8 @@ fun LikeDislikeProgressBar(
                 else -> -(h - gapWidth) / 2 * progress
             }
 
-            val leftLength = (leftCorrectNum.toFloat() / (leftCorrectNum + rightCorrectNum).toFloat()) * w * progress - offset
-            val rightLength = (rightCorrectNum.toFloat() / (leftCorrectNum + rightCorrectNum).toFloat()) * w * progress - offset
+            val leftLength = animatedLeftRatio * w * progress - offset
+            val rightLength = animatedRightRatio * w * progress - offset
 
             val clipPath = Path().apply {
                 addRoundRect(
@@ -198,9 +228,9 @@ fun LikeDislikeProgressBar(
 @Preview
 @Composable
 fun LikeDislikeProgressBarTest() {
-    val leftNum = 100
-    val rightNum = 1
-    val progress = 1f
+    var leftNum by remember { mutableIntStateOf(0) }
+    var rightNum by remember { mutableIntStateOf(0) }
+    var progress by remember { mutableFloatStateOf(1f) }
     val gapWidth = 25f
 
     val leftStartColor = Color.Blue
@@ -208,16 +238,41 @@ fun LikeDislikeProgressBarTest() {
     val rightStartColor = Color.Green
     val rightEndColor = Color.LightGray
 
-    LikeDislikeProgressBar(
-        leftNum,
-        rightNum,
-        progress = progress,
-        gapWidth = gapWidth,
-        colors = listOf(leftStartColor, leftEndColor, rightStartColor, rightEndColor),
-        iconSize = 30.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp)
-            .padding(horizontal = 0.dp)
-    )
+    Column {
+        Row {
+            Button(onClick = { leftNum += 1 }) {
+                Text("Left +1")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { rightNum += 1 }) {
+                Text("Right +1")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = {
+                rightNum = 0
+                leftNum = 0
+            }) {
+                Text("reset")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text("Left: $leftNum, Right: $rightNum")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LikeDislikeProgressBar(
+            leftNum,
+            rightNum,
+            progress = progress,
+            gapWidth = gapWidth,
+            colors = listOf(leftStartColor, leftEndColor, rightStartColor, rightEndColor),
+            iconSize = 30.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .padding(horizontal = 0.dp)
+        )
+    }
 }

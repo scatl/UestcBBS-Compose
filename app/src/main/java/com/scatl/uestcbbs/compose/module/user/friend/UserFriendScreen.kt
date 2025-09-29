@@ -39,7 +39,6 @@ fun UserFriendScreen(
     SwipeRefresh(
         uiState = friendData,
         listState = state,
-        enableRefresh = false,
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer),

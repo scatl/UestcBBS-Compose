@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.FrameLayout
+import com.scatl.uestcbbs.compose.R
 
 /**
  * Created by sca_tl at 2024/8/27 15:12:10
@@ -26,6 +27,7 @@ object WebViewManager {
     fun getWebViewLayout(context: Context, id: String): FrameLayout {
         return webViewMap.getOrPut(id) {
             val webView = WebView(context).apply {
+                this.id = R.id.thread_detail_webview
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT

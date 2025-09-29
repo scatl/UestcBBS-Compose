@@ -93,7 +93,6 @@ fun UserMessageBoardScreen(
         SwipeRefresh(
             uiState = messageBoardData,
             listState = state,
-            enableRefresh = false,
             modifier = Modifier.fillMaxSize(),
             onRefresh = {
                 viewModel.getUserMessageBoard(loadMore = false, init = false)

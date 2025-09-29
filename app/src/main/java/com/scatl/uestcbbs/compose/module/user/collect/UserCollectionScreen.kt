@@ -85,7 +85,6 @@ fun UserCollectionScreen(
         SwipeRefresh(
             uiState = collectionData,
             listState = state,
-            enableRefresh = false,
             modifier = Modifier.fillMaxSize(),
             onRefresh = {
                 viewModel.getUserCollection(loadMore = false, init = false)
