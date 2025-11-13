@@ -41,6 +41,7 @@ import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.toBBSImgUrl
 import com.scatl.uestcbbs.compose.ext.toHexNoAlpha
 import com.scatl.uestcbbs.compose.manager.ThemeManager
+import com.scatl.uestcbbs.compose.module.video.VideoPlayerActivity
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.router.linkNavigate
@@ -186,10 +187,7 @@ private class WebAppInterface(
     @JavascriptInterface
     fun onVideoClick(url: String?, name: String?) {
         (context as Activity).runOnUiThread {
-            navHostController.navigate(Router.VideoPlayerRouterEntity(
-                url = url.toString(),
-                name = name
-            ))
+            VideoPlayerActivity.open(context, url.toString(), name)
         }
     }
 

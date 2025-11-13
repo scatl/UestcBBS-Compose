@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -60,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -73,6 +75,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.iffly.compose.markdown.MarkdownView
+import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.scatl.markdown.MarkdownDefaults
 import com.scatl.markdown.MarkdownText
 import com.scatl.uestcbbs.compose.Constants
@@ -84,6 +88,7 @@ import com.scatl.uestcbbs.compose.ext.copyToClipBoard
 import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.pagePadding
+import com.scatl.uestcbbs.compose.ext.showToast
 import com.scatl.uestcbbs.compose.ext.toAvatarUrl
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
 import com.scatl.uestcbbs.compose.manager.AccountManager
@@ -122,6 +127,7 @@ fun ThreadReplyItem(
 ) {
     val navHostController = LocalNavController.current
     val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
 
     val supportData by viewModel.supportData(item.postId.toString()).collectAsStateWithLifecycle()
     val supportCount = rememberSaveable { mutableIntStateOf(item.support.toIntOrElse()) }
@@ -129,38 +135,48 @@ fun ThreadReplyItem(
 
     var updateCommentFlag by remember { mutableStateOf("") }
 
-    val supported = remember {
-        mutableStateOf(supportData.data?.support == true ||
-                viewModel.postRepository.dataBase.getVotedPostDao().findFirstById(item.postId.toString())?.support == true
-        )
-    }
-    val againsted = remember {
-        mutableStateOf(supportData.data?.support == false ||
-                viewModel.postRepository.dataBase.getVotedPostDao().findFirstById(item.postId.toString())?.against == true
-        )
-    }
-
     val moreOptionsBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val openBottomSheet = remember { mutableStateOf(false) }
 
     LaunchedEffect(supportData.data) {
-        if (viewModel.postRepository.dataBase.getVotedPostDao().findFirstById(item.postId.toString()) == null
-            && supportData.data != null
-            && supportData.data?.success == true
-        ) {
-            if (supportData.data?.support == true) {
-                supportCount.intValue += 1
-                supported.value = true
+        if (supportData.data != null) {
+            if (supportData.data?.type == 3) {
+                "您已评论过本帖".showToast(context)
             } else {
-                againstCount.intValue += 1
-                againsted.value = true
+                val dbEntity = VotedPostDBEntity(pid = item.postId.toString(), support = false, against = false)
+
+                if (supportData.data?.support == true) {
+                    when (supportData.data?.type) {
+                        0 -> {
+                            supportCount.intValue += 1
+                            dbEntity.support = true
+                        }
+                        1 -> {
+                            supportCount.intValue -= 1
+                        }
+                        2 -> {
+                            againstCount.intValue -= 1
+                            supportCount.intValue += 1
+                            dbEntity.support = true
+                        }
+                    }
+                } else {
+                    when (supportData.data?.type) {
+                        0 -> {
+                            againstCount.intValue += 1
+                            dbEntity.against = true
+                        }
+                        1 -> {
+                            againstCount.intValue -= 1
+                        }
+                        2 -> {
+                            supportCount.intValue -= 1
+                            againstCount.intValue += 1
+                            dbEntity.against = true
+                        }
+                    }
+                }
             }
-            val dbEntity = VotedPostDBEntity(
-                pid = item.postId.toString(),
-                support = supportData.data?.support == true,
-                against = supportData.data?.support == false
-            )
-            viewModel.postRepository.dataBase.getVotedPostDao().insert(dbEntity)
         }
     }
 
@@ -368,18 +384,27 @@ fun ThreadReplyItem(
                         )
                     } else {
                         if (item.format == 2) {
-                            MarkdownText(
-                                markdown = HtmlUtil.formatMarkdown(item.message.toString(), item.attachments),
-                                theme = MarkdownDefaults.defaultTheme(),
-                                onLinkClicked = {
-                                    linkNavigate(
-                                        url = it,
-                                        openBrowserIfNotMatch = true,
-                                        navHostController = navHostController,
-                                        uriHandler = uriHandler
-                                    )
-                                }
+                            Text("markdown", color = Color.Red)
+                            MarkdownView(
+                                content = HtmlUtil.formatMarkdown(
+                                    item.message.toString(),
+                                    item.attachments
+                                ),
+                                modifier = Modifier.wrapContentSize(),
+                                markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
                             )
+//                            MarkdownText(
+//                                markdown = HtmlUtil.formatMarkdown(item.message.toString(), item.attachments),
+//                                theme = MarkdownDefaults.defaultTheme(),
+//                                onLinkClicked = {
+//                                    linkNavigate(
+//                                        url = it,
+//                                        openBrowserIfNotMatch = true,
+//                                        navHostController = navHostController,
+//                                        uriHandler = uriHandler
+//                                    )
+//                                }
+//                            )
                         } else {
                             Text(
                                 text = item.message.toString()
@@ -476,11 +501,7 @@ fun ThreadReplyItem(
                             IconTitle(
                                 icon = Icons.Outlined.ThumbUp,
                                 iconSize = 16.dp,
-                                iconTint = if (supported.value) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onBackground
-                                },
+                                iconTint = MaterialTheme.colorScheme.onBackground,
                                 text = if (supportCount.intValue.toIntOrElse() > 0) {
                                     supportCount.intValue.toString()
                                 } else {
@@ -489,11 +510,7 @@ fun ThreadReplyItem(
                                 gap = 2.dp,
                                 textStyle = TextStyle(
                                     fontSize = 12.sp,
-                                    color = if (supported.value) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.onBackground
-                                    }
+                                    color = MaterialTheme.colorScheme.onBackground
                                 ),
                                 modifier = Modifier
                                     .clickable(unbound = true) {
@@ -505,17 +522,13 @@ fun ThreadReplyItem(
                                             )
                                         }
                                     }
-                                    .alpha(alpha = if (supported.value) 0.5f else 0.3f)
+                                    .alpha(0.3f)
                             )
 
                             IconTitle(
                                 icon = Icons.Outlined.ThumbDown,
                                 iconSize = 16.dp,
-                                iconTint = if (againsted.value) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onBackground
-                                },
+                                iconTint = MaterialTheme.colorScheme.onBackground,
                                 text = if (againstCount.intValue.toIntOrElse() > 0) {
                                     againstCount.intValue.toString()
                                 } else {
@@ -524,11 +537,7 @@ fun ThreadReplyItem(
                                 gap = 2.dp,
                                 textStyle = TextStyle(
                                     fontSize = 12.sp,
-                                    color = if (againsted.value) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.onBackground
-                                    }
+                                    color = MaterialTheme.colorScheme.onBackground
                                 ),
                                 modifier = Modifier
                                     .clickable(unbound = true) {
@@ -540,7 +549,7 @@ fun ThreadReplyItem(
                                             )
                                         }
                                     }
-                                    .alpha(alpha = if (againsted.value) 0.5f else 0.3f)
+                                    .alpha( 0.3f)
                             )
 
                             Icon(

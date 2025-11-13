@@ -12,17 +12,17 @@ android {
     defaultConfig {
         applicationId = "com.scatl.uestcbbs.compose"
         namespace = "com.scatl.uestcbbs.compose"
-        minSdk = libs.versions.minSdkVersion.get().toInteger()
-        compileSdk = libs.versions.compileSdkVersion.get().toInteger()
-        targetSdk = libs.versions.targetSdkVersion.get().toInteger()
-        versionCode = libs.versions.versionCode.get().toInteger()
+        minSdk = libs.versions.minSdkVersion.get().toInt()
+        compileSdk = libs.versions.compileSdkVersion.get().toInt()
+        targetSdk = libs.versions.targetSdkVersion.get().toInt()
+        versionCode = libs.versions.versionCode.get().toInt()
         versionName = libs.versions.versionName.get()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            minifyEnabled = false
-            proguardFiles(getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro')
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
@@ -40,14 +40,16 @@ android {
         prefab = true
     }
     packaging {
-        resources { res ->
-            res.excludes += [
-                '/META-INF/{AL2.0,LGPL2.1}',
-                'META-INF/LICENSE-LGPL-3.txt',
-                'META-INF/DEPENDENCIES',
-                'META-INF/LICENSE-W3C-TEST',
-                'META-INF/LICENSE-LGPL-2.1.txt',
-            ]
+        resources {
+            excludes.addAll(
+                arrayOf(
+                    "/META-INF/{AL2.0,LGPL2.1}",
+                    "META-INF/LICENSE-LGPL-3.txt",
+                    "META-INF/DEPENDENCIES",
+                    "META-INF/LICENSE-W3C-TEST",
+                    "META-INF/LICENSE-LGPL-2.1.txt",
+                )
+            )
         }
     }
 }
@@ -69,7 +71,7 @@ dependencies {
     implementation(libs.richText)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.materialKolor)
-    implementation(libs.haze)
+    implementation(libs.compose.markdown)
 
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.compose)
@@ -78,6 +80,7 @@ dependencies {
     implementation(libs.bundles.room)
     implementation(libs.bundles.coil)
     implementation(libs.bundles.media3)
+    implementation(libs.bundles.haze)
 
     ksp(libs.square.moshi.compiler)
     ksp(libs.google.hilt.compiler)
@@ -91,6 +94,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     //解决安卓14 debug包卡顿
-    implementation 'com.bytedance.android:shadowhook:1.0.9'
-    implementation 'com.github.wuyouuuu:wytrace:1.0.1'
+    implementation("com.bytedance.android:shadowhook:1.0.9")
+    implementation("com.github.wuyouuuu:wytrace:1.0.1")
 }

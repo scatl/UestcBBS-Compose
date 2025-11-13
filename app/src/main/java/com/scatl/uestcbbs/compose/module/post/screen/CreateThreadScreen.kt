@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -93,7 +94,7 @@ fun CreateThreadScreen() {
     val voteData = rememberSaveable { mutableStateOf<CreatePostRequestEntity.Poll?>(null) }
     val replyCreditData = rememberSaveable { mutableStateOf<CreatePostRequestEntity.ReplyCredit?>(null) }
     val selectedForum = rememberSaveable { mutableStateOf<SelectForumResult?>(null) }
-
+    val keyboardController = LocalSoftwareKeyboardController.current
     val showCreateVoteSheet = rememberSaveable { mutableStateOf(false) }
     val showCreateReplyCreditSheet = rememberSaveable { mutableStateOf(false) }
 
@@ -137,7 +138,8 @@ fun CreateThreadScreen() {
                         textStyle = TextStyle(
                             fontSize = 19.sp,
                             fontWeight = FontWeight.Bold,
-                            lineHeight = 25.sp
+                            lineHeight = 25.sp,
+                            textAlign = TextAlign.Center
                         ),
                         colors = TextFieldDefaults.colors().copy(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -147,10 +149,13 @@ fun CreateThreadScreen() {
                         ),
                         placeholder = {
                             Text(
-                                text = "请输入标题",
+                                text = "标题",
                                 fontSize = 20.sp,
+                                textAlign = TextAlign.Center,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.outline
+                                color = MaterialTheme.colorScheme.outline,
+                                modifier = Modifier
+                                    .fillMaxWidth()
                             )
                         }
                     )
@@ -175,7 +180,7 @@ fun CreateThreadScreen() {
                         ),
                         placeholder = {
                             Text(
-                                text = "请输入内容",
+                                text = "请输入内容...",
                                 fontSize = 17.sp,
                                 color = MaterialTheme.colorScheme.outline
                             )

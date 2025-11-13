@@ -83,10 +83,4 @@ object Router {
         var name: String
     )
 
-    @Serializable
-    data class VideoPlayerRouterEntity(
-        var url: String,
-        var name: String?
-    )
-
 }

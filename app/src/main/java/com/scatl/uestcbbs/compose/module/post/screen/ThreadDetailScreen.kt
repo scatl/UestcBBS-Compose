@@ -2079,7 +2079,7 @@ private fun SupportInfo(
     val context = LocalContext.current
     val row = remember { mutableStateOf(data.rows?.getOrNull(0)) }
 
-    val supportData by viewModel.threadSupportData(row.value?.postId.toString()).collectAsStateWithLifecycle()
+    val supportData by viewModel.supportData(row.value?.postId.toString()).collectAsStateWithLifecycle()
     val supportCount = rememberSaveable { mutableIntStateOf(data.thread?.recommendAdd.toIntOrElse()) }
     val againstCount = rememberSaveable { mutableIntStateOf(data.thread?.recommendSub.toIntOrElse()) }
 
@@ -2127,7 +2127,7 @@ private fun SupportInfo(
             .height(35.dp),
         onLeftClick = {
             if (!showSnapshot.value) {
-                viewModel.supportThread(
+                viewModel.support(
                     tid = data.thread?.threadId.toString(),
                     pid = row.value?.postId.toString(),
                     support = false
@@ -2136,7 +2136,7 @@ private fun SupportInfo(
         },
         onRightClick = {
             if (!showSnapshot.value) {
-                viewModel.supportThread(
+                viewModel.support(
                     tid = data.thread?.threadId.toString(),
                     pid = row.value?.postId.toString(),
                     support = true

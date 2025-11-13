@@ -1,9 +1,13 @@
 package com.scatl.uestcbbs.compose.module.video
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.database.ContentObserver
+import android.os.Handler
+import android.os.Looper
 import android.os.Parcelable
-import android.view.MotionEvent
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -25,14 +29,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Forward10
 import androidx.compose.material.icons.outlined.Fullscreen
@@ -44,6 +47,7 @@ import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -52,20 +56,17 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -75,14 +76,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import com.scatl.uestcbbs.compose.ext.LoadInitialDataIfNeeded
 import com.scatl.uestcbbs.compose.ext.clickable
 import com.scatl.uestcbbs.compose.ext.getStatusBarHeight
 import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
-import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.theme.DarkTheme
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.parcelize.Parcelize
 
@@ -90,6 +88,7 @@ import kotlinx.parcelize.Parcelize
  * Created by sca_tl at 2025/2/19 10:49:43
  */
 @Composable
+@SuppressLint("SourceLockedOrientationActivity")
 fun VideoPlayerScreen(
     videoUrl: String,
     videoName: String?,
@@ -98,7 +97,6 @@ fun VideoPlayerScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val activity = LocalActivity.current
-    val navHostController = LocalNavController.current
     val configuration = LocalConfiguration.current
     val player by playerViewModel.playerState.collectAsState()
     val currentPosition = rememberSaveable { mutableStateOf(player?.currentPosition) }
@@ -107,18 +105,65 @@ fun VideoPlayerScreen(
     val isControlShow = rememberSaveable { mutableStateOf(false) }
     val currentSpeed = rememberSaveable { mutableStateOf(Speed.Speeds.SPEED_1_0.speed) }
     val isLongPress = rememberSaveable { mutableStateOf(false) }
-    val isPortraitInit = rememberSaveable { mutableStateOf(false) }
+    val isRotationLocked = rememberSaveable { mutableStateOf(false) }
 
-    BackHandler {
-        if (isFullscreen.value && isPortraitInit.value) {
+    LaunchedEffect(Unit) {
+        try {
+            val rotationLocked = Settings.System.getInt(context.contentResolver, Settings.System.ACCELEROMETER_ROTATION) == 0
+            isRotationLocked.value = rotationLocked
+            if (rotationLocked.not()) {
+                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            }
+        } catch (e: Exception) {
+            isRotationLocked.value = false
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
-        } else {
-            navHostController.popBackStack()
         }
     }
 
-    LoadInitialDataIfNeeded(context) {
-        isPortraitInit.value = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+    DisposableEffect(Unit) {
+        val contentObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
+            override fun onChange(selfChange: Boolean) {
+                try {
+                    val rotationLocked = Settings.System.getInt(
+                        context.contentResolver,
+                        Settings.System.ACCELEROMETER_ROTATION
+                    ) == 0
+                    isRotationLocked.value = rotationLocked
+                    if (rotationLocked.not()) {
+                        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                    }
+                } catch (e: Exception) {
+                    isRotationLocked.value = false
+                    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                }
+            }
+        }
+        context.contentResolver.registerContentObserver(
+            Settings.System.getUriFor(Settings.System.ACCELEROMETER_ROTATION),
+            false,
+            contentObserver
+        )
+        onDispose {
+            context.contentResolver.unregisterContentObserver(contentObserver)
+        }
+    }
+
+    fun handleBackClick() {
+        if (isRotationLocked.value) {
+            // 方向锁定：横屏时转竖屏，竖屏时finish
+            if (isFullscreen.value) {
+                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            } else {
+                activity?.finish()
+            }
+        } else {
+            // 方向未锁定：直接finish
+            activity?.finish()
+        }
+    }
+
+    BackHandler {
+        handleBackClick()
     }
 
     LaunchedEffect(videoUrl) {
@@ -169,7 +214,8 @@ fun VideoPlayerScreen(
                     isFullscreen = isFullscreen,
                     isPlaying = isPlaying,
                     isControlShow = isControlShow,
-                    currentSpeed = currentSpeed
+                    currentSpeed = currentSpeed,
+                    isRotationLocked = isRotationLocked
                 )
 
                 if (isLongPress.value) {
@@ -202,7 +248,6 @@ fun VideoPlayerScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier
-
                         .padding(top = getStatusBarHeight(context) + 10.dp, start = 20.dp)
                 ) {
                     Icon(
@@ -212,8 +257,7 @@ fun VideoPlayerScreen(
                         modifier = Modifier
                             .size(30.dp)
                             .clickable(unbound = true) {
-                                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
-                                navHostController.popBackStack()
+                                handleBackClick()
                             }
                     )
                     if (videoName.isNotNullAndEmpty()) {
@@ -301,34 +345,38 @@ private fun VideoPlayer(
     isPlaying: MutableState<Boolean?>,
     isLongPress: MutableState<Boolean>,
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var originSpeed = currentSpeed.value.copy()
-    val isTouching = rememberSaveable { mutableStateOf<Boolean>(false) }
+    val isOnTap = rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(isTouching.value) {
-        if (isControlShow.value && isTouching.value.not()) {
+    LaunchedEffect(isOnTap.value) {
+        if (isControlShow.value && isOnTap.value.not()) {
             scope.launchSafety {
                 delay(3000)
-                if (isTouching.value.not()) {
+                if (isOnTap.value.not()) {
                     isControlShow.value = false
                 }
             }
         }
     }
 
+    val playerView = remember {
+        PlayerView(context).apply {
+            this.useController = false
+        }
+    }
+    
+    DisposableEffect(player) {
+        playerView.player = player
+        onDispose {
+            playerView.player = null
+        }
+    }
+    
     AndroidView(
+        factory = { playerView },
         modifier = Modifier
-//            .pointerInteropFilter { event ->
-//                when (event.action) {
-//                    MotionEvent.ACTION_DOWN -> {
-//                        isTouching = true
-//                    }
-//                    MotionEvent.ACTION_UP -> {
-//                        isTouching = false
-//                    }
-//                }
-//                false
-//            }
             .pointerInput(Unit) {
                 detectTapGestures(
                     onLongPress = { offset ->
@@ -347,19 +395,18 @@ private fun VideoPlayer(
                         }
                     },
                     onTap = {
+                        //isOnTap.value = true
                         isControlShow.value = isControlShow.value.not()
+//                        scope.launchSafety {
+//                            delay(20)
+//                            isOnTap.value = false
+//                        }
                     },
                     onDoubleTap = {
                         playOrPause(player, isPlaying)
                     }
                 )
             },
-        factory = { context ->
-            PlayerView(context).apply {
-                this.player = player
-                this.useController = false
-            }
-        },
         update = { playerView ->
             playerView.player = player
         }
@@ -379,6 +426,7 @@ private fun playOrPause(
 }
 
 @Composable
+@SuppressLint("SourceLockedOrientationActivity")
 private fun BottomControls(
     modifier: Modifier = Modifier,
     player: ExoPlayer?,
@@ -386,10 +434,21 @@ private fun BottomControls(
     isFullscreen: MutableState<Boolean>,
     isPlaying: MutableState<Boolean?>,
     isControlShow: MutableState<Boolean>,
-    currentSpeed: MutableState<Speed>
+    currentSpeed: MutableState<Speed>,
+    isRotationLocked: MutableState<Boolean>
 ) {
     val activity = LocalActivity.current
+    val scope = rememberCoroutineScope()
     val showSpeedSelect = rememberSaveable { mutableStateOf(false) }
+    
+    fun handleFullscreenClick() {
+        if (isFullscreen.value) {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
+    }
+
     AnimatedVisibility(
         visible = isControlShow.value,
         enter = fadeIn(),
@@ -476,20 +535,21 @@ private fun BottomControls(
                         }
                     }
 
-                    Icon(
-                        imageVector = if (isFullscreen.value) Icons.Outlined.FullscreenExit else Icons.Outlined.Fullscreen,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier
-                            .clickable(unbound = true) {
-                                if (isFullscreen.value) {
-                                    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
-                                } else {
-                                    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    AnimatedVisibility(
+                        visible = isRotationLocked.value,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Icon(
+                            imageVector = if (isFullscreen.value) Icons.Outlined.FullscreenExit else Icons.Outlined.Fullscreen,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier
+                                .clickable(unbound = true) {
+                                    handleFullscreenClick()
                                 }
-                                isFullscreen.value = isFullscreen.value.not()
-                            }
-                    )
+                        )
+                    }
                 }
             }
         }

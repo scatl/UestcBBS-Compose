@@ -1,4 +1,4 @@
- pluginManagement {
+pluginManagement {
     repositories {
         google {
             content {
@@ -16,11 +16,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = "https://jitpack.io" }
+        maven(url = "https://jitpack.io")
     }
 }
 
 rootProject.name = "UestcBBS-Compose"
-include ':app'
-include ':hcaptcha'
-include ':markdown'
+include(":app")
+include(":hcaptcha")
+include(":markdown")

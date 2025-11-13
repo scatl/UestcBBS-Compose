@@ -53,7 +53,6 @@ fun NewThreadScreen(
     pagerState: PagerState,
     onAlphaChanged: (Float) -> Unit,
     showRefreshBtn: MutableState<Boolean>,
-    hazeState: HazeState
 ) {
     val tag = "NewPostScreen"
 

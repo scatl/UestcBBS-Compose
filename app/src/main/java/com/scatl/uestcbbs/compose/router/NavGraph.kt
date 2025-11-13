@@ -207,14 +207,6 @@ fun NavGraph(
                     CreateThreadScreen()
                 }
 
-                composable<Router.VideoPlayerRouterEntity> {
-                    val entity: Router.VideoPlayerRouterEntity = it.toRoute()
-                    VideoPlayerScreen(
-                        videoUrl = entity.url,
-                        videoName = entity.name
-                    )
-                }
-
                 composable<Router.DarkRoomRouterEntity> {
                     DarkRoomScreen()
                 }

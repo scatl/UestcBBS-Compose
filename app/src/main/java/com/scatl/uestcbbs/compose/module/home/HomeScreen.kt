@@ -126,7 +126,6 @@ fun HomeScreen() {
                         page = page,
                         pagerState = pagerState,
                         showRefreshBtn = showRefreshBtn,
-                        hazeState = hazeState,
                         onAlphaChanged = {
                             alpha.floatValue = it
                         }
