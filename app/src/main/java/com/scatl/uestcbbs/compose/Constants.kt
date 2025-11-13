@@ -5,7 +5,7 @@ package com.scatl.uestcbbs.compose
  */
 object Constants {
     const val BBS_URL = "https://bbs.uestc.edu.cn"
-    const val BBS_API_BASE_URL = "${BBS_URL}/star/api/v1/"
+    const val BBS_API_BASE_URL = "${BBS_URL}/_/"
     const val BING_BASE_URL = "https://cn.bing.com"
     const val BBS_LOGO = "https://bbs.uestc.edu.cn/assets/qshp-logo-D_kvMs8m.png"
     const val HCAPTCHA_SITE_KEY = "52100d97-0777-4497-8852-e380d5b3430b"

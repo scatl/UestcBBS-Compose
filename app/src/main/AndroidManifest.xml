@@ -42,6 +42,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".module.video.VideoPlayerActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:theme="@style/Theme.UestcBBSCompose">
+        </activity>
+
         <service
             android:name=".module.download.DownloadService"
             android:enabled="true"

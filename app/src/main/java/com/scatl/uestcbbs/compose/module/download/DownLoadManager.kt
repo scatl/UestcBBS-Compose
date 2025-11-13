@@ -39,22 +39,19 @@ object DownLoadManager {
 
     @JvmStatic
     fun isFileExist(context: Context, name: String?): Boolean {
-        DocumentFile
+        val file = DocumentFile
             .fromTreeUri(context, Uri.parse(DataStore.downloadFolderUri))
             ?.listFiles()
             ?.find { it.name == name }
-            ?.let { return true }
-            ?: return false
+        return file != null
     }
 
     @JvmStatic
     fun getExistFile(context: Context, name: String?): DocumentFile? {
-        DocumentFile
+        return DocumentFile
             .fromTreeUri(context, Uri.parse(DataStore.downloadFolderUri))
             ?.listFiles()
             ?.find { it.name == name }
-            ?.let { return it }
-            ?: return null
     }
 
 }

@@ -1,8 +1,6 @@
 package com.scatl.uestcbbs.compose.module.main
 
-import android.Manifest
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
@@ -19,19 +17,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.platform.WindowInfo
-import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
 import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.db.AppDataBase
-import com.scatl.uestcbbs.compose.ext.dp2px
 import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.sp2px

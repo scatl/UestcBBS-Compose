@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -22,6 +21,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -47,6 +47,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -67,7 +68,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.scatl.uestcbbs.compose.ext.LoadInitialDataIfNeeded
 import com.scatl.uestcbbs.compose.ext.clickable
@@ -75,27 +75,33 @@ import com.scatl.uestcbbs.compose.ext.hasPermission
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.rememberMutableStateListOf
 import com.scatl.uestcbbs.compose.ext.showToast
-import com.scatl.uestcbbs.compose.ext.toIntOrElse
-import com.scatl.uestcbbs.compose.module.post.commentrate.CommentRateType
+import com.scatl.uestcbbs.compose.module.video.VideoPlayerActivity
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.widget.RoundCheckBox
 import com.scatl.uestcbbs.compose.widget.RoundCheckBoxDefaults
 import com.scatl.uestcbbs.compose.widget.image.viewer.ImageViewerConfig
 import com.scatl.uestcbbs.compose.widget.refresh.EmptyContent
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.chrisbanes.haze.materials.HazeMaterials
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
  * Created by sca_tl at 2024/10/28 18:40:03
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalHazeMaterialsApi::class)
 @Composable
 fun MediaPickerScreen(
     config: MediaPickerConfig = MediaPickerConfig()
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val hazeState = rememberHazeState()
     val navHostController = LocalNavController.current
     val showErrorView = rememberSaveable { mutableStateOf(false) }
     val galleryEntity = rememberSaveable { mutableStateOf(GalleryEntity()) }
@@ -153,6 +159,12 @@ fun MediaPickerScreen(
     Scaffold (
         topBar = {
             TopAppBar(
+                modifier = Modifier
+                    .hazeEffect(state = hazeState, style = HazeMaterials.regular(MaterialTheme.colorScheme.surface)),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent,
+                ),
                 title = {
                     Text(
                         text = "选择媒体"
@@ -176,15 +188,21 @@ fun MediaPickerScreen(
         Box (
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
         ) {
             if (showErrorView.value) {
-                EmptyView(requestPermissionLauncher)
+                EmptyView(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    requestPermissionLauncher = requestPermissionLauncher
+                )
             } else {
                 ImageGrid(
                     currentAlbum = currentAlbum,
                     showAlbumSelect = showAlbumSelect,
                     currentSelect = currentSelect,
+                    hazeState = hazeState,
+                    padding = padding,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(bottom = 60.dp)
@@ -202,6 +220,7 @@ fun MediaPickerScreen(
                                 ).value
                             )
                         )
+                        .padding(padding)
                         .clickable(radius = 0.dp, enable = showAlbumSelect.value) {
                             showAlbumSelect.value = showAlbumSelect.value.not()
                         }
@@ -225,12 +244,13 @@ fun MediaPickerScreen(
 
 @Composable
 private fun EmptyView(
+    modifier: Modifier,
     requestPermissionLauncher: ActivityResultLauncher<Array<String>>,
 ) {
     val context = LocalContext.current
 
     EmptyContent(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         error = true,
         errorData = Throwable("由于您拒绝了相册权限，无法显示相册"),
         onClick = {
@@ -255,9 +275,12 @@ private fun ImageGrid(
     currentAlbum: MutableState<AlbumEntity>,
     showAlbumSelect: MutableState<Boolean>,
     currentSelect: SnapshotStateList<MediaEntity>,
+    hazeState: HazeState,
+    padding: PaddingValues,
     modifier: Modifier
 ) {
     val navHostController = LocalNavController.current
+    val context = LocalContext.current
 
     fun toImageViewer(mediaEntity: MediaEntity) {
         val imageViewerItems = mutableListOf<ImageViewerConfig.ImageViewerItem>()
@@ -286,6 +309,7 @@ private fun ImageGrid(
 
     LazyVerticalGrid(
         modifier = modifier
+            .hazeSource(hazeState)
             .offset(
                 x = 0.dp,
                 y = animateDpAsState(
@@ -294,11 +318,12 @@ private fun ImageGrid(
                     label = "offset"
                 ).value
             ),
+        contentPadding = padding,
         columns = GridCells.Adaptive(100.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        currentAlbum.value.allMedia.forEachIndexed { index, mediaEntity ->
+        currentAlbum.value.allMedia.forEachIndexed { _, mediaEntity ->
             item {
                 Box(
                     modifier = Modifier
@@ -306,10 +331,7 @@ private fun ImageGrid(
                         .animateItem()
                         .clickable(unbound = false) {
                             if (mediaEntity.isVideo) {
-                                navHostController.navigate(Router.VideoPlayerRouterEntity(
-                                    url = mediaEntity.absolutePath ?: "",
-                                    name = mediaEntity.name
-                                ))
+                                VideoPlayerActivity.open(context, mediaEntity.absolutePath.toString(), mediaEntity.name)
                             } else {
                                 toImageViewer(mediaEntity)
                             }
@@ -507,7 +529,7 @@ private fun BottomBar(
                 modifier = Modifier
                     .fillMaxHeight(0.5f)
             ) {
-                galleryEntity.value.albums.forEachIndexed { index, albumEntity ->
+                galleryEntity.value.albums.forEachIndexed { _, albumEntity ->
                     item {
                         Row (
                             verticalAlignment = Alignment.CenterVertically,

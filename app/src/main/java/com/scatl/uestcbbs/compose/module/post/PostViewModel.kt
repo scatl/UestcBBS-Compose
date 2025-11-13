@@ -14,7 +14,6 @@ import com.scatl.uestcbbs.compose.api.entity.RateOptionsEntity
 import com.scatl.uestcbbs.compose.api.entity.ThreadDetailEntity
 import com.scatl.uestcbbs.compose.api.entity.ThreadPollEntity
 import com.scatl.uestcbbs.compose.api.entity.ThreadReplyEntity
-import com.scatl.uestcbbs.compose.api.entity.ThreadSupportEntity
 import com.scatl.uestcbbs.compose.api.entity.request.CreatePostRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.DeleteFavoriteRequestEntity
 import com.scatl.uestcbbs.compose.api.entity.request.FavoriteRequestEntity
@@ -89,7 +88,6 @@ class PostViewModel @Inject constructor(
     val reportData: StateFlow<UiState<Boolean?>> = _reportData
 
     private val _supportDataMap = mutableMapOf<String, MutableStateFlow<UiState<PostSupportEntity>>>()
-    private val _supportThreadDataMap = mutableMapOf<String, MutableStateFlow<UiState<ThreadSupportEntity>>>()
     private var currentThreadDetailPage: Int = 1
     private var firstVisibleIndex = 0
 
@@ -123,12 +121,6 @@ class PostViewModel @Inject constructor(
     fun supportData(pid: String): StateFlow<UiState<PostSupportEntity>> {
         return _supportDataMap.getOrPut(pid) {
             MutableStateFlow(UiState<PostSupportEntity>().init())
-        }
-    }
-
-    fun threadSupportData(pid: String): StateFlow<UiState<ThreadSupportEntity>> {
-        return _supportThreadDataMap.getOrPut(pid) {
-            MutableStateFlow(UiState<ThreadSupportEntity>().init())
         }
     }
 
@@ -371,40 +363,20 @@ class PostViewModel @Inject constructor(
     fun support(tid: String, pid: String, support: Boolean) {
         viewModelScope.launchSafety {
             postRepository
-                .support(tid, pid, support)
+                .supportThread(tid, pid, support)
                 .onSuccess {
-                    _supportDataMap[pid]?.value?.success(
+                    _supportDataMap[pid]?.value = UiState<PostSupportEntity>().apply {
                         data = PostSupportEntity(
-                            success = it,
-                            support = support
-                        )
-                    )
-                }
-                .onFailure {
-                    _supportDataMap[pid]?.value?.error(Throwable(it.message))
-                }
-        }.onCatch {
-            _supportDataMap[pid]?.value?.error(it)
-        }
-    }
-
-    fun supportThread(tid: String, pid: String, support: Boolean) {
-        viewModelScope.launchSafety {
-            postRepository
-                .supportThread(tid, support)
-                .onSuccess {
-                    _supportThreadDataMap[pid]?.value = UiState<ThreadSupportEntity>().apply {
-                        data = ThreadSupportEntity(
                             type = it,
                             support = support
                         )
                     }
                 }
                 .onFailure {
-                    _supportThreadDataMap[pid]?.value?.error(Throwable(it.message))
+                    _supportDataMap[pid]?.value?.error(Throwable(it.message))
                 }
         }.onCatch {
-            _supportThreadDataMap[pid]?.value?.error(it)
+            _supportDataMap[pid]?.value?.error(it)
         }
     }
 
