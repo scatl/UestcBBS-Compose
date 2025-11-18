@@ -1,18 +1,16 @@
 package com.scatl.uestcbbs.compose.ext
 
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.UserHandle
 import android.provider.Settings
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.core.app.ActivityCompat
 import com.elvishew.xlog.XLog
-import com.scatl.uestcbbs.compose.widget.image.picker.permissions
 
 /**
  * Created by sca_tl at 2023/7/31 17:17
@@ -37,7 +35,7 @@ fun isGTESdk35() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREA
 
 fun ComponentActivity.setSecureFlag(enable: Boolean) {
     if (enable) {
-        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE,)
+        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
     } else {
         window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
     }
@@ -82,4 +80,16 @@ fun Context.hasPermission(permissions: Array<String>): Boolean {
     return permissions.all {
         ActivityCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
     }
+}
+
+fun currentUid(): Int {
+    runCatching {
+        val method = UserHandle::class.java.getDeclaredMethod("myUserId")
+        method.isAccessible = true
+        val o = method.invoke(null)
+        if (o is Int) {
+            return o
+        }
+    }
+    return 0
 }

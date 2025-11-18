@@ -7,9 +7,7 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.elvishew.xlog.LogLevel
 import com.elvishew.xlog.XLog
-import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.db.AppDataBase
-import com.scatl.uestcbbs.compose.ext.isGTESdk31
 import com.scatl.uestcbbs.compose.init.task.TaskInitializer
 import com.scatl.uestcbbs.compose.manager.AccountManager
 import com.scatl.uestcbbs.compose.manager.EmotionManager
@@ -39,18 +37,12 @@ class App: Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
-
         context = applicationContext
-
         AccountManager.toggleSigned(dataBase.getAccountDao().getSignedInAccount())
         DownLoadManager.initDownloadFolderUri(context)
         ArtMethodTrace.fix14debugApp(this)
         EmotionManager.init(context)
         taskInitializer.init()
-
-        if (!isGTESdk31()) {
-            DataStore.dynamicTheme = false
-        }
     }
 
     override fun newImageLoader() = imageLoader

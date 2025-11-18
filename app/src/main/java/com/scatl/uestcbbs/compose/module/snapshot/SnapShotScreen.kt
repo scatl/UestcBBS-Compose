@@ -12,15 +12,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarDefaults
@@ -30,18 +29,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.datastore.DataStore
 import com.scatl.uestcbbs.compose.ext.LoadInitialDataIfNeeded
@@ -107,7 +103,7 @@ fun SnapShotScreen() {
                     if (DataStore.tipShowedId.contains(TIP_ID_THREAD_SNAPSHOT)) {
                         val tooltipState = rememberTooltipState(isPersistent = true)
                         TooltipBox(
-                            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above, 4.dp),
                             tooltip = {
                                 PlainTooltip (
                                     containerColor = MaterialTheme.colorScheme.primary,
@@ -167,7 +163,7 @@ fun SnapShotScreen() {
                 enableRefresh = false,
                 enableLoadMore = false,
                 listState = listState
-            ) { index, item ->
+            ) { _, item ->
                 SnapshotItem(
                     item = item
                 )

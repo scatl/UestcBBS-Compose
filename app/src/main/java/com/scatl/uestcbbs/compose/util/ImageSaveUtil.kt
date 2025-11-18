@@ -180,7 +180,7 @@ object ImageSaveUtil {
             XLog.tag(TAG).d(e)
             return false
         } finally {
-            //tempFile.delete()
+            tempFile.delete()
         }
     }
 

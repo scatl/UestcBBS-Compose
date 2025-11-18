@@ -34,22 +34,19 @@ import com.scatl.uestcbbs.compose.module.dayquestion.DayQuestionScreen
 import com.scatl.uestcbbs.compose.module.download.DownloadScreen
 import com.scatl.uestcbbs.compose.module.forum.detail.ForumDetailScreen
 import com.scatl.uestcbbs.compose.module.history.BrowsingHistoryScreen
-import com.scatl.uestcbbs.compose.widget.image.viewer.ImageViewerConfig
-import com.scatl.uestcbbs.compose.widget.image.viewer.ImageViewerScreen
 import com.scatl.uestcbbs.compose.module.magic.MagicShopScreen
 import com.scatl.uestcbbs.compose.module.main.MainScreen
 import com.scatl.uestcbbs.compose.module.medal.MedalCenterScreen
 import com.scatl.uestcbbs.compose.module.message.chat.ChatDetailScreen
+import com.scatl.uestcbbs.compose.module.post.commentrate.CommentRateScreen
 import com.scatl.uestcbbs.compose.module.post.screen.CreateThreadScreen
 import com.scatl.uestcbbs.compose.module.post.screen.ThreadDetailScreen
-import com.scatl.uestcbbs.compose.module.post.commentrate.CommentRateScreen
 import com.scatl.uestcbbs.compose.module.search.SearchScreen
 import com.scatl.uestcbbs.compose.module.setting.AboutScreen
 import com.scatl.uestcbbs.compose.module.setting.OpenSourceScreen
 import com.scatl.uestcbbs.compose.module.setting.SettingScreen
 import com.scatl.uestcbbs.compose.module.snapshot.SnapShotScreen
 import com.scatl.uestcbbs.compose.module.user.UserProfileScreen
-import com.scatl.uestcbbs.compose.module.video.VideoPlayerScreen
 import com.scatl.uestcbbs.compose.module.watertask.WaterTaskScreen
 import com.scatl.uestcbbs.compose.module.wealth.MyWealthScreen
 import com.scatl.uestcbbs.compose.module.wealth.WealthHistoryScreen
@@ -57,6 +54,7 @@ import com.scatl.uestcbbs.compose.util.BBSLinkUtil
 import com.scatl.uestcbbs.compose.util.LinkType
 import com.scatl.uestcbbs.compose.widget.image.picker.MediaPickerConfig
 import com.scatl.uestcbbs.compose.widget.image.picker.MediaPickerScreen
+import com.scatl.uestcbbs.compose.widget.image.viewer.ImageViewerScreen
 
 /**
  * Created by sca_tl at 2024/4/23 10:31:21
@@ -158,11 +156,9 @@ fun NavGraph(
 
                 composable<Router.ImageViewerRouterEntity> {
                     val entity: Router.ImageViewerRouterEntity = it.toRoute()
-                    val imageViewerConfig = ImageViewerConfig.fromJson(entity.config)
-                    if (imageViewerConfig.images.isNotEmpty()) {
-                        ImageViewerScreen(
-                            config = imageViewerConfig
-                        )
+                    val configId = entity.configId ?: ""
+                    if (configId.isNotEmpty()) {
+                        ImageViewerScreen(configId = configId)
                     }
                 }
 
@@ -315,7 +311,8 @@ fun linkNavigate(
 
         }
         is LinkType.CreditHistory -> {
-
+            navHostController.navigate(Router.WealthHistoryRouterEntity)
+            return true
         }
         is LinkType.ResetPsw -> {
 

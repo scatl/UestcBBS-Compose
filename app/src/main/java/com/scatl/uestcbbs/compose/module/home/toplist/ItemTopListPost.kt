@@ -117,16 +117,12 @@ fun ItemTopListPost(
                 gridSpace = 4.dp,
                 imageCorner = imageCorner,
                 onClick = { index, entities ->
-                    navHostController.navigate(
-                        Router.ImageViewerRouterEntity(
-                            config = ImageViewerConfig.toJson(
-                                ImageViewerConfig(
-                                    images = imageViewerItems,
-                                    initialIndex = index
-                                )
-                            )
-                        )
+                    val imageViewerConfig = ImageViewerConfig(
+                        images = imageViewerItems,
+                        initialIndex = index
                     )
+                    val configId = ImageViewerConfig.saveConfig(imageViewerConfig)
+                    navHostController.navigate(Router.ImageViewerRouterEntity(configId))
                 }
             )
         }

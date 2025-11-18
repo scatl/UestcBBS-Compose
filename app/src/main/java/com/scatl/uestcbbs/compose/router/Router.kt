@@ -55,7 +55,7 @@ object Router {
 
     @Serializable
     data class ImageViewerRouterEntity(
-        var config: String = ""
+        var configId: String? = ""
     )
 
     @Serializable

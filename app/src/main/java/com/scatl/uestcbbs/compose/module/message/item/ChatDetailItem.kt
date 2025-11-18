@@ -132,7 +132,7 @@ private fun RightMsg(
                     .weight(1f, fill = false)
                     .padding(top = 5.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                        color = MaterialTheme.colorScheme.primaryContainer,
                         shape = RoundedCornerShape(
                             topStart = cardCorner * 2,
                             topEnd = 0.dp,

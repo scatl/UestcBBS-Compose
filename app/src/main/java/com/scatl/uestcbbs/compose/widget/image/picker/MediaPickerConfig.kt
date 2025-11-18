@@ -1,7 +1,7 @@
 package com.scatl.uestcbbs.compose.widget.image.picker
 
-import android.net.Uri
 import android.os.Parcelable
+import com.elvishew.xlog.XLog
 import com.scatl.uestcbbs.compose.moshi.UriJsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
@@ -14,13 +14,21 @@ import kotlinx.parcelize.Parcelize
 @JsonClass(generateAdapter = true)
 data class MediaPickerConfig(
     var initMedia: MutableList<MediaEntity> = mutableListOf(),
-    var maxSelect: Int = Int.MAX_VALUE
+    var maxSelect: Int = Int.MAX_VALUE,
+    var allowImgMimeType: MutableList<String> = mutableListOf("image/*"),
+    var allowVideoMimeType: MutableList<String> = mutableListOf("video/*"),
 ): Parcelable {
     companion object {
         fun fromJson(data: String): MediaPickerConfig {
             runCatching {
-                val jsonAdapter = Moshi.Builder().build().adapter(MediaPickerConfig::class.java)
+                val jsonAdapter = Moshi
+                    .Builder()
+                    .add(UriJsonAdapter())
+                    .build()
+                    .adapter(MediaPickerConfig::class.java)
                 return jsonAdapter.fromJson(data) ?: MediaPickerConfig()
+            }.onFailure {
+                XLog.tag("MediaPickerConfig").d(it)
             }
             return MediaPickerConfig()
         }

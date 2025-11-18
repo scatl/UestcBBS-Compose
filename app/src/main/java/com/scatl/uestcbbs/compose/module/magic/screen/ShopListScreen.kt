@@ -23,6 +23,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarDefaults
@@ -34,13 +35,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.datastore.DataStore
@@ -72,7 +71,6 @@ fun ShopListScreen(
     val magicListData by viewModel.magicListData.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val navHostController = LocalNavController.current
 
     Scaffold (
@@ -104,7 +102,7 @@ fun ShopListScreen(
                     if (DataStore.tipShowedId.contains(TIP_ID_MAGIC_SHOP)) {
                         val tooltipState = rememberTooltipState(isPersistent = true)
                         TooltipBox(
-                            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above, 4.dp),
                             tooltip = {
                                 PlainTooltip (
                                     containerColor = MaterialTheme.colorScheme.primary,
@@ -172,7 +170,7 @@ fun ShopListScreen(
                 onRetry = {
                     viewModel.getMagicList(init = true, refresh = false)
                 }
-            ) { index, item ->
+            ) { _, item ->
                 ShopItem(
                     data = item,
                     onDetailClick = {
