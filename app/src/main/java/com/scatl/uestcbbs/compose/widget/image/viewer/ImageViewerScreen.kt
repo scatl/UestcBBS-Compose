@@ -2,7 +2,6 @@ package com.scatl.uestcbbs.compose.widget.image.viewer
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -58,7 +57,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import coil.request.ImageRequest
 import com.scatl.uestcbbs.compose.R
 import com.scatl.uestcbbs.compose.ext.clickable
@@ -83,8 +81,12 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImageViewerScreen(
-    config: ImageViewerConfig
+    configId: String
 ) {
+    val config = remember(configId) {
+        ImageViewerConfig.getConfig(configId) ?: ImageViewerConfig()
+    }
+
     val moreOptionsBottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )

@@ -27,13 +27,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.elvishew.xlog.XLog
 import com.scatl.uestcbbs.compose.api.entity.BingDailyPicEntity
 import com.scatl.uestcbbs.compose.ext.dp2px
 import com.scatl.uestcbbs.compose.router.LocalNavController
-import com.scatl.uestcbbs.compose.widget.image.viewer.ImageViewerConfig
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.widget.LoopBanner
+import com.scatl.uestcbbs.compose.widget.image.viewer.ImageViewerConfig
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
@@ -75,13 +74,13 @@ fun NewThreadBanner(
                             )
                         }
 
+                        val imageViewerConfig = ImageViewerConfig(
+                            images = imageViewerItems,
+                            initialIndex = dataIndex
+                        )
+                        val configId = ImageViewerConfig.saveConfig(imageViewerConfig)
                         navHostController.navigate(Router.ImageViewerRouterEntity(
-                            config = ImageViewerConfig.toJson(
-                                ImageViewerConfig(
-                                    images = imageViewerItems,
-                                    initialIndex = dataIndex
-                                )
-                            )
+                            configId = configId
                         ))
                     }
             ) {

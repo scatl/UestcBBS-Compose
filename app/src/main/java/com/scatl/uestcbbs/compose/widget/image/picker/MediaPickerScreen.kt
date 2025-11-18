@@ -52,6 +52,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -104,15 +105,15 @@ fun MediaPickerScreen(
     val hazeState = rememberHazeState()
     val navHostController = LocalNavController.current
     val showErrorView = rememberSaveable { mutableStateOf(false) }
-    val galleryEntity = rememberSaveable { mutableStateOf(GalleryEntity()) }
-    val currentAlbum = rememberSaveable { mutableStateOf(AlbumEntity()) }
+    val galleryEntity = remember { MediaPickerStateManager.getOrCreateGalleryEntity() }
+    val currentAlbum = remember { MediaPickerStateManager.getOrCreateCurrentAlbum() }
     val showAlbumSelect = rememberSaveable { mutableStateOf(false) }
     val currentSelect = rememberMutableStateListOf(config.initMedia)
 
     fun loadMedia() {
         scope.launchSafety {
             galleryEntity.value = withContext(Dispatchers.IO) {
-                val result = MediaStoreUtil.queryImages(context)
+                val result = MediaStoreUtil.queryImages(context, config)
                 currentAlbum.value = result.albums[0]
                 result
             }
@@ -201,6 +202,7 @@ fun MediaPickerScreen(
                     currentAlbum = currentAlbum,
                     showAlbumSelect = showAlbumSelect,
                     currentSelect = currentSelect,
+                    config = config,
                     hazeState = hazeState,
                     padding = padding,
                     modifier = Modifier
@@ -275,6 +277,7 @@ private fun ImageGrid(
     currentAlbum: MutableState<AlbumEntity>,
     showAlbumSelect: MutableState<Boolean>,
     currentSelect: SnapshotStateList<MediaEntity>,
+    config: MediaPickerConfig,
     hazeState: HazeState,
     padding: PaddingValues,
     modifier: Modifier
@@ -295,16 +298,12 @@ private fun ImageGrid(
             }
         }
 
-        navHostController.navigate(
-            Router.ImageViewerRouterEntity(
-                config = ImageViewerConfig.toJson(
-                    ImageViewerConfig(
-                        images = imageViewerItems,
-                        initialIndex = imageViewerItems.indexOf(imageViewerItems.find { it.originUrl == mediaEntity.absolutePath })
-                    )
-                )
-            )
+        val imageViewerConfig = ImageViewerConfig(
+            images = imageViewerItems,
+            initialIndex = imageViewerItems.indexOf(imageViewerItems.find { it.originUrl == mediaEntity.absolutePath })
         )
+        val configId = ImageViewerConfig.saveConfig(imageViewerConfig)
+        navHostController.navigate(Router.ImageViewerRouterEntity(configId))
     }
 
     LazyVerticalGrid(
@@ -427,7 +426,11 @@ private fun ImageGrid(
                             if (currentSelect.contains(mediaEntity)) {
                                 currentSelect.remove(mediaEntity)
                             } else {
-                                currentSelect.add(mediaEntity)
+                                if (currentSelect.size == config.maxSelect) {
+                                    "最多可以选择${config.maxSelect}个媒体".showToast(context)
+                                } else {
+                                    currentSelect.add(mediaEntity)
+                                }
                             }
                         },
                         color = RoundCheckBoxDefaults.colors(

@@ -1,11 +1,8 @@
 package com.scatl.uestcbbs.compose.widget.image.viewer
 
-import androidx.core.text.htmlEncode
 import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Moshi
-import okio.ByteString.Companion.encodeUtf8
-import java.net.URLEncoder
-import java.nio.charset.Charset
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 @JsonClass(generateAdapter = true)
 data class ImageViewerConfig(
@@ -19,24 +16,25 @@ data class ImageViewerConfig(
     )
 
     companion object {
-        fun toJson(data: ImageViewerConfig): String {
-            runCatching {
-                val jsonString = Moshi
-                    .Builder()
-                    .build()
-                    .adapter(ImageViewerConfig::class.java)
-                    .toJson(data)
-                return jsonString
+        private val configMap = ConcurrentHashMap<String, ImageViewerConfig>()
+
+        fun saveConfig(config: ImageViewerConfig): String? {
+            return runCatching {
+                val configId = UUID.randomUUID().toString()
+                configMap[configId] = config
+                return configId
+            }.getOrElse {
+                null
             }
-            return ""
         }
 
-        fun fromJson(data: String): ImageViewerConfig {
-            runCatching {
-                val jsonAdapter = Moshi.Builder().build().adapter(ImageViewerConfig::class.java)
-                return jsonAdapter.fromJson(data) ?: ImageViewerConfig()
+        fun getConfig(configId: String): ImageViewerConfig? {
+            return runCatching {
+                val config = configMap.get(configId)
+                return config
+            }.getOrElse {
+                null
             }
-            return ImageViewerConfig()
         }
     }
 }

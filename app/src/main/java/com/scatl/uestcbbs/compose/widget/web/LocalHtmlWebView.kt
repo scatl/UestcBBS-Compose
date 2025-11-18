@@ -209,11 +209,8 @@ private class WebAppInterface(
             }
 
             (context as Activity).runOnUiThread {
-                navHostController.navigate(
-                    Router.ImageViewerRouterEntity(
-                        config = ImageViewerConfig.toJson(imageViewerConfig)
-                    )
-                )
+                val configId = ImageViewerConfig.saveConfig(imageViewerConfig)
+                navHostController.navigate(Router.ImageViewerRouterEntity(configId))
             }
         }
     }

@@ -2,9 +2,9 @@ package com.scatl.uestcbbs.compose.module.download
 
 import android.content.Context
 import android.net.Uri
-import android.provider.ContactsContract.Data
 import androidx.documentfile.provider.DocumentFile
 import com.scatl.uestcbbs.compose.datastore.DataStore
+import com.scatl.uestcbbs.compose.ext.currentUid
 import java.net.URLDecoder
 
 /**
@@ -33,7 +33,7 @@ object DownLoadManager {
     fun getDownloadFolder() =
         URLDecoder
             .decode(DataStore.downloadFolderUri, "UTF-8")
-            .replace("content://com.android.externalstorage.documents/tree/primary:", "/storage/emulated/0/")
+            .replace("content://com.android.externalstorage.documents/tree/primary:", "/storage/emulated/${currentUid()}/")
             .replace("content://com.android.providers.downloads.documents/tree/raw:", "")
             .plus("/")
 

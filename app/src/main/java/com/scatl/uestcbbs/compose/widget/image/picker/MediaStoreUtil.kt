@@ -7,7 +7,7 @@ import android.provider.MediaStore
 object MediaStoreUtil {
 
     @JvmStatic
-    fun queryImages(context: Context): GalleryEntity {
+    fun queryImages(context: Context, config: MediaPickerConfig): GalleryEntity {
         val images = arrayListOf<MediaEntity>()
         val albums = arrayListOf<AlbumEntity>()
 
@@ -25,16 +25,39 @@ object MediaStoreUtil {
 
         val sortOrder = "${MediaStore.Files.FileColumns.DATE_MODIFIED} DESC"
         var selection: String? = null
+        var selectionArgs: Array<String>? = null
 
-//        if (!Gallery.INSTANCE.mShowGif) {
-//            selection = MediaStore.Images.Media.MIME_TYPE + "!='image/gif'"
-//        }
+        //在这里补全
+        val allMimeTypes = mutableListOf<String>().apply {
+            addAll(config.allowImgMimeType)
+            addAll(config.allowVideoMimeType)
+        }
+        
+        if (allMimeTypes.isNotEmpty()) {
+            val selectionBuilder = StringBuilder()
+            val selectionArgsList = mutableListOf<String>()
+            
+            allMimeTypes.forEachIndexed { index, mimeType ->
+                if (index > 0) {
+                    selectionBuilder.append(" OR ")
+                }
+                if (mimeType.endsWith("/*")) {
+                    selectionBuilder.append("${MediaStore.Files.FileColumns.MIME_TYPE} LIKE ?")
+                    selectionArgsList.add("${mimeType.dropLast(1)}%")
+                } else {
+                    selectionBuilder.append("${MediaStore.Files.FileColumns.MIME_TYPE} = ?")
+                    selectionArgsList.add(mimeType)
+                }
+            }
+            selection = selectionBuilder.toString()
+            selectionArgs = selectionArgsList.toTypedArray()
+        }
 
         val albumName = mutableSetOf<String>()
 
         context.contentResolver.query(
             MediaStore.Files.getContentUri("external"),
-            projection, selection, null, sortOrder)?.use { cursor ->
+            projection, selection, selectionArgs, sortOrder)?.use { cursor ->
 
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID))
@@ -43,10 +66,14 @@ object MediaStoreUtil {
                 val dateModified = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED))
                 val displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME))
                 val uri = ContentUris.withAppendedId(MediaStore.Files.getContentUri("external"), id)
-                val bucketName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME))
+                var bucketName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME))
                 val width = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.WIDTH))
                 val height = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.HEIGHT))
                 val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE))
+
+                if (bucketName.isNullOrEmpty()) {
+                    bucketName = "根目录"
+                }
 
                 val mediaEntity = MediaEntity(
                     id = id,
