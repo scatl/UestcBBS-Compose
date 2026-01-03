@@ -15,7 +15,7 @@ class AuthorizationInterceptor @Inject constructor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val newBuilder = chain.request().newBuilder()
 
-        newBuilder.addHeader("X-Uestc-Bbs", "1")
+        newBuilder.addHeader("X-UESTC-BBS", "1")
 
         //重要：添加账号时需要考虑已经登录的情况，这种情况不能带上已登录账号的Cookies，否则登录后返回的Cookies缺了数据
         if (!chain.request().url.toString().contains("auth/signin")) {

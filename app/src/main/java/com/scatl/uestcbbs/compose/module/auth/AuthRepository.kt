@@ -9,9 +9,13 @@ import javax.inject.Inject
  */
 class AuthRepository @Inject constructor(): BaseRepository() {
 
-    suspend fun signIn(
-        hCaptcha: String,
+    suspend fun signInWithHcaptcha(
+        hCaptcha: String?,
         requestBody: LoginRequestEntity
-    ) = authService.signIn(hCaptcha, requestBody)
+    ) = authService.signInWithHcaptcha(hCaptcha, requestBody)
 
+    suspend fun signInWithRecaptcha(
+        reCaptcha: String?,
+        requestBody: LoginRequestEntity
+    ) = authService.signInWithRecaptcha(reCaptcha, requestBody)
 }

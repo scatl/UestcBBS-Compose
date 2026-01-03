@@ -33,13 +33,17 @@ class AuthViewModel @Inject constructor(
     val signInData: StateFlow<UiState<SignInEntity>> = _signInData
 
     fun signIn(
-        hCaptcha: String,
+        hCaptchaToken: String? = "",
+        reCaptchaToken: String? = "",
         requestBody: LoginRequestEntity,
         signInAfterAdd: Boolean
     ) {
         viewModelScope.launchSafety {
-            authRepository
-                .signIn(hCaptcha, requestBody)
+            if (hCaptchaToken.isNullOrEmpty().not()) {
+                authRepository.signInWithHcaptcha(hCaptchaToken, requestBody)
+            } else {
+                authRepository.signInWithRecaptcha(reCaptchaToken, requestBody)
+            }
                 .onSuccess {
                     if (it?.authorization.isNullOrEmpty()) {
                         _signInData.value = UiState<SignInEntity>().error(
@@ -53,15 +57,15 @@ class AuthViewModel @Inject constructor(
                             AccountDBEntity(
                                 id = 0,
                                 name = requestBody.username,
-                                uid = it?.uid,
-                                token = it?.authorization,
-                                cookies = it?.cookie,
-                                icon = it?.uid?.toIntOrNull().toAvatarUrl(),
+                                uid = it.uid,
+                                token = it.authorization,
+                                cookies = it.cookie,
+                                icon = it.uid?.toIntOrNull().toAvatarUrl(),
                                 signedIn = signInAfterAdd
                             )
                         )
                         if (signInAfterAdd) {
-                            switchAccount(uid = it?.uid, name = requestBody.username)
+                            switchAccount(uid = it.uid, name = requestBody.username)
                             AccountManager.toggleSigned(authRepository.dataBase.getAccountDao().getSignedInAccount())
                         }
                     }

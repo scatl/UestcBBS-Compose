@@ -27,7 +27,6 @@ object MediaStoreUtil {
         var selection: String? = null
         var selectionArgs: Array<String>? = null
 
-        //在这里补全
         val allMimeTypes = mutableListOf<String>().apply {
             addAll(config.allowImgMimeType)
             addAll(config.allowVideoMimeType)

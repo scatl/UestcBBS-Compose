@@ -41,6 +41,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -145,6 +146,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.elvishew.xlog.XLog
+import com.iffly.compose.markdown.MarkdownView
+import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.scatl.uestcbbs.compose.Constants
 import com.scatl.uestcbbs.compose.ForumPicture
 import com.scatl.uestcbbs.compose.R
@@ -180,6 +183,7 @@ import com.scatl.uestcbbs.compose.module.snapshot.SnapshotViewModel
 import com.scatl.uestcbbs.compose.router.LocalNavController
 import com.scatl.uestcbbs.compose.router.Router
 import com.scatl.uestcbbs.compose.theme.LocalCustomColors
+import com.scatl.uestcbbs.compose.util.HtmlUtil
 import com.scatl.uestcbbs.compose.util.ImageSaveUtil
 import com.scatl.uestcbbs.compose.util.formatTimestamp
 import com.scatl.uestcbbs.compose.util.formatTimestampYMDHMS

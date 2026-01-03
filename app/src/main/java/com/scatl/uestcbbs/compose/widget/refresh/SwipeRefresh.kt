@@ -392,15 +392,6 @@ fun CircleRefreshIndicator(
     success: Boolean,
     initState: Boolean
 ) {
-    val loadingHeight = SwipeRefreshDefaults.RefreshingOffset
-    val threadHeight = SwipeRefreshDefaults.RefreshThreshold
-    val loadingHeightPx: Float
-    val threadHeightPx: Float
-    with(LocalDensity.current) {
-        loadingHeightPx = loadingHeight.toPx()
-        threadHeightPx = threadHeight.toPx()
-    }
-
     val scale = animateFloatAsState(
         targetValue = if (success && state.position == state.refreshOffset) 0f else 1f,
         animationSpec = tween(durationMillis = 400),
@@ -424,22 +415,11 @@ fun CircleRefreshIndicator(
                 )
                 .padding(10.dp)
         ) {
-//            if (state.refreshing || (success && state.position == state.refreshOffset)) {
-                CircularProgressIndicator(
-                    strokeWidth = 3.dp,
-                    modifier = Modifier
-                        .size(25.dp)
-                )
-//            } else {
-//                CircularProgressIndicator(
-//                    progress = {
-//                        //indicatorProgress.value
-//                        state.position / threadHeightPx / 2
-//                    },
-//                    strokeWidth = 3.dp,
-//                    modifier = Modifier.size(25.dp)
-//                )
-//            }
+            CircularProgressIndicator(
+                strokeWidth = 3.dp,
+                modifier = Modifier
+                    .size(25.dp)
+            )
         }
     }
 }
