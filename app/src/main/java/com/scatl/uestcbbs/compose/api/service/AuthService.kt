@@ -4,7 +4,6 @@ import com.scatl.uestcbbs.compose.api.entity.SignInEntity
 import com.scatl.uestcbbs.compose.api.entity.request.LoginRequestEntity
 import com.scatl.uestcbbs.compose.net.BaseApiResult
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
@@ -14,9 +13,16 @@ import retrofit2.http.POST
  */
 interface AuthService {
     @POST("auth/signin")
-    @Headers("X-Uestc-Bbs-Captcha-Type: hcaptcha")
-    suspend fun signIn(
-        @Header("X-Uestc-Bbs-Captcha") hCaptcha: String,
+    @Headers("X-UESTC-BBS-Captcha-Type: hcaptcha")
+    suspend fun signInWithHcaptcha(
+        @Header("X-UESTC-BBS-Captcha") hCaptcha: String?,
+        @Body requestBody: LoginRequestEntity
+    ): BaseApiResult<SignInEntity>
+
+    @POST("auth/signin")
+    @Headers("X-UESTC-BBS-Captcha-Type: recaptcha")
+    suspend fun signInWithRecaptcha(
+        @Header("X-UESTC-BBS-Captcha") reCaptcha: String?,
         @Body requestBody: LoginRequestEntity
     ): BaseApiResult<SignInEntity>
 }

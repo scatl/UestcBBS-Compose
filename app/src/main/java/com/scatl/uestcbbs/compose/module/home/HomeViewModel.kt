@@ -7,10 +7,14 @@ import androidx.lifecycle.viewModelScope
 import com.scatl.uestcbbs.compose.Constants
 import com.scatl.uestcbbs.compose.api.entity.BingDailyPicEntity
 import com.scatl.uestcbbs.compose.api.entity.CommonThreadEntity
+import com.scatl.uestcbbs.compose.api.entity.IndexEntity
+import com.scatl.uestcbbs.compose.api.entity.TopListEntity
 import com.scatl.uestcbbs.compose.api.service.TopListService.IdListType
 import com.scatl.uestcbbs.compose.ext.isNotNullAndEmpty
 import com.scatl.uestcbbs.compose.ext.launchSafety
 import com.scatl.uestcbbs.compose.ext.toIntOrElse
+import com.scatl.uestcbbs.compose.manager.CacheDataManager
+import com.scatl.uestcbbs.compose.module.home.entity.NewThreadCacheEntity
 import com.scatl.uestcbbs.compose.module.home.newpost.entity.NewThreadData
 import com.scatl.uestcbbs.compose.module.home.newpost.entity.SiteStatusData
 import com.scatl.uestcbbs.compose.net.onFailure
@@ -24,7 +28,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import javax.inject.Inject
 
 /**
@@ -61,7 +64,18 @@ class HomeViewModel @Inject constructor(
     fun getNewThreadData(loadMore: Boolean, init: Boolean = false) {
         if (init) {
             currentNewThreadPage = 1
-            _newThreadData.value.init()
+
+            val cacheData = CacheDataManager.getNewThreadData()
+            var finalData: SnapshotStateList<NewThreadData>? = null
+            if (cacheData != null) {
+                finalData = packNewThreadData(cacheData.bannerData, cacheData.homeData, cacheData.newPostData, cacheData.indexData)
+            }
+
+            if (finalData == null) {
+                _newThreadData.value.init(finalData)
+            } else {
+                _newThreadData.value.init(finalData).refreshing()
+            }
         } else {
             if (loadMore) {
                 currentNewThreadPage += 1
@@ -99,44 +113,9 @@ class HomeViewModel @Inject constructor(
 
             viewModelScope.launchSafety {
                 combine(bannerFlow, homeFlow, newPostFlow, indexFlow) { bannerData, homeData, newPostData, indexData ->
-
-                    val finalData = SnapshotStateList<NewThreadData>()
-
-                    if (bannerData.images.isNotNullAndEmpty()) {
-                        bannerData.images.forEach {
-                            it.fullThumbUrl = Constants.BING_BASE_URL + it.urlbase + "_1920x1080.jpg"
-                            it.fullOriginUrl = Constants.BING_BASE_URL + it.urlbase + "_UHD.jpg"
-                        }
-                        finalData.add(NewThreadData.Banner(data = bannerData.images))
-                    }
-
-                    if (indexData.data != null) {
-                        val siteStatusData = SiteStatusData(
-                            indexEntity = indexData.data,
-                        )
-
-                        siteStatusData.onlineNum = try {
-                            Jsoup
-                                .parse(homeData)
-                                .select("span[class=xs1]")
-                                .select("strong")[0]
-                                .text()
-                                .toIntOrElse()
-                        } catch (e: Exception) {
-                            0
-                        }
-
-                        finalData.add(NewThreadData.SiteStatus(data = siteStatusData))
-                    }
-
-                    newPostData.data?.newThread?.forEach {
-                        finalData.add(NewThreadData.NewThread(data = it))
-                    }
-
-                    _newThreadData.value.success(
-                        data = finalData,
-                        hasMore = true
-                    )
+                    val finalData = packNewThreadData(bannerData, homeData, newPostData.data, indexData.data)
+                    CacheDataManager.saveNewThreadData(NewThreadCacheEntity(bannerData, homeData, newPostData.data, indexData.data))
+                    _newThreadData.value.success(data = finalData, hasMore = true)
                 }.collect()
             }.onCatch {
                 _newThreadData.value.error(
@@ -170,6 +149,47 @@ class HomeViewModel @Inject constructor(
                 _newThreadData.value.error(errorData = it, initState = init)
             }
         }
+    }
+
+    private fun packNewThreadData(
+        bannerData: BingDailyPicEntity,
+        homeData: String,
+        newPostData: TopListEntity?,
+        indexData: IndexEntity?
+    ): SnapshotStateList<NewThreadData> {
+        val finalData = SnapshotStateList<NewThreadData>()
+
+        if (bannerData.images.isNotNullAndEmpty()) {
+            bannerData.images.forEach {
+                it.fullThumbUrl = Constants.BING_BASE_URL + it.urlbase + "_1920x1080.jpg"
+                it.fullOriginUrl = Constants.BING_BASE_URL + it.urlbase + "_UHD.jpg"
+            }
+            finalData.add(NewThreadData.Banner(data = bannerData.images))
+        }
+
+        if (indexData != null) {
+            val siteStatusData = SiteStatusData(
+                indexEntity = indexData,
+            )
+            siteStatusData.onlineNum = try {
+                Jsoup
+                    .parse(homeData)
+                    .select("span[class=xs1]")
+                    .select("strong")[0]
+                    .text()
+                    .toIntOrElse()
+            } catch (e: Exception) {
+                0
+            }
+
+            finalData.add(NewThreadData.SiteStatus(data = siteStatusData))
+        }
+
+        newPostData?.newThread?.forEach {
+            finalData.add(NewThreadData.NewThread(data = it))
+        }
+
+        return finalData
     }
 
     fun getTopListData(

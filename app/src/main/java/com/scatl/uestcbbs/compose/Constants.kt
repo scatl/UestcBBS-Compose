@@ -9,6 +9,7 @@ object Constants {
     const val BING_BASE_URL = "https://cn.bing.com"
     const val BBS_LOGO = "https://bbs.uestc.edu.cn/assets/qshp-logo-D_kvMs8m.png"
     const val HCAPTCHA_SITE_KEY = "52100d97-0777-4497-8852-e380d5b3430b"
+    const val RECAPTCHA_SITE_KEY = "6Ld1TkwpAAAAALDLfvalMXHJAU2SS2q-k00Nm9LT"
     const val DAY_MILLIS = 24 * 60 * 60 * 1000
     val INTERNAL_FIDS = intArrayOf(174, 395, 263, 267, 378)
 

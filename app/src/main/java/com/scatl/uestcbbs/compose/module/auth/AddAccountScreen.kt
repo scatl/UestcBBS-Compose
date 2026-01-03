@@ -4,21 +4,27 @@ import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,15 +60,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.elvishew.xlog.XLog
 import com.hcaptcha.sdk.HCaptchaConfig
 import com.hcaptcha.sdk.HCaptchaResponse
+import com.hcaptcha.sdk.HCaptchaWebView
+import com.hcaptcha.sdk.HCaptchaWebViewHelper
 import com.scatl.uestcbbs.compose.Constants
 import com.scatl.uestcbbs.compose.R
+import com.scatl.uestcbbs.compose.ReCaptchaWebView
 import com.scatl.uestcbbs.compose.api.entity.request.LoginRequestEntity
 import com.scatl.uestcbbs.compose.ext.removeAllBlank
 import com.scatl.uestcbbs.compose.ext.showToast
@@ -72,13 +86,15 @@ import com.scatl.uestcbbs.compose.widget.LoadingDialog
 import com.scatl.uestcbbs.compose.widget.RoundCheckBox
 import com.scatl.uestcbbs.compose.widget.RoundCheckBoxDefaults
 
+private const val USE_HCAPTCHA = true
+
 /**
  * Created by sca_tl at 2024/7/9 14:03:36
  */
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AddAccountScreen() {
     val viewModel: AuthViewModel = hiltViewModel()
+    val scope = rememberCoroutineScope()
     val signInData by viewModel.signInData.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val navHostController = LocalNavController.current
@@ -87,7 +103,9 @@ fun AddAccountScreen() {
     var userName by remember { mutableStateOf(" ") }
     var password by remember { mutableStateOf(" ") }
     var hCaptchaToken by remember { mutableStateOf("") }
+    var reCaptchaToken by remember { mutableStateOf("") }
     var showHCaptchaDialog by remember { mutableStateOf(false) }
+    var showReCaptchaDialog by remember { mutableStateOf(false) }
     var showLoadingDialog by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
     var signInAfterAdd by remember { mutableStateOf(true) }
@@ -99,10 +117,11 @@ fun AddAccountScreen() {
         appIcon.value = context.packageManager?.getApplicationIcon(context.packageName)
     }
 
-    LaunchedEffect(key1 = hCaptchaToken) {
-        if (hCaptchaToken.isNotEmpty()) {
+    LaunchedEffect(key1 = hCaptchaToken, key2 = reCaptchaToken) {
+        if (hCaptchaToken.isNotEmpty() || reCaptchaToken.isNotEmpty()) {
             viewModel.signIn(
-                hCaptcha = hCaptchaToken,
+                hCaptchaToken = hCaptchaToken,
+                reCaptchaToken = reCaptchaToken,
                 requestBody = LoginRequestEntity(userName, password),
                 signInAfterAdd = signInAfterAdd
             )
@@ -311,7 +330,11 @@ fun AddAccountScreen() {
                             && ruleAgree,
                     onClick = {
                         keyboardController?.hide()
-                        showHCaptchaDialog = !showHCaptchaDialog
+                        if (USE_HCAPTCHA) {
+                            showHCaptchaDialog = showHCaptchaDialog.not()
+                        } else {
+                            showReCaptchaDialog = showReCaptchaDialog.not()
+                        }
                     }
                 ) {
                     Text(
@@ -356,6 +379,36 @@ fun AddAccountScreen() {
                     }
                 }
             )
+
+            if (showReCaptchaDialog) {
+                Dialog(
+                    onDismissRequest = {
+                        showReCaptchaDialog = false
+                    },
+                    properties = DialogProperties(usePlatformDefaultWidth = false),
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxWidth(0.8f)
+                            .fillMaxHeight(0.8f)
+                    ) {
+
+                        ReCaptchaWebView(
+                            modifier = Modifier.fillMaxSize(),
+                            siteKey = Constants.RECAPTCHA_SITE_KEY,
+                            onVerificationSuccess = {
+                                reCaptchaToken = it
+                                showReCaptchaDialog = false
+                                showLoadingDialog = true
+                            },
+                            onVerificationFailed = {
+                                showReCaptchaDialog = false
+                                ContextCompat.getString(context, R.string.add_account_fail).showToast(context)
+                            }
+                        )
+                    }
+                }
+            }
         }
     )
 

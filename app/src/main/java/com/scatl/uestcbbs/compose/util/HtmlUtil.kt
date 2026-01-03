@@ -787,7 +787,7 @@ object HtmlUtil {
                 res = res.replace(
                     "![${it.filename}](i:${it.attachmentId})",
 //                    "\n\n![${it.filename}](${it.thumbnailUrl.toBBSImgUrl()})\n\n"
-                    "[![${it.filename}](${it.thumbnailUrl.toBBSImgUrl()})](${it.thumbnailUrl.toBBSImgUrl()})"
+                    "![${it.filename}](${it.thumbnailUrl.toBBSImgUrl()})"
                 )
             }
         }
